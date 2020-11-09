@@ -3,7 +3,8 @@ export BASE_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 # Build flags
 export CXX := g++
 USER_CXXFLAGS :=
-HOST_CXXFLAGS := -O2 -fPIC -fdiagnostics-show-option -felide-constructors -fmessage-length=0 -fno-math-errno -ftree-vectorize -fvisibility-inlines-hidden --param vect-max-version-for-alias-checks=50 -msse3 -pipe -pthread -Werror=address -Wall -Werror=array-bounds -Wno-attributes -Werror=conversion-null -Werror=delete-non-virtual-dtor -Wno-deprecated -Werror=format-contains-nul -Werror=format -Wno-long-long -Werror=main -Werror=missing-braces -Werror=narrowing -Wno-non-template-friend -Wnon-virtual-dtor -Werror=overflow -Werror=overlength-strings -Wparentheses -Werror=pointer-arith -Wno-psabi -Werror=reorder -Werror=return-local-addr -Wreturn-type -Werror=return-type -Werror=sign-compare -Werror=strict-aliasing -Wstrict-overflow -Werror=switch -Werror=type-limits -Wunused -Werror=unused-but-set-variable -Wno-unused-local-typedefs -Werror=unused-value -Wno-error=unused-variable -Wno-vla -Werror=write-strings
+#HOST_CXXFLAGS := -O2 -fPIC -fdiagnostics-show-option -felide-constructors -fmessage-length=0 -fno-math-errno -ftree-vectorize -fvisibility-inlines-hidden --param vect-max-version-for-alias-checks=50 -msse3 -pipe -pthread -Werror=address -Wall -Werror=array-bounds -Wno-attributes -Werror=conversion-null -Werror=delete-non-virtual-dtor -Wno-deprecated -Werror=format-contains-nul -Werror=format -Wno-long-long -Werror=main -Werror=missing-braces -Werror=narrowing -Wno-non-template-friend -Wnon-virtual-dtor -Werror=overflow -Werror=overlength-strings -Wparentheses -Werror=pointer-arith -Wno-psabi -Werror=reorder -Werror=return-local-addr -Wreturn-type -Werror=return-type -Werror=sign-compare -Werror=strict-aliasing -Wstrict-overflow -Werror=switch -Werror=type-limits -Wunused -Werror=unused-but-set-variable -Wno-unused-local-typedefs -Werror=unused-value -Wno-error=unused-variable -Wno-vla -Werror=write-strings
+HOST_CXXFLAGS := -O2 -fPIC -fdiagnostics-show-option -felide-constructors -fmessage-length=0 -fno-math-errno -ftree-vectorize -fvisibility-inlines-hidden --param vect-max-version-for-alias-checks=50 -msse3 -pipe -pthread -Werror=address -Wall -Werror=array-bounds -Wno-attributes -Werror=conversion-null -Werror=delete-non-virtual-dtor -Wno-deprecated -Werror=format-contains-nul -Werror=format -Wno-long-long -Werror=main -Werror=narrowing -Wno-non-template-friend -Wnon-virtual-dtor -Werror=overflow -Werror=overlength-strings -Wparentheses -Werror=pointer-arith -Wno-psabi -Werror=reorder -Werror=return-local-addr -Wreturn-type -Werror=return-type -Werror=sign-compare -Werror=strict-aliasing -Wstrict-overflow -Werror=switch -Werror=type-limits -Wunused -Werror=unused-but-set-variable -Wno-unused-local-typedefs -Werror=unused-value -Wno-error=unused-variable -Wno-vla -Werror=write-strings
 export CXXFLAGS := -std=c++17 $(HOST_CXXFLAGS) $(USER_CXXFLAGS)
 export LDFLAGS := -O2 -fPIC -pthread -Wl,-E -lstdc++fs
 export LDFLAGS_NVCC := -ccbin $(CXX) --linker-options '-E' --linker-options '-lstdc++fs'
@@ -26,19 +27,22 @@ export LIB_DIR := $(BASE_DIR)/lib
 export TEST_DIR := $(BASE_DIR)/test
 
 # System external definitions
-CUDA_BASE := /usr/local/cuda-10.2
+#CUDA_BASE := /usr/local/cuda-10.2
+CUDA_BASE := /usr/local/cuda-11.1
 ifneq ($(wildcard $(CUDA_BASE)),)
 CUDA_LIBDIR := $(CUDA_BASE)/lib64
 USER_CUDAFLAGS :=
 export CUDA_DEPS := $(CUDA_BASE)/lib64/libcudart.so
-export CUDA_ARCH := 35 60 70
+#export CUDA_ARCH := 35 60 70
+export CUDA_ARCH := 50
 export CUDA_CXXFLAGS := -I$(CUDA_BASE)/include
 export CUDA_TEST_CXXFLAGS := -DGPU_DEBUG
 export CUDA_LDFLAGS := -L$(CUDA_BASE)/lib64 -lcudart -lcudadevrt
 export CUDA_NVCC := $(CUDA_BASE)/bin/nvcc
 define CUFLAGS_template
 $(2)NVCC_FLAGS := $$(foreach ARCH,$(1),-gencode arch=compute_$$(ARCH),code=sm_$$(ARCH)) -Wno-deprecated-gpu-targets -Xcudafe --diag_suppress=esa_on_defaulted_function_ignored --expt-relaxed-constexpr --expt-extended-lambda --generate-line-info --source-in-ptx --cudart=shared
-$(2)NVCC_COMMON := -std=c++14 -O3 $$($(2)NVCC_FLAGS) -ccbin $(CXX) --compiler-options '$(HOST_CXXFLAGS) $(USER_CXXFLAGS)'
+#$(2)NVCC_COMMON := -std=c++14 -O3 $$($(2)NVCC_FLAGS) -ccbin $(CXX) --compiler-options '$(HOST_CXXFLAGS) $(USER_CXXFLAGS)'
+$(2)NVCC_COMMON := -std=c++17 -O3 $$($(2)NVCC_FLAGS) -ccbin $(CXX) --compiler-options '$(HOST_CXXFLAGS) $(USER_CXXFLAGS)'
 $(2)CUDA_CUFLAGS := -dc $$($(2)NVCC_COMMON) $(USER_CUDAFLAGS)
 $(2)CUDA_DLINKFLAGS := -dlink $$($(2)NVCC_COMMON)
 endef
@@ -111,12 +115,16 @@ KOKKOS_MAKEFILE := $(KOKKOS_BUILD)/Makefile
 # For SERIAL to be enabled always, allow host-parallel and device-parallel to be (un)set
 export KOKKOS_HOST_PARALLEL :=
 export KOKKOS_DEVICE_PARALLEL := CUDA
-KOKKOS_CUDA_ARCH := 70
-KOKKOS_CMAKE_CUDA_ARCH := 70
+#KOKKOS_CUDA_ARCH := 70
+KOKKOS_CUDA_ARCH := 50
+#KOKKOS_CMAKE_CUDA_ARCH := 70
+KOKKOS_CMAKE_CUDA_ARCH := 50
 ifeq ($(KOKKOS_CUDA_ARCH),70)
   KOKKOS_CMAKE_CUDA_ARCH := -DKokkos_ARCH_VOLTA70=On
 else ifeq ($(KOKKOS_CUDA_ARCH),75)
   KOKKOS_CMAKE_CUDA_ARCH := -DKokkos_ARCH_TURING75=On
+else ifeq ($(KOKKOS_CUDA_ARCH),50)
+  KOKKOS_CMAKE_CUDA_ARCH := -DKokkos_ARCH_MAXWELL50=On
 else
   $(error Unsupported KOKKOS_CUDA_ARCH $(KOKKOS_CUDA_ARCH). Likely it is sufficient just add another case in the Makefile)
 endif
@@ -215,7 +223,10 @@ TEST_INTELGPU_TARGETS := $(patsubst %,test_%_intelgpu,$(TARGETS))
 TEST_AUTO_TARGETS := $(patsubst %,test_%_auto,$(TARGETS))
 test: test_cpu test_nvidiagpu test_intelgpu test_auto
 test_cpu: $(TEST_CPU_TARGETS)
-test_nvidiagpu: $(TEST_NVIDIAGPU_TARGETS)
+#test_nvidiagpu: $(TEST_NVIDIAGPU_TARGETS)
+#test_nvidiagpu: test_fwtest_nvidiagpu test_alpakatest_nvidiagpu test_kokkostest_nvidiagpu test_kokkos_nvidiagpu test_cuda_nvidiagpu test_cudatest_nvidiagpu test_cudauvm_nvidiagpu test_cudadev_nvidiagpu test_alpaka_nvidiagpu
+#test_nvidiagpu: test_fwtest_nvidiagpu test_alpakatest_nvidiagpu test_kokkostest_nvidiagpu test_kokkos_nvidiagpu test_cuda_nvidiagpu test_cudatest_nvidiagpu test_cudadev_nvidiagpu test_alpaka_nvidiagpu
+test_nvidiagpu: test_fwtest_nvidiagpu test_alpakatest_nvidiagpu test_kokkostest_nvidiagpu test_kokkos_nvidiagpu test_cudatest_nvidiagpu test_cudadev_nvidiagpu test_alpaka_nvidiagpu
 test_intelgpu: $(TEST_INTELGPU_TARGETS)
 test_auto: $(TEST_AUTO_TARGETS)
 # $(TARGETS) needs to be PHONY because only the called Makefile knows their dependencies
@@ -283,6 +294,7 @@ test_$(1)_cpu: $(1)
 test_$(1)_nvidiagpu: $(1)
 	@echo
 	@echo "Testing $(1) for NVIDIA GPU device"
+	#echo $(TEST_NVIDIAGPU_TARGETS)
 	+$(MAKE) -C src/$(1) test_nvidiagpu
 	@echo
 
@@ -375,7 +387,8 @@ $(BOOST_BASE):
 external_alpaka: $(ALPAKA_BASE)
 
 $(ALPAKA_BASE):
-	git clone git@github.com:alpaka-group/alpaka.git -b release-0.4.1 $@
+	#git clone git@github.com:alpaka-group/alpaka.git -b release-0.4.1 $@
+	git clone git@github.com:alpaka-group/alpaka.git -b 0.5.0 $@
 
 # Cupla
 .PHONY: external_cupla
