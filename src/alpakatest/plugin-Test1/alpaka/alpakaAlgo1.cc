@@ -274,12 +274,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   void alpakaAlgo1() {
 
     const DevHost host(alpaka::pltf::getDevByIdx<PltfHost>(0u));
-    const DevAcc2 device(alpaka::pltf::getDevByIdx<PltfAcc2>(0u));
-    const Vec size(NUM_VALUES);
+    const DevAcc device(alpaka::pltf::getDevByIdx<PltfAcc>(0u));
     Queue queue(device);
 
    
     // Host data
+    const Vec1 size(NUM_VALUES);
     auto h_a_buf = alpaka::mem::buf::alloc<float, Idx>(host, size);
     auto h_b_buf = alpaka::mem::buf::alloc<float, Idx>(host, size);
     auto h_a = alpaka::mem::view::getPtrNative(h_a_buf);
@@ -299,21 +299,21 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
 
     // Prepare 1D workDiv
-    Vec elementsPerThread(Vec::all(1));
-    Vec threadsPerBlock(Vec::all(32));
-    const Vec blocksPerGrid(Vec::all((NUM_VALUES + 32 - 1) / 32));
+    Vec1 elementsPerThread(Vec1::all(1));
+    Vec1 threadsPerBlock(Vec1::all(32));
+    const Vec1 blocksPerGrid(Vec1::all((NUM_VALUES + 32 - 1) / 32));
 #if defined ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED || ALPAKA_ACC_CPU_B_TBB_T_SEQ_ENABLED || \
   ALPAKA_ACC_CPU_B_OMP2_T_SEQ_ENABLED || ALPAKA_ACC_CPU_BT_OMP4_ENABLED
     // on the GPU, run with 32 threads in parallel per block, each looking at a single element
     // on the CPU, run serially with a single thread per block, over 32 elements
     std::swap(threadsPerBlock, elementsPerThread);
 #endif
-    const WorkDiv workDiv(blocksPerGrid, threadsPerBlock, elementsPerThread);
+    const WorkDiv1 workDiv1(blocksPerGrid, threadsPerBlock, elementsPerThread);
 
 
     // VECTOR ADDITION
     alpaka::queue::enqueue(queue,
-                           alpaka::kernel::createTaskKernel<Acc>(workDiv,
+                           alpaka::kernel::createTaskKernel<Acc1>(workDiv1,
                                                                  vectorAdd(),
                                                                  alpaka::mem::view::getPtrNative(d_a_buf),
                                                                  alpaka::mem::view::getPtrNative(d_b_buf),
@@ -370,7 +370,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     // MATRIX - VECTOR MULTIPLICATION
     alpaka::queue::enqueue(queue,
-			   alpaka::kernel::createTaskKernel<Acc>(workDiv,
+			   alpaka::kernel::createTaskKernel<Acc1>(workDiv1,
 								 matrixMulVector(),
 								 alpaka::mem::view::getPtrNative(d_mc_buf),
 								 alpaka::mem::view::getPtrNative(d_b_buf),
