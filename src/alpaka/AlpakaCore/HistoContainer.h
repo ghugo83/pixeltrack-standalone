@@ -94,7 +94,6 @@ namespace cms {
     std::cout << "Start dirty poff* calc" << std::endl;
     uint32_t *poff = (uint32_t *)((char *)(h) + offsetof(Histo, off));
 
-    //alpaka::wait::wait(queue);
     std::cout << "End dirty poff* calc" << std::endl;
       
       //int32_t *ppsws = (int32_t *)((char *)(h) + offsetof(Histo, psws)); // now unused???
@@ -121,7 +120,6 @@ namespace cms {
 								  psum_d,
 								  num_items));
 
-    alpaka::wait::wait(queue);
     std::cout << "Ended multiBlockPrefixScanFirstStep" << std::endl;
 
     const WorkDiv1 &workDivWith1Block = cms::alpakatools::make_workdiv(Vec1::all(1), threadsPerBlockOrElementsPerThread);
@@ -134,7 +132,6 @@ namespace cms {
 								  num_items,
 								  nblocks));
 
-    alpaka::wait::wait(queue);
     std::cout << "Ended multiBlockPrefixScanSecondStep" << std::endl;
     }
 
@@ -152,7 +149,6 @@ namespace cms {
 			     alpaka::kernel::createTaskKernel<Acc1>(WorkDiv1{Vec1::all(1u), Vec1::all(1u), Vec1::all(1u)},
 								    launchZero(),
 								    h));
-      alpaka::wait::wait(queue);
       std::cout << "Ended launchZero" << std::endl;
 
       unsigned int nblocks = (totSize + nthreads - 1) / nthreads;
@@ -165,7 +161,6 @@ namespace cms {
 								    countFromVector(),
 								    h, nh, v, offsets));
      
-      alpaka::wait::wait(queue);
       std::cout << "Ended countFromVector" << std::endl;
 
       
@@ -176,7 +171,7 @@ namespace cms {
 			     alpaka::kernel::createTaskKernel<Acc1>(workDiv,
 								    fillFromVector(),
 								    h, nh, v, offsets));
-      alpaka::wait::wait(queue);
+      //alpaka::wait::wait(queue);
       std::cout << "Ended fillFromVector" << std::endl;
     }
 
