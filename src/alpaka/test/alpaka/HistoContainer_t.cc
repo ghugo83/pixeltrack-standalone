@@ -78,8 +78,9 @@ void go(const DevHost& host, const DevAcc1& device, Queue& queue) {
 		       256, 
 		       device, 
 		       queue);
-  
+ 
     std::cout << "Prepare to copy results" << std::endl;
+    alpaka::wait::wait(queue);
     alpaka::mem::view::copy(queue, h_buf, h_d, 1u);
     alpaka::wait::wait(queue);
     std::cout << "Copied results" << std::endl;

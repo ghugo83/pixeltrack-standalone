@@ -132,6 +132,7 @@ namespace cms {
 								  num_items,
 								  nblocks));
 
+    alpaka::wait::wait(queue);
     std::cout << "Ended multiBlockPrefixScanSecondStep" << std::endl;
     }
 
@@ -163,7 +164,7 @@ namespace cms {
      
       std::cout << "Ended countFromVector" << std::endl;
 
-      
+      alpaka::wait::wait(queue);
       launchFinalize(h, device, queue);
       std::cout << "Ended launchFinalize" << std::endl;
       
@@ -171,8 +172,8 @@ namespace cms {
 			     alpaka::kernel::createTaskKernel<Acc1>(workDiv,
 								    fillFromVector(),
 								    h, nh, v, offsets));
-      //alpaka::wait::wait(queue);
       std::cout << "Ended fillFromVector" << std::endl;
+      alpaka::wait::wait(queue);
     }
 
     struct finalizeBulk {
