@@ -164,7 +164,7 @@ namespace cms {
      
       std::cout << "Ended countFromVector" << std::endl;
 
-      alpaka::wait::wait(queue);
+      //alpaka::wait::wait(queue);
       launchFinalize(h, device, queue);
       std::cout << "Ended launchFinalize" << std::endl;
       
