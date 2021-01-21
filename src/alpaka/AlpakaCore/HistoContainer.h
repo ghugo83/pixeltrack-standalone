@@ -80,20 +80,10 @@ namespace cms {
 	// TO DO: USE A WORKDIV??????????????
 	for (uint32_t i = 0; i < Histo::totbins(); ++i) {
 	  h->off[i] = 0;
+	  //printf("h->off[i] = %u" , h->off[i]);
 	}
       }
     };
-
-    /*
-    struct multiBlockPrefixScanFirstStepHisto {
-      template <typename T_Acc, typename T>
-	ALPAKA_FN_ACC void operator()(const T_Acc& acc, Histo *__restrict__ h, T* psum_d, int32_t size) const {
-	multiBlockPrefixScanFirstStepHisto<uint32_t>(
-	  h->sum, // TO DO: GetPointerNative??
-	  h->sum, // TO DO: ppws??
-	  psum_d,
-	  size));
-	  };*/
 
 
   template <typename Histo>
@@ -101,8 +91,11 @@ namespace cms {
 											  const DevAcc1& device,
 											  Queue& queue) {
 
+    std::cout << "Start dirty poff* calc" << std::endl;
     uint32_t *poff = (uint32_t *)((char *)(h) + offsetof(Histo, off));
-    // NB: Why are we not interested in poff on device memory (cuda version as well, different from test). ??
+
+    //alpaka::wait::wait(queue);
+    std::cout << "End dirty poff* calc" << std::endl;
       
       //int32_t *ppsws = (int32_t *)((char *)(h) + offsetof(Histo, psws)); // now unused???
       // ppsws ?????????????????????????????????????????????????????????????????????????????????
@@ -128,6 +121,9 @@ namespace cms {
 								  psum_d,
 								  num_items));
 
+    alpaka::wait::wait(queue);
+    std::cout << "Ended multiBlockPrefixScanFirstStep" << std::endl;
+
     const WorkDiv1 &workDivWith1Block = cms::alpakatools::make_workdiv(Vec1::all(1), threadsPerBlockOrElementsPerThread);
     alpaka::queue::enqueue(queue,
 			   alpaka::kernel::createTaskKernel<Acc1>(workDivWith1Block,
@@ -137,6 +133,9 @@ namespace cms {
 								  psum_d,
 								  num_items,
 								  nblocks));
+
+    alpaka::wait::wait(queue);
+    std::cout << "Ended multiBlockPrefixScanSecondStep" << std::endl;
     }
 
     template <typename Histo, typename T>
@@ -153,23 +152,32 @@ namespace cms {
 			     alpaka::kernel::createTaskKernel<Acc1>(WorkDiv1{Vec1::all(1u), Vec1::all(1u), Vec1::all(1u)},
 								    launchZero(),
 								    h));
+      alpaka::wait::wait(queue);
+      std::cout << "Ended launchZero" << std::endl;
 
       unsigned int nblocks = (totSize + nthreads - 1) / nthreads;
       const Vec1 &blocksPerGrid(Vec1::all(nblocks));  
       const Vec1 &threadsPerBlockOrElementsPerThread(Vec1::all(nthreads));
       const WorkDiv1 &workDiv = cms::alpakatools::make_workdiv(blocksPerGrid, threadsPerBlockOrElementsPerThread);
+      std::cout << "Starting countFromVector" << std::endl;
       alpaka::queue::enqueue(queue,
 			     alpaka::kernel::createTaskKernel<Acc1>(workDiv,
 								    countFromVector(),
 								    h, nh, v, offsets));
      
+      alpaka::wait::wait(queue);
+      std::cout << "Ended countFromVector" << std::endl;
 
-
+      
       launchFinalize(h, device, queue);
+      std::cout << "Ended launchFinalize" << std::endl;
+      
       alpaka::queue::enqueue(queue,
 			     alpaka::kernel::createTaskKernel<Acc1>(workDiv,
 								    fillFromVector(),
 								    h, nh, v, offsets));
+      alpaka::wait::wait(queue);
+      std::cout << "Ended fillFromVector" << std::endl;
     }
 
     struct finalizeBulk {

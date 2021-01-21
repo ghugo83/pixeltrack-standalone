@@ -74,6 +74,14 @@ void go() {
     assert(0 == h.off[0]);
     assert(offsets[10] == h.size());
 
+    std::cout << "h->psws = " << h.psws << std::endl;
+    for (uint32_t i = 0; i < Hist::totbins(); ++i) {
+      std::cout << "h->off = " << h.off[i] << std::endl;
+    }
+    for (uint32_t i = 0; i < Hist::capacity(); ++i) {
+      std::cout << "h->bins = " << h.bins[i] << std::endl;
+    }
+
     auto verify = [&](uint32_t i, uint32_t k, uint32_t t1, uint32_t t2) {
       assert(t1 < N);
       assert(t2 < N);

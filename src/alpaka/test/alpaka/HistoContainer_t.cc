@@ -37,7 +37,6 @@ void go(const DevHost& host, const DevAcc1& device, Queue& queue) {
   auto h_d = alpaka::mem::buf::alloc<Hist, Idx>(device, 1u);
 
   for (int it = 0; it < 5; ++it) {
-
     offsets[0] = 0;
     for (uint32_t j = 1; j < nParts + 1; ++j) {
       offsets[j] = offsets[j - 1] + partSize - 3 * j;
@@ -79,16 +78,33 @@ void go(const DevHost& host, const DevAcc1& device, Queue& queue) {
 		       256, 
 		       device, 
 		       queue);
-    alpaka::wait::wait(queue);
+    //alpaka::wait::wait(queue);
     std::cout << "Prepare to copy results" << std::endl;
     alpaka::mem::view::copy(queue, h_buf, h_d, 1u);
     alpaka::wait::wait(queue);
     std::cout << "Copied results" << std::endl;
 
     auto h = alpaka::mem::view::getPtrNative(h_buf);
-    assert(0 == h->off[0]);
-    assert(offsets[10] == h->size());
+    /*    
+	  assert(0 == h->off[0]);
+	  assert(offsets[10] == h->size());*/
 
+    //std::cout << "h->psws = " << h->psws << std::endl;
+
+
+
+    for (uint32_t i = 0; i < Hist::totbins(); ++i) {
+      std::cout << "h->off = " << h->off[i] << std::endl;
+    }
+
+
+
+
+    /*for (uint32_t i = 0; i < Hist::capacity(); ++i) {
+      std::cout << "h->bins = " << h->bins[i] << std::endl;
+      }*/
+
+    /*
     auto verify = [&](uint32_t i, uint32_t k, uint32_t t1, uint32_t t2) {
       assert(t1 < N);
       assert(t2 < N);
@@ -156,7 +172,7 @@ void go(const DevHost& host, const DevAcc1& device, Queue& queue) {
                     << std::endl;
         assert(!l);
       }
-    }
+      }*/
   }
 }
 
