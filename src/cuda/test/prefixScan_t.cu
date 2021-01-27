@@ -67,6 +67,17 @@ __global__ void testWarpPrefixScan(uint32_t size) {
   }
 }
 
+__global__ void blockPrefixScanMyTest(uint32_t* c, uint32_t size, uint32_t* ws) {
+  
+  //auto i = threadIdx.x;
+  for (auto i = threadIdx.x; i < size; i += blockDim.x) {
+    c[i] = 1;
+  }
+  __syncthreads();
+
+  blockPrefixScan(c, size, ws);
+}
+
 __global__ void init(uint32_t *v, uint32_t val, uint32_t n) {
   auto i = blockIdx.x * blockDim.x + threadIdx.x;
   if (i < n)
@@ -86,7 +97,7 @@ __global__ void verify(uint32_t const *v, uint32_t n) {
 int main() {
   cms::cudatest::requireDevices();
 
-  std::cout << "warp level" << std::endl;
+  /*std::cout << "warp level" << std::endl;
   // std::cout << "warp 32" << std::endl;
   testWarpPrefixScan<int><<<1, 32>>>(32);
   cudaDeviceSynchronize();
@@ -139,10 +150,42 @@ int main() {
     std::cout << "launch multiBlockPrefixScan " << num_items << ' ' << nblocks << std::endl;
     multiBlockPrefixScan<<<nblocks, nthreads, 4 * nblocks>>>(d_in, d_out1, num_items, d_pc);
     cudaCheck(cudaGetLastError());
-    verify<<<nblocks, nthreads, 0>>>(d_out1, num_items);
-    cudaCheck(cudaGetLastError());
-    cudaDeviceSynchronize();
+    verify<<<nblocks, nthreads, 0>>>(d_out1, num_items);*/
 
-  }  // ksize
+
+
+  // MY TEST
+  std::cout << "MY TESTTTTT!!!!" << std::endl;
+  uint32_t* matrix_d;
+  //auto v_d = cms::cuda::make_device_unique<std::array<uint16_t, 4>[]>(N, nullptr);
+  cudaCheck(cudaMalloc(&matrix_d, 1024 * sizeof(uint32_t)));
+  cudaCheck(cudaMemset(matrix_d, 0, sizeof(int32_t)));
+
+  uint32_t* ws_d;
+  cudaCheck(cudaMalloc(&ws_d, 32 * sizeof(uint32_t)));
+  cudaCheck(cudaMemset(ws_d, 0, sizeof(int32_t)));
+
+  blockPrefixScanMyTest<<<1, 32, 0>>>(matrix_d, 1024, ws_d);
+  cudaCheck(cudaGetLastError());
+
+  uint32_t matrix_h[1024];
+  cudaCheck(cudaMemcpy(matrix_h, matrix_d, 1024 * sizeof(uint32_t), cudaMemcpyDeviceToHost));
+  uint32_t ws_h[32];
+  cudaCheck(cudaMemcpy(ws_h, ws_d, 32 * sizeof(uint32_t), cudaMemcpyDeviceToHost));
+  
+
+  for (int i = 0; i < 1024; ++i) {
+    std::cout << matrix_h[i] << std::endl;
+  }
+  for (int i = 0; i < 32; ++i) {
+    std::cout << ws_h[i] << std::endl;
+  }
+
+
+
+  cudaCheck(cudaGetLastError());
+  cudaDeviceSynchronize();
+
+
   return 0;
 }

@@ -80,6 +80,27 @@ struct testWarpPrefixScan {
   }
 };
 
+struct blockPrefixScanMyTest {
+  template <typename T_Acc>
+  ALPAKA_FN_ACC void operator()(const T_Acc& acc, uint32_t* c, uint32_t size, uint32_t* ws) const {
+
+    const uint32_t blockDimension(alpaka::workdiv::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[0u]);
+
+    const auto& [firstElementIdxNoStride, endElementIdxNoStride] =
+      cms::alpakatools::element_global_index_range(acc, Vec1::all(size));
+    uint32_t endElementIdx = endElementIdxNoStride[0u];
+    for (uint32_t threadIdx = firstElementIdxNoStride[0u]; threadIdx < size; threadIdx += blockDimension) {
+      for (uint32_t i = threadIdx; i < std::min(size, endElementIdx); ++i) {
+	c[i] = 1;
+      }
+      endElementIdx += blockDimension;
+    }
+
+    blockPrefixScan(acc, c, size, ws);
+
+  }
+};
+
 struct init {
   template <typename T_Acc>
   ALPAKA_FN_ACC void operator()(const T_Acc& acc, uint32_t* v, uint32_t val, uint32_t n) const {
@@ -116,23 +137,23 @@ int main() {
 
   Queue queue(device);
 
-  Vec1 elementsPerThread(Vec1::all(1));
-  Vec1 threadsPerBlock(Vec1::all(32));
+  Vec1 elementsPerThread(Vec1::all(32));
+  Vec1 threadsPerBlock(Vec1::all(1));
   Vec1 blocksPerGrid(Vec1::all(1));
-#if defined ALPAKA_ACC_CPU_B_TBB_T_SEQ_ENABLED || ALPAKA_ACC_CPU_B_OMP2_T_SEQ_ENABLED || ALPAKA_ACC_CPU_BT_OMP4_ENABLED
+#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
   // on the GPU, run with 512 threads in parallel per block, each looking at a single element
   // on the CPU, run serially with a single thread per block, over 512 elements
   std::swap(threadsPerBlock, elementsPerThread);
 #endif
-#if defined ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
+  /*#if defined ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
   threadsPerBlock = Vec1::all(1);
-#endif
+  #endif*/
 
   const WorkDiv1 workDiv(blocksPerGrid, threadsPerBlock, elementsPerThread);
   std::cout << "blocks per grid: " << blocksPerGrid << ", threads per block: " << threadsPerBlock
             << ", elements per thread: " << elementsPerThread << std::endl;
 
-#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+  /*#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
   std::cout << "warp level" << std::endl;
   alpaka::queue::enqueue(queue, alpaka::kernel::createTaskKernel<Acc1>(workDiv, testWarpPrefixScan<int>(), 32));
   alpaka::wait::wait(queue);
@@ -165,8 +186,47 @@ int main() {
   }
 #endif
 
+alpaka::wait::wait(queue);*/
+
+
+
+
+  // MY TEST
+  std::cout << "MY TESTTTTT!!!!" << std::endl;
+  auto matrix_dbuf = alpaka::mem::buf::alloc<uint32_t, Idx>(device, Vec1::all(1024));
+  auto ws_dbuf = alpaka::mem::buf::alloc<uint32_t, Idx>(device, Vec1::all(32));
+  alpaka::mem::view::set(queue, matrix_dbuf, 0, 1u);
+  alpaka::mem::view::set(queue, ws_dbuf, 0, 1u);
+  alpaka::queue::enqueue(queue,
+    alpaka::kernel::createTaskKernel<Acc1>(workDiv, 
+    blockPrefixScanMyTest(),
+    alpaka::mem::view::getPtrNative(matrix_dbuf),
+    1024,
+    alpaka::mem::view::getPtrNative(ws_dbuf)
+    ));
+
+  auto matrix_hbuf = alpaka::mem::buf::alloc<uint32_t, Idx>(host, Vec1::all(1024));
+  auto matrix = alpaka::mem::view::getPtrNative(matrix_hbuf);
+  alpaka::mem::view::copy(queue, matrix_hbuf, matrix_dbuf, 1024u);
   alpaka::wait::wait(queue);
 
+  auto ws_hbuf = alpaka::mem::buf::alloc<uint32_t, Idx>(host, Vec1::all(1024));
+  auto ws = alpaka::mem::view::getPtrNative(ws_hbuf);
+  alpaka::mem::view::copy(queue, ws_hbuf, ws_dbuf, 32u);
+  alpaka::wait::wait(queue);
+
+  for (int i = 0; i < 1024; ++i) {
+  std::cout << matrix[i] << std::endl;
+}
+  for (int i = 0; i < 32; ++i) {
+  std::cout << ws[i] << std::endl;
+}
+
+  
+
+
+
+/*
   int num_items = 200;
   for (int ksize = 1; ksize < 4; ++ksize) {
     // test multiblock
@@ -234,9 +294,9 @@ int main() {
     alpaka::queue::enqueue(
         queue,
         alpaka::kernel::createTaskKernel<Acc1>(
-            WorkDiv1{Vec1::all(nblocks), Vec1::all(nthreads), Vec1::all(nelements)}, verify(), output1_d, num_items));
+	WorkDiv1{Vec1::all(nblocks), Vec1::all(nthreads), Vec1::all(nelements)}, verify(), output1_d, num_items));*/
     alpaka::wait::wait(queue);
 
-  }  // ksize
+    //}  // ksize
   return 0;
 }
