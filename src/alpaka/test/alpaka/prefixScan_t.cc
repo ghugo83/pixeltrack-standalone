@@ -115,22 +115,12 @@ int main() {
   const Vec1 size(1u);
 
   Queue queue(device);
-
-  Vec1 elementsPerThread(Vec1::all(1));
-  Vec1 threadsPerBlock(Vec1::all(32));
+  /*
+  Vec1 threadsPerBlockOrElementsPerThread(Vec1::all(32));
   Vec1 blocksPerGrid(Vec1::all(1));
-#if defined ALPAKA_ACC_CPU_B_TBB_T_SEQ_ENABLED || ALPAKA_ACC_CPU_B_OMP2_T_SEQ_ENABLED || ALPAKA_ACC_CPU_BT_OMP4_ENABLED
-  // on the GPU, run with 512 threads in parallel per block, each looking at a single element
-  // on the CPU, run serially with a single thread per block, over 512 elements
-  std::swap(threadsPerBlock, elementsPerThread);
-#endif
-#if defined ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
-  threadsPerBlock = Vec1::all(1);
-#endif
+  const WorkDiv1 &workDiv = cms::alpakatools::make_workdiv(blocksPerGrid, threadsPerBlockOrElementsPerThread);
 
-  const WorkDiv1 workDiv(blocksPerGrid, threadsPerBlock, elementsPerThread);
-  std::cout << "blocks per grid: " << blocksPerGrid << ", threads per block: " << threadsPerBlock
-            << ", elements per thread: " << elementsPerThread << std::endl;
+  std::cout << "blocks per grid: " << blocksPerGrid << ", threads per block or element per thread: " << threadsPerBlockOrElementsPerThread << std::endl;
 
 #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
   std::cout << "warp level" << std::endl;
@@ -165,7 +155,7 @@ int main() {
   }
 #endif
 
-  alpaka::wait::wait(queue);
+alpaka::wait::wait(queue);*/
 
   int num_items = 200;
   for (int ksize = 1; ksize < 4; ++ksize) {
@@ -176,16 +166,16 @@ int main() {
     uint32_t* d_out1;
     uint32_t* d_out2;
 
-    auto input_dBuf = alpaka::mem::buf::alloc<uint32_t, Idx>(device, Vec1::all(num_items * sizeof(uint32_t)));
+    auto input_dBuf = alpaka::mem::buf::alloc<uint32_t, Idx>(device, Vec1::all(num_items));
     uint32_t* input_d = alpaka::mem::view::getPtrNative(input_dBuf);
 
-    auto output1_dBuf = alpaka::mem::buf::alloc<uint32_t, Idx>(device, Vec1::all(num_items * sizeof(uint32_t)));
+    auto output1_dBuf = alpaka::mem::buf::alloc<uint32_t, Idx>(device, Vec1::all(num_items));
     uint32_t* output1_d = alpaka::mem::view::getPtrNative(output1_dBuf);
 
-#if defined ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
-    auto nthreads = 1;
-#else
+#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
     auto nthreads = 256;
+#else
+    auto nthreads = 1;
 #endif
     auto nblocks = (num_items + nthreads - 1) / nthreads;
 
@@ -195,46 +185,47 @@ int main() {
             WorkDiv1{Vec1::all(nblocks), Vec1::all(nthreads), Vec1::all(1)}, init(), input_d, 1, num_items));
     alpaka::wait::wait(queue);
 
-    auto psum_dBuf = alpaka::mem::buf::alloc<uint32_t, Idx>(device, Vec1::all(num_items * sizeof(uint32_t)));
-    uint32_t* psum_d = alpaka::mem::view::getPtrNative(psum_dBuf);
+    //auto psum_dBuf = alpaka::mem::buf::alloc<uint32_t, Idx>(device, Vec1::all(num_items * sizeof(uint32_t)));
+    //uint32_t* psum_d = alpaka::mem::view::getPtrNative(psum_dBuf);
 
-    alpaka::mem::view::set(queue, psum_dBuf, 0u, Vec1::all(num_items * sizeof(uint32_t)));
+    //alpaka::mem::view::set(queue, psum_dBuf, 0u, Vec1::all(num_items * sizeof(uint32_t)));
 
-#if defined ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
-    nthreads = 1;
-    auto nelements = 768;
-    nblocks = (num_items + nelements - 1) / nelements;
+#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+    auto nthreadsMulti = 768;
+    auto nelementsMulti = 1;
+    auto nblocksMulti = (num_items + nthreadsMulti - 1) / nthreadsMulti;
 #else
-    nthreads = 768;
-    auto nelements = 1;
-    nblocks = (num_items + nthreads - 1) / nthreads;
+    auto nthreadsMulti = 1;
+    auto nelementsMulti = 768;
+    auto nblocksMulti = (num_items + nelementsMulti - 1) / nelementsMulti;
 #endif
 
-    std::cout << "launch multiBlockPrefixScan " << num_items << ' ' << nblocks << std::endl;
-    alpaka::queue::enqueue(
-        queue,
-        alpaka::kernel::createTaskKernel<Acc1>(WorkDiv1{Vec1::all(nblocks), Vec1::all(nthreads), Vec1::all(nelements)},
-                                               multiBlockPrefixScanFirstStep<uint32_t>(),
-                                               input_d,
-                                               output1_d,
-                                               psum_d,
-                                               num_items));
+    std::cout << "launch multiBlockPrefixScan  nblocksMulti = " << nblocksMulti
+              << ", nthreadsMulti =  " << nthreadsMulti << std::endl;
+    alpaka::queue::enqueue(queue,
+                           alpaka::kernel::createTaskKernel<Acc1>(
+                               WorkDiv1{Vec1::all(nblocksMulti), Vec1::all(nthreadsMulti), Vec1::all(nelementsMulti)},
+                               multiBlockPrefixScanFirstStep<uint32_t>(),
+                               input_d,
+                               output1_d,
+                               num_items));
     alpaka::wait::wait(queue);
-    alpaka::queue::enqueue(
-        queue,
-        alpaka::kernel::createTaskKernel<Acc1>(WorkDiv1{Vec1::all(1), Vec1::all(nthreads), Vec1::all(nelements)},
-                                               multiBlockPrefixScanSecondStep<uint32_t>(),
-                                               input_d,
-                                               output1_d,
-                                               psum_d,
-                                               num_items,
-                                               nblocks));
+    alpaka::queue::enqueue(queue,
+                           alpaka::kernel::createTaskKernel<Acc1>(
+                               WorkDiv1{Vec1::all(1), Vec1::all(nthreadsMulti), Vec1::all(nelementsMulti)},
+                               multiBlockPrefixScanSecondStep<uint32_t>(),
+                               input_d,
+                               output1_d,
+                               num_items,
+                               nblocksMulti));
     alpaka::wait::wait(queue);
 
-    alpaka::queue::enqueue(
-        queue,
-        alpaka::kernel::createTaskKernel<Acc1>(
-            WorkDiv1{Vec1::all(nblocks), Vec1::all(nthreads), Vec1::all(nelements)}, verify(), output1_d, num_items));
+    alpaka::queue::enqueue(queue,
+                           alpaka::kernel::createTaskKernel<Acc1>(
+                               WorkDiv1{Vec1::all(nblocksMulti), Vec1::all(nthreadsMulti), Vec1::all(nelementsMulti)},
+                               verify(),
+                               output1_d,
+                               num_items));
     alpaka::wait::wait(queue);
 
   }  // ksize
