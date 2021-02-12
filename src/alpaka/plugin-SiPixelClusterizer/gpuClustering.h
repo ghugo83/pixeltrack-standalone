@@ -40,9 +40,10 @@ namespace gpuClustering {
 	  if (j < 0 or id[j] != id[i]) {
 	    // boundary...
             //auto loc = alpaka::atomic::atomicOp<alpaka::atomic::op::Inc>(acc, moduleStart, MaxNumModules);   
-	    //auto loc = alpaka::atomic::atomicOp<alpaka::atomic::op::Inc>(acc, moduleStart, 2000u);
-	    auto loc = alpaka::atomic::atomicOp<alpaka::atomic::op::Inc>(acc, &moduleStart[0], 1u);  // TO DO: does that work the same???????
-	    assert(moduleStart[0] < MaxNumModules);
+	    auto loc = alpaka::atomic::atomicOp<alpaka::atomic::op::Inc>(acc, moduleStart, 2000u);
+            printf("loc = %u", loc);
+//auto loc = alpaka::atomic::atomicOp<alpaka::atomic::op::Add>(acc, &moduleStart[0], 1u);  // TO DO: does that work the same???????
+//	    assert(moduleStart[0] < MaxNumModules);
 
 	    moduleStart[loc + 1] = i;
 	  }
@@ -129,7 +130,11 @@ namespace gpuClustering {
 	}
       }
 
-      alpaka::block::sync::syncBlockThreads(acc);
+alpaka::block::sync::syncBlockThreads(acc);
+// DEBUG ADDEDDDDDDDDDDDDDDDDDDDDDDDDDDD
+printf("msize= %u, firstPixel= %u, maxPixInModule= %u .\n", msize, firstPixel, maxPixInModule);
+alpaka::block::sync::syncBlockThreads(acc);
+// DEBUG ADDEDDDDDDDDDDDDDDDDDDDDDDDDDDD
       assert(msize - firstPixel <= maxPixInModule);
 
 #ifdef GPU_DEBUG
@@ -310,7 +315,7 @@ namespace gpuClustering {
 	  if (id[i] == InvId)  // skip invalid pixels
 	    continue;
 	  if (clusterId[i] == static_cast<int>(i)) {
-	    auto old = alpaka::atomic::atomicOp<alpaka::atomic::op::Inc>(acc, &foundClusters, 0xffffffff);                    // TO DO: What the hell is this??
+	    auto old = alpaka::atomic::atomicOp<alpaka::atomic::op::Inc>(acc, &foundClusters, 0xffffffff);
 	    //auto old = alpaka::atomic::atomicOp<alpaka::atomic::op::Inc>(acc, &foundClusters, 4294967295u);
 	    clusterId[i] = -(old + 1);
 	  }

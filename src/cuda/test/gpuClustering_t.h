@@ -230,7 +230,10 @@ int main(void) {
       }
     }
   };  // end lambda
-  for (auto kkk = 0; kkk < 5; ++kkk) {
+  // DEBUG ADDEDDDDDDDDDDDDDDDDDDDDDDDDDDD
+  //for (auto kkk = 0; kkk < 5; ++kkk) {
+  for (auto kkk = 0; kkk < 1; ++kkk) {
+    // DEBUG ADDEDDDDDDDDDDDDDDDDDDDDDDDDDDD
     n = 0;
     ncl = 0;
     generateClusters(kkk);
@@ -257,6 +260,18 @@ int main(void) {
               << " threads\n";
 
     cms::cuda::launch(countModules, {blocksPerGrid, threadsPerBlock}, d_id.get(), d_moduleStart.get(), d_clus.get(), n);
+
+    // DEBUG ADDEDDDDDDDDDDDDDDDDDDDDDDDDDDD
+    //auto h_moduleStart =  std::make_unique<uint32_t[]>(MaxNumModules + 1);
+    //cudaCheck(cudaMemcpy(h_moduleStart.get(), d_moduleStart.get(), (MaxNumModules + 1) * sizeof(unsigned int), cudaMemcpyDeviceToHost));
+    /*for (unsigned int i = 0; i < MaxNumModules + 1; ++i) {
+      std::cout << "h_moduleStart[" << i << "] = " << h_moduleStart[i] << std::endl;
+      }*/
+    // DEBUG ADDEDDDDDDDDDDDDDDDDDDDDDDDDDDD
+
+
+
+
 
     blocksPerGrid = MaxNumModules;  //nModules;
 

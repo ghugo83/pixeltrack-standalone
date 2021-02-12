@@ -18,12 +18,17 @@
 
 int main(void) {
   using namespace gpuClustering;
+  //using QueueHost = alpaka::queue::QueueCpuNonBlocking;
 
   const DevHost host(alpaka::pltf::getDevByIdx<PltfHost>(0u));
   const ALPAKA_ACCELERATOR_NAMESPACE::DevAcc1 device(alpaka::pltf::getDevByIdx<ALPAKA_ACCELERATOR_NAMESPACE::PltfAcc1>(0u));
   ALPAKA_ACCELERATOR_NAMESPACE::Queue queue(device);
+  //QueueHost queueHost;
 
+  // DEBUG ADDEDDDDDDDDDDDDDDDDDDDDDDDDDDD
   constexpr unsigned int numElements = 256 * 2000;                                           // TO DO: added constexpr unsigned
+  //constexpr unsigned int numElements = 128;
+  // DEBUG ADDEDDDDDDDDDDDDDDDDDDDDDDDDDDD
   // these in reality are already on GPU
   auto h_id_buf = alpaka::mem::buf::alloc<uint16_t, Idx>(host, numElements);
   auto h_id = alpaka::mem::view::getPtrNative(h_id_buf);
@@ -33,7 +38,6 @@ int main(void) {
   auto h_y = alpaka::mem::view::getPtrNative(h_y_buf);
   auto h_adc_buf = alpaka::mem::buf::alloc<uint16_t, Idx>(host, numElements);
   auto h_adc = alpaka::mem::view::getPtrNative(h_adc_buf);
-
   auto h_clus_buf = alpaka::mem::buf::alloc<int, Idx>(host, numElements);
   auto h_clus = alpaka::mem::view::getPtrNative(h_clus_buf);
 
@@ -46,8 +50,39 @@ int main(void) {
   
 
   auto d_moduleStart_buf = alpaka::mem::buf::alloc<uint32_t, Idx>(device, MaxNumModules + 1);
-  auto d_clusInModule_buf = alpaka::mem::buf::alloc<uint32_t, Idx>(device, MaxNumModules + 1);
-  auto d_moduleId_buf = alpaka::mem::buf::alloc<uint32_t, Idx>(device, MaxNumModules + 1);
+  auto d_clusInModule_buf = alpaka::mem::buf::alloc<uint32_t, Idx>(device, MaxNumModules);
+  auto d_moduleId_buf = alpaka::mem::buf::alloc<uint32_t, Idx>(device, MaxNumModules);
+
+
+  // DEBUG ADDEDDDDDDDDDDDDDDDDDDDDDDDDDDD
+  alpaka::mem::view::set(queue, d_id_buf, 0, numElements);
+  alpaka::mem::view::set(queue, d_x_buf, 0, numElements);
+  alpaka::mem::view::set(queue, d_y_buf, 0, numElements);
+  alpaka::mem::view::set(queue, d_adc_buf, 0, numElements);
+  alpaka::mem::view::set(queue, d_clus_buf, 0, numElements);  // not needed
+
+  alpaka::mem::view::copy(queue, h_id_buf, d_id_buf, numElements);
+  alpaka::mem::view::copy(queue, h_x_buf, d_x_buf, numElements);
+  alpaka::mem::view::copy(queue, h_y_buf, d_y_buf, numElements);
+  alpaka::mem::view::copy(queue, h_adc_buf, d_adc_buf, numElements);
+  alpaka::mem::view::copy(queue, h_clus_buf, d_clus_buf, numElements);
+
+  alpaka::mem::view::set(queue, d_moduleStart_buf, 0, MaxNumModules + 1);  // TO DO: likely important line???
+  alpaka::mem::view::set(queue, d_clusInModule_buf, 0, MaxNumModules);  // TO DO: likely important line???
+  alpaka::mem::view::set(queue, d_moduleId_buf, 0, MaxNumModules);
+
+  auto h_moduleStart_buf = alpaka::mem::buf::alloc<uint32_t, Idx>(host, MaxNumModules + 1);
+  auto h_moduleStart = alpaka::mem::view::getPtrNative(h_moduleStart_buf);
+  auto h_clusInModule_buf = alpaka::mem::buf::alloc<uint32_t, Idx>(host, MaxNumModules);
+  auto h_clusInModule = alpaka::mem::view::getPtrNative(h_clusInModule_buf);
+  auto h_moduleId_buf = alpaka::mem::buf::alloc<uint32_t, Idx>(host, MaxNumModules);
+  auto h_moduleId = alpaka::mem::view::getPtrNative(h_moduleId_buf);
+  alpaka::mem::view::copy(queue, h_moduleStart_buf, d_moduleStart_buf, MaxNumModules + 1);
+  alpaka::mem::view::copy(queue, h_clusInModule_buf, d_clusInModule_buf, MaxNumModules);
+  alpaka::mem::view::copy(queue, h_moduleId_buf, d_moduleId_buf, MaxNumModules);
+  // DEBUG ADDEDDDDDDDDDDDDDDDDDDDDDDDDDDD
+
+
 
   // later random number
   unsigned int n = 0;                                                              // TO DO: added unsigned
@@ -231,12 +266,16 @@ int main(void) {
     generateClusters(kkk);
 
     std::cout << "created " << n << " digis in " << ncl << " clusters" << std::endl;
+    std::cout << "numElements =  " << numElements << std::endl;
     assert(n <= numElements);
+    std::cout << "survived assert" << std::endl;
 
     auto h_nModules_buf = alpaka::mem::buf::alloc<uint32_t, Idx>(host, 1u);
     auto nModules = alpaka::mem::view::getPtrNative(h_nModules_buf);
-    alpaka::mem::view::set(queue, h_nModules_buf, 0, 1u);
-    alpaka::mem::view::copy(queue, d_moduleStart_buf, h_nModules_buf, 1u);                                         // TO DO: can copy raw pointer into device memory without using host_buf ??????????????????????
+    // DEBUG ADDEDDDDDDDDDDDDDDDDDDDDDDDDDDD
+    //alpaka::mem::view::set(queue, h_nModules_buf, 0, 1u);    
+    //alpaka::mem::view::copy(queue, d_moduleStart_buf, h_nModules_buf, 1u);  
+    // DEBUG ADDEDDDDDDDDDDDDDDDDDDDDDDDDDDD                                       // TO DO: can copy raw pointer into device memory without using host_buf ??????????????????????
 
     alpaka::mem::view::copy(queue, d_id_buf, h_id_buf, n);
     alpaka::mem::view::copy(queue, d_x_buf, h_x_buf, n);
@@ -244,7 +283,10 @@ int main(void) {
     alpaka::mem::view::copy(queue, d_adc_buf, h_adc_buf, n);
   
     // Launch CUDA Kernels
+    // DEBUG ADDEDDDDDDDDDDDDDDDDDDDDDDDDDDD
     const int threadsPerBlockOrElementsPerThread = (kkk == 5) ? 512 : ((kkk == 3) ? 128 : 256);
+    //const int threadsPerBlockOrElementsPerThread = 64;
+    // DEBUG ADDEDDDDDDDDDDDDDDDDDDDDDDDDDDD
 
     const int blocksPerGridCountModules = (numElements + threadsPerBlockOrElementsPerThread - 1) / threadsPerBlockOrElementsPerThread;
     const WorkDiv1& workDivCountModules = cms::alpakatools::make_workdiv(Vec1::all(blocksPerGridCountModules), Vec1::all(threadsPerBlockOrElementsPerThread));
@@ -259,6 +301,24 @@ int main(void) {
 												alpaka::mem::view::getPtrNative(d_clus_buf),
 												n
 												));
+
+    // DEBUG ADDEDDDDDDDDDDDDDDDDDDDDDDDDDDD
+    alpaka::wait::wait(queue);
+    /*std::cout << "finished kernel countModules" << std::endl;
+    alpaka::mem::view::copy(queue, h_moduleStart_buf, d_moduleStart_buf, MaxNumModules + 1);
+    std::cout << "finished copie d_moduleStart_buf" << std::endl;
+    alpaka::mem::view::copy(queue, h_clus_buf, d_clus_buf, n);
+    alpaka::wait::wait(queue);
+    std::cout << "finished copies" << std::endl;
+
+    for (unsigned int i = 0; i < MaxNumModules + 1; ++i) {
+      std::cout << "h_moduleStart[" << i << "] = " << h_moduleStart[i] << std::endl;
+      }*/
+    // DEBUG ADDEDDDDDDDDDDDDDDDDDDDDDDDDDDD
+
+
+
+
 
     const WorkDiv1& workDivMaxNumModules = cms::alpakatools::make_workdiv(Vec1::all(MaxNumModules), Vec1::all(threadsPerBlockOrElementsPerThread));
     std::cout << "CUDA findModules kernel launch with " << MaxNumModules << " blocks of " << threadsPerBlockOrElementsPerThread
@@ -279,13 +339,16 @@ int main(void) {
 												n
 												));
 
+    // DEBUG ADDEDDDDDDDDDDDDDDDDDDDDDDDDDDD
+    alpaka::wait::wait(queue);
+    // DEBUG ADDEDDDDDDDDDDDDDDDDDDDDDDDDDDD
+
     alpaka::mem::view::copy(queue, h_nModules_buf, d_moduleStart_buf, 1u);                                         // TO DO: can copy raw pointer into host memory without using host_buf ??????????????????????
-    alpaka::wait::wait(queue);                                                                                     // TO DO: remove this wait??                                                                                    
 
     auto h_nclus_buf = alpaka::mem::buf::alloc<uint32_t, Idx>(host, MaxNumModules);
+    auto nclus = alpaka::mem::view::getPtrNative(h_nclus_buf);
     alpaka::mem::view::copy(queue, h_nclus_buf, d_clusInModule_buf, MaxNumModules);
     alpaka::wait::wait(queue);
-    auto nclus = alpaka::mem::view::getPtrNative(h_nclus_buf);
 
     auto h_moduleId_buf = alpaka::mem::buf::alloc<uint32_t, Idx>(host, *nModules);
     //auto moduleId = alpaka::mem::view::getPtrNative(h_moduleId_buf);

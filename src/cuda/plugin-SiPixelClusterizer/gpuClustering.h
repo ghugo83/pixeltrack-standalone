@@ -100,6 +100,11 @@ namespace gpuClustering {
       }
     }
 
+    // DEBUG ADDEDDDDDDDDDDDDDDDDDDDDDDDDDDD
+    __syncthreads();
+    printf("msize= %u, firstPixel= %u, maxPixInModule= %u .\n", msize, firstPixel, maxPixInModule);
+    // DEBUG ADDEDDDDDDDDDDDDDDDDDDDDDDDDDDD
+
     __syncthreads();
     assert(msize - firstPixel <= maxPixInModule);
 
