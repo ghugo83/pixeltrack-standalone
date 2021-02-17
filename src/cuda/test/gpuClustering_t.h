@@ -231,9 +231,12 @@ int main(void) {
     }
   };  // end lambda
   for (auto kkk = 0; kkk < 5; ++kkk) {
+    //for (auto kkk = 4; kkk < 5; ++kkk) {
     n = 0;
     ncl = 0;
     generateClusters(kkk);
+
+    std::cout << "kkk = " << kkk << ", n = " << n << std::endl;
 
     std::cout << "created " << n << " digis in " << ncl << " clusters" << std::endl;
     assert(n <= numElements);

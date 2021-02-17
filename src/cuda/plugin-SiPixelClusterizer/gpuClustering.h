@@ -33,9 +33,11 @@ namespace gpuClustering {
       if (j < 0 or id[j] != id[i]) {
         // boundary...
         auto loc = atomicInc(moduleStart, MaxNumModules);
-        moduleStart[loc + 1] = i;
+
+	moduleStart[loc + 1] = i;
       }
     }
+
   }
 
   __global__
@@ -78,6 +80,9 @@ namespace gpuClustering {
         break;
       }
     }
+    /*if (blockIdx.x == 0) {
+      printf("msize = %u \n", msize);
+      }*/
 
     //init hist  (ymax=416 < 512 : 9bits)
     constexpr uint32_t maxPixInModule = 4000;
@@ -174,6 +179,14 @@ namespace gpuClustering {
     __syncthreads();
 #endif
 
+    if (thisModuleId % 100 == 1 && threadIdx.x == 0) {
+      printf("n40 = %u \n", n40);
+      printf("n60 = %u \n", n60);
+    }
+    __syncthreads();
+
+
+
     // fill NN
     for (auto j = threadIdx.x, k = 0U; j < hist.size(); j += blockDim.x, ++k) {
       assert(k < maxiter);
@@ -193,8 +206,15 @@ namespace gpuClustering {
         if (std::abs(int(x[m]) - int(x[i])) > 1)
           continue;
         auto l = nnn[k]++;
+	if (thisModuleId % 100 == 1 && threadIdx.x == 0) {
+	  printf("k = %u \n", k);
+	  printf("nnn[k] = %u \n", nnn[k]);
+	  }
         assert(l < maxNeighbours);
         nn[k][l] = *p;
+	if (thisModuleId % 100 == 1 && threadIdx.x == 0) {
+	  printf("nn[k][l] = %u \n", nn[k][l]);
+	}
       }
     }
 
@@ -229,11 +249,18 @@ namespace gpuClustering {
               more = true;
             }
             atomicMin(&clusterId[i], old);
+	    if (thisModuleId % 100 == 1 && threadIdx.x == 0) {
+	      printf("i = %u, clusterId[i] = %u \n", i, clusterId[i]);
+	    }
           }  // nnloop
         }    // pixel loop
       }
       ++nloops;
     }  // end while
+    if (thisModuleId % 100 == 1 && threadIdx.x == 0) {
+      printf("nloops = %u", nloops);
+    }
+
 
 #ifdef GPU_DEBUG
     {
@@ -264,6 +291,9 @@ namespace gpuClustering {
       }
     }
     __syncthreads();
+    if (threadIdx.x == 0) {
+      printf("thisModuleId = %u, msize = %u, firstPixel = %u, foundClusters = %u \n", thisModuleId, msize, firstPixel, foundClusters);
+    }
 
     // propagate the negative id to all the pixels in the cluster.
     for (int i = first; i < msize; i += blockDim.x) {
