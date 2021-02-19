@@ -156,7 +156,7 @@ namespace cms {
     ALPAKA_FN_ACC void for_each_element_in_thread_1D_index_in_block(const T_Acc& acc,
                                                                     const uint32_t maxNumberOfElements,
                                                                     const uint32_t elementIdxShift,
-                                                                    const Func& func) {
+                                                                    const Func func) {
       const auto& [firstElementIdx, endElementIdx] = cms::alpakatools::element_index_range_in_block_truncated(
           acc, Vec1::all(maxNumberOfElements), Vec1::all(elementIdxShift));
 
@@ -171,7 +171,7 @@ namespace cms {
     template <typename T_Acc, typename Func>
     ALPAKA_FN_ACC void for_each_element_in_thread_1D_index_in_block(const T_Acc& acc,
                                                                     const uint32_t maxNumberOfElements,
-                                                                    const Func& func) {
+                                                                    const Func func) {
       const uint32_t elementIdxShift = 0;
       cms::alpakatools::for_each_element_in_thread_1D_index_in_block(acc, maxNumberOfElements, elementIdxShift, func);
     }
@@ -185,7 +185,7 @@ namespace cms {
     ALPAKA_FN_ACC void for_each_element_in_thread_1D_index_in_grid(const T_Acc& acc,
                                                                    const uint32_t maxNumberOfElements,
                                                                    uint32_t elementIdxShift,
-                                                                   const Func& func) {
+                                                                   const Func func) {
       // Take into account the block index in grid to compute the element indices.
       const uint32_t blockIdxInGrid(alpaka::idx::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
       const uint32_t blockDimension(alpaka::workdiv::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[0u]);
@@ -200,7 +200,7 @@ namespace cms {
     template <typename T_Acc, typename Func>
     ALPAKA_FN_ACC void for_each_element_in_thread_1D_index_in_grid(const T_Acc& acc,
                                                                    const uint32_t maxNumberOfElements,
-                                                                   const Func& func) {
+                                                                   const Func func) {
       const uint32_t elementIdxShift = 0;
       cms::alpakatools::for_each_element_in_thread_1D_index_in_grid(acc, maxNumberOfElements, elementIdxShift, func);
     }
@@ -219,7 +219,7 @@ namespace cms {
     ALPAKA_FN_ACC void for_each_element_1D_block_stride(const T_Acc& acc,
                                                         const uint32_t maxNumberOfElements,
                                                         const uint32_t elementIdxShift,
-                                                        const Func& func) {
+                                                        const Func func) {
       // Get thread / element indices in block.
       const auto& [firstElementIdxNoStride, endElementIdxNoStride] =
           cms::alpakatools::element_index_range_in_block(acc, Vec1::all(elementIdxShift));
@@ -231,8 +231,9 @@ namespace cms {
       for (uint32_t threadIdx = firstElementIdxNoStride[0u], endElementIdx = endElementIdxNoStride[0u];
            threadIdx < maxNumberOfElements;
            threadIdx += blockDimension, endElementIdx += blockDimension) {
+	const uint32_t maxElem = std::min(endElementIdx, maxNumberOfElements);
         // (CPU) Loop on all elements.
-        for (uint32_t i = threadIdx; i < std::min(endElementIdx, maxNumberOfElements); ++i) {
+        for (uint32_t i = threadIdx; i < maxElem; ++i) {
           func(i);
         }
       }
@@ -244,7 +245,7 @@ namespace cms {
     template <typename T_Acc, typename Func>
     ALPAKA_FN_ACC void for_each_element_1D_block_stride(const T_Acc& acc,
                                                         const uint32_t maxNumberOfElements,
-                                                        const Func& func) {
+                                                        const Func func) {
       const uint32_t elementIdxShift = 0;
       cms::alpakatools::for_each_element_1D_block_stride(acc, maxNumberOfElements, elementIdxShift, func);
     }
@@ -259,7 +260,7 @@ namespace cms {
     ALPAKA_FN_ACC void for_each_element_1D_grid_stride(const T_Acc& acc,
                                                        const uint32_t maxNumberOfElements,
                                                        const uint32_t elementIdxShift,
-                                                       const Func& func) {
+                                                       const Func func) {
       Vec1 elementIdxShiftVec = Vec1::all(elementIdxShift);
 
       // Get thread / element indices in block.
@@ -286,10 +287,68 @@ namespace cms {
     template <typename T_Acc, typename Func>
     ALPAKA_FN_ACC void for_each_element_1D_grid_stride(const T_Acc& acc,
                                                        const uint32_t maxNumberOfElements,
-                                                       const Func& func) {
+                                                       const Func func) {
       const uint32_t elementIdxShift = 0;
       cms::alpakatools::for_each_element_1D_grid_stride(acc, maxNumberOfElements, elementIdxShift, func);
     }
+
+
+
+
+
+
+
+    template <typename T1, typename T2>
+      ALPAKA_FN_HOST_ACC T1 atomicCAS(T1* address, T1 compare, T2 val) {
+      T1 old = *address;
+      *address = old == compare ? val : old;
+      return old;
+    }
+
+    template <typename T1, typename T2>
+      ALPAKA_FN_HOST_ACC T1 atomicInc(T1* a, T2 b) {
+      auto ret = *a;
+      if ((*a) < T1(b))
+        (*a)++;
+      return ret;
+    }
+
+    template <typename T1, typename T2>
+      ALPAKA_FN_HOST_ACC T1 atomicAdd(T1* a, T2 b) {
+      auto ret = *a;
+      (*a) += b;
+      return ret;
+    }
+
+    template <typename T1, typename T2>
+      ALPAKA_FN_HOST_ACC T1 atomicSub(T1* a, T2 b) {
+      auto ret = *a;
+      (*a) -= b;
+      return ret;
+    }
+
+    template <typename T1, typename T2>
+      ALPAKA_FN_HOST_ACC T1 atomicMin(T1* a, T2 b) {
+      auto ret = *a;
+      *a = std::min(*a, T1(b));
+      return ret;
+    }
+    template <typename T1, typename T2>
+      ALPAKA_FN_HOST_ACC T1 atomicMax(T1* a, T2 b) {
+      auto ret = *a;
+      *a = std::max(*a, T1(b));
+      return ret;
+    }
+
+
+
+
+
+
+
+
+
+
 
   }  // namespace alpakatools
 }  // namespace cms

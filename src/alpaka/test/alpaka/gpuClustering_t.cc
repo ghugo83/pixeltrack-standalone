@@ -17,11 +17,19 @@
 #include "plugin-SiPixelClusterizer/gpuClusterChargeCut.h"
 
 int main(void) {
+
+  int maxEvents = 10;
+  auto start = std::chrono::high_resolution_clock::now();
+
+  
+
   using namespace gpuClustering;
 
   const DevHost host(alpaka::pltf::getDevByIdx<PltfHost>(0u));
   const ALPAKA_ACCELERATOR_NAMESPACE::DevAcc1 device(alpaka::pltf::getDevByIdx<ALPAKA_ACCELERATOR_NAMESPACE::PltfAcc1>(0u));
   ALPAKA_ACCELERATOR_NAMESPACE::Queue queue(device);
+
+  for (int i = 0; i < maxEvents; ++i) {
 
   constexpr unsigned int numElements = 256 * 2000;
   // these in reality are already on GPU
@@ -224,11 +232,12 @@ int main(void) {
     }
   };  // end lambda
   for (auto kkk = 0; kkk < 5; ++kkk) {
+  //for (auto kkk = 0; kkk < 1; ++kkk) {
     n = 0;
     ncl = 0;
     generateClusters(kkk);
 
-    std::cout << "created " << n << " digis in " << ncl << " clusters" << std::endl;
+    //std::cout << "created " << n << " digis in " << ncl << " clusters" << std::endl;
     assert(n <= numElements);
 
     auto h_nModules_buf = alpaka::mem::buf::alloc<uint32_t, Idx>(host, 1u);
@@ -242,17 +251,22 @@ int main(void) {
     alpaka::mem::view::copy(queue, d_adc_buf, h_adc_buf, n);
   
     // Launch CUDA Kernels
-    const int threadsPerBlockOrElementsPerThread = (kkk == 5) ? 512 : ((kkk == 3) ? 128 : 256);
+    //const int threadsPerBlockOrElementsPerThread = (kkk == 5) ? 512 : ((kkk == 3) ? 128 : 256);
+    const int threadsPerBlockOrElementsPerThread = 1;
+    alpaka::mem::view::set(queue, d_clus_buf, 0, numElements);
 
     // COUNT MODULES
-    const int blocksPerGridCountModules = (numElements + threadsPerBlockOrElementsPerThread - 1) / threadsPerBlockOrElementsPerThread;
+    //const int blocksPerGridCountModules = (numElements + threadsPerBlockOrElementsPerThread - 1) / threadsPerBlockOrElementsPerThread;
+    const int blocksPerGridCountModules = 1;
+
+
     const WorkDiv1& workDivCountModules = cms::alpakatools::make_workdiv(Vec1::all(blocksPerGridCountModules), Vec1::all(threadsPerBlockOrElementsPerThread));
-    std::cout << "CUDA countModules kernel launch with " << blocksPerGridCountModules << " blocks of " << threadsPerBlockOrElementsPerThread
-              << " threads (GPU) or elements (CPU). \n";
+    //std::cout << "CUDA countModules kernel launch with " << blocksPerGridCountModules << " blocks of " << threadsPerBlockOrElementsPerThread
+    //<< " threads (GPU) or elements (CPU). \n";
   
     alpaka::queue::enqueue(queue,
 			   alpaka::kernel::createTaskKernel<ALPAKA_ACCELERATOR_NAMESPACE::Acc1>(workDivCountModules, 
-												countModules(), 
+												countModules(),
 												alpaka::mem::view::getPtrNative(d_id_buf),
 												alpaka::mem::view::getPtrNative(d_moduleStart_buf),
 												alpaka::mem::view::getPtrNative(d_clus_buf),
@@ -261,10 +275,12 @@ int main(void) {
 
     // FIND CLUSTER
     const WorkDiv1& workDivMaxNumModules = cms::alpakatools::make_workdiv(Vec1::all(MaxNumModules), Vec1::all(threadsPerBlockOrElementsPerThread));
-    std::cout << "CUDA findModules kernel launch with " << MaxNumModules << " blocks of " << threadsPerBlockOrElementsPerThread
-              << " threads (GPU) or elements (CPU). \n";
+    //std::cout << "CUDA findModules kernel launch with " << MaxNumModules << " blocks of " << threadsPerBlockOrElementsPerThread
+    //<< " threads (GPU) or elements (CPU). \n";
 
     alpaka::mem::view::set(queue, d_clusInModule_buf, 0, MaxNumModules);
+
+    alpaka::wait::wait(queue);
    
     alpaka::queue::enqueue(queue,
 			   alpaka::kernel::createTaskKernel<ALPAKA_ACCELERATOR_NAMESPACE::Acc1>(workDivMaxNumModules, 
@@ -290,15 +306,17 @@ int main(void) {
     auto h_moduleId_buf = alpaka::mem::buf::alloc<uint32_t, Idx>(host, nModules[0]);
     //auto moduleId = alpaka::mem::view::getPtrNative(h_moduleId_buf);
 
-    std::cout << "before charge cut found " << std::accumulate(nclus, nclus + MaxNumModules, 0) << " clusters"
-              << std::endl;
+    //std::cout << "before charge cut found " << std::accumulate(nclus, nclus + MaxNumModules, 0) << " clusters"
+    //<< std::endl;
     for (auto i = MaxNumModules; i > 0; i--)
       if (nclus[i - 1] > 0) {
-        std::cout << "last module is " << i - 1 << ' ' << nclus[i - 1] << std::endl;
+        //std::cout << "last module is " << i - 1 << ' ' << nclus[i - 1] << std::endl;
         break;
       }
     if (ncl != std::accumulate(nclus, nclus + MaxNumModules, 0))
       std::cout << "ERROR!!!!! wrong number of cluster found" << std::endl;
+
+    //std::cout << "start charge cut" << std::endl;
 
     // CLUSTER CHARGE CUT
     alpaka::queue::enqueue(queue,
@@ -319,7 +337,7 @@ int main(void) {
 
     // Wait for memory transfers to be completed
     alpaka::wait::wait(queue);
-    std::cout << "found " << nModules[0] << " Modules active" << std::endl;
+    //std::cout << "found " << nModules[0] << " Modules active" << std::endl;
 
     // CROSS-CHECK
     std::set<unsigned int> clids;
@@ -339,8 +357,8 @@ int main(void) {
     assert(0 == (*p) % 1000);
     auto c = p;
     ++c;
-    std::cout << "first clusters " << *p << ' ' << *c << ' ' << nclus[cmid] << ' ' << nclus[(*c) / 1000] << std::endl;
-    std::cout << "last cluster " << *clids.rbegin() << ' ' << nclus[(*clids.rbegin()) / 1000] << std::endl;
+    //std::cout << "first clusters " << *p << ' ' << *c << ' ' << nclus[cmid] << ' ' << nclus[(*c) / 1000] << std::endl;
+    //std::cout << "last cluster " << *clids.rbegin() << ' ' << nclus[(*clids.rbegin()) / 1000] << std::endl;
     for (; c != clids.end(); ++c) {
       auto cc = *c;
       auto pp = *p;
@@ -361,14 +379,26 @@ int main(void) {
         std::cout << "error " << mid << ": " << nc << ' ' << pnc << std::endl;
     }
 
-    std::cout << "found " << std::accumulate(nclus, nclus + MaxNumModules, 0) << ' ' << clids.size() << " clusters"
-              << std::endl;
+    //std::cout << "found " << std::accumulate(nclus, nclus + MaxNumModules, 0) << ' ' << clids.size() << " clusters"
+    //<< std::endl;
     for (auto i = MaxNumModules; i > 0; i--)
       if (nclus[i - 1] > 0) {
-        std::cout << "last module is " << i - 1 << ' ' << nclus[i - 1] << std::endl;
+        //std::cout << "last module is " << i - 1 << ' ' << nclus[i - 1] << std::endl;
         break;
       }
     // << " and " << seeds.size() << " seeds" << std::endl;
   }  /// end loop kkk
+
+
+
+  }
+  auto stop = std::chrono::high_resolution_clock::now();
+
+  auto diff = stop - start;
+  auto time = static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(diff).count()) / 1e6;
+  std::cout << "Processed " << maxEvents << " events in " << std::scientific << time << " seconds, throughput "
+            << std::defaultfloat << (maxEvents / time) << " events/s." << std::endl;
+
+
   return 0;
 }

@@ -24,19 +24,19 @@ namespace gpuClustering {
 
     auto firstPixel = moduleStart[1 + blockIdx.x];
     auto thisModuleId = id[firstPixel];
-    assert(thisModuleId < MaxNumModules);
-    assert(thisModuleId == moduleId[blockIdx.x]);
+    //assert(thisModuleId < MaxNumModules);
+    //assert(thisModuleId == moduleId[blockIdx.x]);
 
     auto nclus = nClustersInModule[thisModuleId];
     if (nclus == 0)
       return;
 
-    if (threadIdx.x == 0 && nclus > MaxNumClustersPerModules)
-      printf("Warning too many clusters in module %d in block %d: %d > %d\n",
+    //if (threadIdx.x == 0 && nclus > MaxNumClustersPerModules)
+      /*printf("Warning too many clusters in module %d in block %d: %d > %d\n",
              thisModuleId,
              blockIdx.x,
              nclus,
-             MaxNumClustersPerModules);
+             MaxNumClustersPerModules);*/
 
     auto first = firstPixel + threadIdx.x;
 
@@ -56,16 +56,16 @@ namespace gpuClustering {
     }
 
 #ifdef GPU_DEBUG
-    if (thisModuleId % 100 == 1)
-      if (threadIdx.x == 0)
-        printf("start clusterizer for module %d in block %d\n", thisModuleId, blockIdx.x);
+    //if (thisModuleId % 100 == 1)
+    //if (threadIdx.x == 0)
+    // printf("start clusterizer for module %d in block %d\n", thisModuleId, blockIdx.x);
 #endif
 
     __shared__ int32_t charge[MaxNumClustersPerModules];
     __shared__ uint8_t ok[MaxNumClustersPerModules];
     __shared__ uint16_t newclusId[MaxNumClustersPerModules];
 
-    assert(nclus <= MaxNumClustersPerModules);
+    //assert(nclus <= MaxNumClustersPerModules);
     for (auto i = threadIdx.x; i < nclus; i += blockDim.x) {
       charge[i] = 0;
     }
@@ -91,7 +91,7 @@ namespace gpuClustering {
     __shared__ uint16_t ws[32];
     cms::cuda::blockPrefixScan(newclusId, nclus, ws);
 
-    assert(nclus >= newclusId[nclus - 1]);
+    //assert(nclus >= newclusId[nclus - 1]);
 
     if (nclus == newclusId[nclus - 1])
       return;

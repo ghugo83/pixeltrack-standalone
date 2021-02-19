@@ -61,7 +61,8 @@ namespace alpaka_serial_sync {
   template <class T_Data>
   using AlpakaAccBuf2 = alpaka::mem::buf::Buf<Acc2, T_Data, Dim2, Idx>;
 
-  using Queue = alpaka::queue::QueueCpuBlocking;
+  //using Queue = alpaka::queue::QueueCpuBlocking;
+  using Queue = alpaka::queue::QueueCpuNonBlocking;
 }  // namespace alpaka_serial_sync
 
 #endif  // ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED

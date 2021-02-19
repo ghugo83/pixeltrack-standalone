@@ -39,7 +39,8 @@ namespace cms {
         c += incr;
 
         Atomic2 ret;
-        ret.ac = alpaka::atomic::atomicOp<alpaka::atomic::op::Add>(acc, &counter.ac, c);
+        //ret.ac = alpaka::atomic::atomicOp<alpaka::atomic::op::Add>(acc, &counter.ac, c);
+	ret.ac = cms::alpakatools::atomicAdd(&counter.ac, c);
         return ret.counters;
       }
 

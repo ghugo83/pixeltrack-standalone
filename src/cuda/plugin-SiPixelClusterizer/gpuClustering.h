@@ -55,9 +55,9 @@ namespace gpuClustering {
     assert(thisModuleId < MaxNumModules);
 
 #ifdef GPU_DEBUG
-    if (thisModuleId % 100 == 1)
-      if (threadIdx.x == 0)
-        printf("start clusterizer for module %d in block %d\n", thisModuleId, blockIdx.x);
+    //if (thisModuleId % 100 == 1)
+    //if (threadIdx.x == 0)
+    // printf("start clusterizer for module %d in block %d\n", thisModuleId, blockIdx.x);
 #endif
 
     auto first = firstPixel + threadIdx.x;
@@ -88,18 +88,18 @@ namespace gpuClustering {
     }
     __syncthreads();
 
-    assert((msize == numElements) or ((msize < numElements) and (id[msize] != thisModuleId)));
+    //assert((msize == numElements) or ((msize < numElements) and (id[msize] != thisModuleId)));
 
     // limit to maxPixInModule  (FIXME if recurrent (and not limited to simulation with low threshold) one will need to implement something cleverer)
     if (0 == threadIdx.x) {
       if (msize - firstPixel > maxPixInModule) {
-        printf("too many pixels in module %d: %d > %d\n", thisModuleId, msize - firstPixel, maxPixInModule);
+        //printf("too many pixels in module %d: %d > %d\n", thisModuleId, msize - firstPixel, maxPixInModule);
         msize = maxPixInModule + firstPixel;
       }
     }
 
     __syncthreads();
-    assert(msize - firstPixel <= maxPixInModule);
+    //assert(msize - firstPixel <= maxPixInModule);
 
 #ifdef GPU_DEBUG
     __shared__ uint32_t totGood;
@@ -123,10 +123,10 @@ namespace gpuClustering {
     hist.finalize(ws);
     __syncthreads();
 #ifdef GPU_DEBUG
-    assert(hist.size() == totGood);
-    if (thisModuleId % 100 == 1)
-      if (threadIdx.x == 0)
-        printf("histo size %d\n", hist.size());
+    //assert(hist.size() == totGood);
+    //if (thisModuleId % 100 == 1)
+    //if (threadIdx.x == 0)
+    //printf("histo size %d\n", hist.size());
 #endif
     for (int i = first; i < msize; i += blockDim.x) {
       if (id[i] == InvId)  // skip invalid pixels
@@ -140,9 +140,10 @@ namespace gpuClustering {
 #else
     auto maxiter = hist.size();
 #endif
+    if (hist.size() > 200) { printf("hist.size() = %u \n", hist.size()); }
     // allocate space for duplicate pixels: a pixel can appear more than once with different charge in the same event
     constexpr int maxNeighbours = 10;
-    assert((hist.size() / blockDim.x) <= maxiter);
+    //assert((hist.size() / blockDim.x) <= maxiter);
     // nearest neighbour
     uint16_t nn[maxiter][maxNeighbours];
     uint8_t nnn[maxiter];  // number of nn
@@ -164,34 +165,34 @@ namespace gpuClustering {
     }
     __syncthreads();
     if (0 == threadIdx.x) {
-      if (n60 > 0)
-        printf("columns with more than 60 px %d in %d\n", n60, thisModuleId);
-      else if (n40 > 0)
-        printf("columns with more than 40 px %d in %d\n", n40, thisModuleId);
+      //if (n60 > 0)
+      //printf("columns with more than 60 px %d in %d\n", n60, thisModuleId);
+      //else if (n40 > 0)
+      //printf("columns with more than 40 px %d in %d\n", n40, thisModuleId);
     }
     __syncthreads();
 #endif
 
     // fill NN
     for (auto j = threadIdx.x, k = 0U; j < hist.size(); j += blockDim.x, ++k) {
-      assert(k < maxiter);
+      //assert(k < maxiter);
       auto p = hist.begin() + j;
       auto i = *p + firstPixel;
-      assert(id[i] != InvId);
-      assert(id[i] == thisModuleId);  // same module
+      //assert(id[i] != InvId);
+      //assert(id[i] == thisModuleId);  // same module
       int be = Hist::bin(y[i] + 1);
       auto e = hist.end(be);
       ++p;
-      assert(0 == nnn[k]);
+      //assert(0 == nnn[k]);
       for (; p < e; ++p) {
         auto m = (*p) + firstPixel;
-        assert(m != i);
-        assert(int(y[m]) - int(y[i]) >= 0);
-        assert(int(y[m]) - int(y[i]) <= 1);
+        //assert(m != i);
+        //assert(int(y[m]) - int(y[i]) >= 0);
+        //assert(int(y[m]) - int(y[i]) <= 1);
         if (std::abs(int(x[m]) - int(x[i])) > 1)
           continue;
         auto l = nnn[k]++;
-        assert(l < maxNeighbours);
+        //assert(l < maxNeighbours);
         nn[k][l] = *p;
       }
     }
@@ -220,7 +221,7 @@ namespace gpuClustering {
           for (int kk = 0; kk < nnn[k]; ++kk) {
             auto l = nn[k][kk];
             auto m = l + firstPixel;
-            assert(m != i);
+            //assert(m != i);
             auto old = atomicMin(&clusterId[m], clusterId[i]);
             if (old != clusterId[i]) {
               // end the loop only if no changes were applied
@@ -235,15 +236,15 @@ namespace gpuClustering {
 
 #ifdef GPU_DEBUG
     {
-      __shared__ int n0;
+      /*__shared__ int n0;
       if (threadIdx.x == 0)
-        n0 = nloops;
+      n0 = nloops;*/
       __syncthreads();
-      auto ok = n0 == nloops;
-      assert(__syncthreads_and(ok));
-      if (thisModuleId % 100 == 1)
-        if (threadIdx.x == 0)
-          printf("# loops %d\n", nloops);
+      //auto ok = n0 == nloops;
+      //assert(__syncthreads_and(ok));
+      //if (thisModuleId % 100 == 1)
+      // if (threadIdx.x == 0)
+      //printf("# loops %d\n", nloops);
     }
 #endif
 
@@ -290,13 +291,13 @@ namespace gpuClustering {
 #ifdef GPU_DEBUG
       if (foundClusters > gMaxHit) {
         gMaxHit = foundClusters;
-        if (foundClusters > 8)
-          printf("max hit %d in %d\n", foundClusters, thisModuleId);
+        //if (foundClusters > 8)
+	//printf("max hit %d in %d\n", foundClusters, thisModuleId);
       }
 #endif
 #ifdef GPU_DEBUG
-      if (thisModuleId % 100 == 1)
-        printf("%d clusters in module %d\n", foundClusters, thisModuleId);
+      //if (thisModuleId % 100 == 1)
+      //printf("%d clusters in module %d\n", foundClusters, thisModuleId);
 #endif
     }
   }

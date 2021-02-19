@@ -196,18 +196,21 @@ namespace cms {
       template <typename T_Acc>
       ALPAKA_FN_ACC ALPAKA_FN_INLINE void add(const T_Acc &acc, CountersOnly const &co) {
         for (uint32_t i = 0; i < totbins(); ++i) {
-          alpaka::atomic::atomicOp<alpaka::atomic::op::Add>(acc, off + i, co.off[i]);
+          //alpaka::atomic::atomicOp<alpaka::atomic::op::Add>(acc, off + i, co.off[i]);
+	  cms::alpakatools::atomicAdd(off + i, co.off[i]);
         }
       }
 
       template <typename T_Acc>
       static ALPAKA_FN_ACC ALPAKA_FN_INLINE uint32_t atomicIncrement(const T_Acc &acc, Counter &x) {
-        return alpaka::atomic::atomicOp<alpaka::atomic::op::Add>(acc, &x, 1u);
+        //return alpaka::atomic::atomicOp<alpaka::atomic::op::Add>(acc, &x, 1u);
+	return cms::alpakatools::atomicAdd(&x, 1u);
       }
 
       template <typename T_Acc>
       static ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE uint32_t atomicDecrement(const T_Acc &acc, Counter &x) {
-        return alpaka::atomic::atomicOp<alpaka::atomic::op::Sub>(acc, &x, 1u);
+        //return alpaka::atomic::atomicOp<alpaka::atomic::op::Sub>(acc, &x, 1u);
+	return cms::alpakatools::atomicSub(&x, 1u);
       }
 
       template <typename T_Acc>
