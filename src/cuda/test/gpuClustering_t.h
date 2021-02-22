@@ -245,7 +245,7 @@ int maxEvents = 10;
     ncl = 0;
     generateClusters(kkk);
 
-    //std::cout << "created " << n << " digis in " << ncl << " clusters" << std::endl;
+    std::cout << "created " << n << " digis in " << ncl << " clusters" << std::endl;
     assert(n <= numElements);
 
     uint32_t nModules = 0;
@@ -263,15 +263,15 @@ int maxEvents = 10;
     // Launch CUDA Kernels
     int threadsPerBlock = (kkk == 5) ? 512 : ((kkk == 3) ? 128 : 256);
     int blocksPerGrid = (numElements + threadsPerBlock - 1) / threadsPerBlock;
-    //std::cout << "CUDA countModules kernel launch with " << blocksPerGrid << " blocks of " << threadsPerBlock
-    //<< " threads\n";
+    std::cout << "CUDA countModules kernel launch with " << blocksPerGrid << " blocks of " << threadsPerBlock
+    << " threads\n";
 
     cms::cuda::launch(countModules, {blocksPerGrid, threadsPerBlock}, d_id.get(), d_moduleStart.get(), d_clus.get(), n);
 
     blocksPerGrid = MaxNumModules;  //nModules;
 
-    //std::cout << "CUDA findModules kernel launch with " << blocksPerGrid << " blocks of " << threadsPerBlock
-    //<< " threads\n";
+    std::cout << "CUDA findModules kernel launch with " << blocksPerGrid << " blocks of " << threadsPerBlock
+    << " threads\n";
     cudaCheck(cudaMemset(d_clusInModule.get(), 0, MaxNumModules * sizeof(uint32_t)));
 
     cms::cuda::launch(findClus,
@@ -290,11 +290,11 @@ int maxEvents = 10;
     uint32_t nclus[MaxNumModules], moduleId[nModules];
     cudaCheck(cudaMemcpy(&nclus, d_clusInModule.get(), MaxNumModules * sizeof(uint32_t), cudaMemcpyDeviceToHost));
 
-    //std::cout << "before charge cut found " << std::accumulate(nclus, nclus + MaxNumModules, 0) << " clusters"
-    //<< std::endl;
+    std::cout << "before charge cut found " << std::accumulate(nclus, nclus + MaxNumModules, 0) << " clusters"
+    << std::endl;
     for (auto i = MaxNumModules; i > 0; i--)
       if (nclus[i - 1] > 0) {
-        //std::cout << "last module is " << i - 1 << ' ' << nclus[i - 1] << std::endl;
+        std::cout << "last module is " << i - 1 << ' ' << nclus[i - 1] << std::endl;
         break;
       }
     if (ncl != std::accumulate(nclus, nclus + MaxNumModules, 0))
@@ -331,11 +331,11 @@ int maxEvents = 10;
     nModules = h_moduleStart[0];
     auto nclus = h_clusInModule.get();
 
-    // std::cout << "before charge cut found " << std::accumulate(nclus, nclus + MaxNumModules, 0) << " clusters"
-    //<< std::endl;
+     std::cout << "before charge cut found " << std::accumulate(nclus, nclus + MaxNumModules, 0) << " clusters"
+    << std::endl;
     for (auto i = MaxNumModules; i > 0; i--)
       if (nclus[i - 1] > 0) {
-        //std::cout << "last module is " << i - 1 << ' ' << nclus[i - 1] << std::endl;
+        std::cout << "last module is " << i - 1 << ' ' << nclus[i - 1] << std::endl;
         break;
       }
     if (ncl != std::accumulate(nclus, nclus + MaxNumModules, 0))
@@ -350,7 +350,7 @@ int maxEvents = 10;
 
 #endif
 
-    //std::cout << "found " << nModules << " Modules active" << std::endl;
+    std::cout << "found " << nModules << " Modules active" << std::endl;
 
 #ifdef __CUDACC__
     cudaCheck(cudaMemcpy(h_id.get(), d_id.get(), size16, cudaMemcpyDeviceToHost));
@@ -376,8 +376,8 @@ int maxEvents = 10;
     assert(0 == (*p) % 1000);
     auto c = p;
     ++c;
-    //std::cout << "first clusters " << *p << ' ' << *c << ' ' << nclus[cmid] << ' ' << nclus[(*c) / 1000] << std::endl;
-    //std::cout << "last cluster " << *clids.rbegin() << ' ' << nclus[(*clids.rbegin()) / 1000] << std::endl;
+    std::cout << "first clusters " << *p << ' ' << *c << ' ' << nclus[cmid] << ' ' << nclus[(*c) / 1000] << std::endl;
+    std::cout << "last cluster " << *clids.rbegin() << ' ' << nclus[(*clids.rbegin()) / 1000] << std::endl;
     for (; c != clids.end(); ++c) {
       auto cc = *c;
       auto pp = *p;
@@ -387,25 +387,25 @@ int maxEvents = 10;
       if (mid != cmid) {
         assert(0 == cc % 1000);
         assert(nclus[cmid] - 1 == pp % 1000);
-        // if (nclus[cmid]-1 != pp%1000) std::cout << "error size " << mid << ": "  << nclus[mid] << ' ' << pp << std::endl;
+        if (nclus[cmid]-1 != pp%1000) std::cout << "error size " << mid << ": "  << nclus[mid] << ' ' << pp << std::endl;
         cmid = mid;
         p = c;
         continue;
       }
       p = c;
-      // assert(nc==pnc+1);
+      assert(nc==pnc+1);
       if (nc != pnc + 1)
         std::cout << "error " << mid << ": " << nc << ' ' << pnc << std::endl;
     }
 
-    //std::cout << "found " << std::accumulate(nclus, nclus + MaxNumModules, 0) << ' ' << clids.size() << " clusters"
-    //<< std::endl;
+    std::cout << "found " << std::accumulate(nclus, nclus + MaxNumModules, 0) << ' ' << clids.size() << " clusters"
+    << std::endl;
     for (auto i = MaxNumModules; i > 0; i--)
       if (nclus[i - 1] > 0) {
-        //std::cout << "last module is " << i - 1 << ' ' << nclus[i - 1] << std::endl;
+        std::cout << "last module is " << i - 1 << ' ' << nclus[i - 1] << std::endl;
         break;
       }
-    // << " and " << seeds.size() << " seeds" << std::endl;
+    //<< " and " << seeds.size() << " seeds" << std::endl;
   }  /// end loop kkk
 
 

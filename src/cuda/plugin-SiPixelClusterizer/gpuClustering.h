@@ -140,7 +140,7 @@ namespace gpuClustering {
 #else
     auto maxiter = hist.size();
 #endif
-    if (hist.size() > 200) { printf("hist.size() = %u \n", hist.size()); }
+    //if (hist.size() > 200) { printf("hist.size() = %u \n", hist.size()); }
     // allocate space for duplicate pixels: a pixel can appear more than once with different charge in the same event
     constexpr int maxNeighbours = 10;
     //assert((hist.size() / blockDim.x) <= maxiter);
