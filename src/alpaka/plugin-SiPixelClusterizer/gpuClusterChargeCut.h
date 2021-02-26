@@ -118,7 +118,7 @@ namespace gpuClustering {
       cms::alpakatools::for_each_element_1D_block_stride(acc, nclus, [&](uint32_t i) {
 	  charge[i] = 0;
 	});
-      alpaka::syncBlockThreads(acc);
+      //alpaka::syncBlockThreads(acc);
 
 
 
@@ -155,13 +155,13 @@ namespace gpuClustering {
 	    }
 	  }
 	  });*/
-      alpaka::syncBlockThreads(acc);
+      //alpaka::syncBlockThreads(acc);
 
       auto chargeCut = thisModuleId < 96 ? 2000 : 4000;  // move in constants (calib?)
       cms::alpakatools::for_each_element_1D_block_stride(acc, nclus, [&](uint32_t i) {
 	  newclusId[i] = ok[i] = charge[i] > chargeCut ? 1 : 0;
 	});
-      alpaka::syncBlockThreads(acc);
+      //alpaka::syncBlockThreads(acc);
 
       // renumber
       // DEBUG SHARED MEMORY ALIGNMENT
@@ -179,14 +179,14 @@ namespace gpuClustering {
 	return;
 
       nClustersInModule[thisModuleId] = newclusId[nclus - 1];
-      alpaka::syncBlockThreads(acc);
+      //alpaka::syncBlockThreads(acc);
 
       // mark bad cluster again
       cms::alpakatools::for_each_element_1D_block_stride(acc, nclus, [&](uint32_t i) {
 	  if (0 == ok[i])
 	    newclusId[i] = InvId + 1;
 	});
-      alpaka::syncBlockThreads(acc);
+      //alpaka::syncBlockThreads(acc);
 
       // reassign id
       // skip threads not associated to an existing pixel

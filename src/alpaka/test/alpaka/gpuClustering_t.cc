@@ -307,6 +307,7 @@ int maxEvents = 10;
     auto nclus = alpaka::getPtrNative(h_nclus_buf);
     alpaka::memcpy(queue, h_nclus_buf, d_clusInModule_buf, MaxNumModules);
 
+
     // Wait for memory transfers to be completed
     alpaka::wait(queue);
 
