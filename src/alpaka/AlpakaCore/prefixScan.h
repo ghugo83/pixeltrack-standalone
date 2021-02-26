@@ -66,18 +66,18 @@ namespace cms {
           ws[warpId] = co[i];
         mask = __ballot_sync(mask, i + blockDimension < size);
       }
-      //alpaka::syncBlockThreads(acc);
+      alpaka::syncBlockThreads(acc);
       if (size <= 32)
         return;
       if (blockThreadIdx < 32) {
         warpPrefixScan(laneId, ws, blockThreadIdx, 0xffffffff);
       }
-      //alpaka::syncBlockThreads(acc);
+      alpaka::syncBlockThreads(acc);
       for (auto i = first + 32; i < size; i += blockDimension) {
         uint32_t warpId = i / 32;
         co[i] += ws[warpId - 1];
       }
-      //alpaka::syncBlockThreads(acc);
+      alpaka::syncBlockThreads(acc);
 
 #else
       co[0] = ci[0];
@@ -114,18 +114,18 @@ namespace cms {
           ws[warpId] = c[i];
         mask = __ballot_sync(mask, i + blockDimension < size);
       }
-      //alpaka::syncBlockThreads(acc);
+      alpaka::syncBlockThreads(acc);
       if (size <= 32)
         return;
       if (blockThreadIdx < 32) {
         warpPrefixScan(laneId, ws, blockThreadIdx, 0xffffffff);
       }
-      //alpaka::syncBlockThreads(acc);
+      alpaka::syncBlockThreads(acc);
       for (auto i = first + 32; i < size; i += blockDimension) {
         auto warpId = i / 32;
         c[i] += ws[warpId - 1];
       }
-      //alpaka::syncBlockThreads(acc);
+      alpaka::syncBlockThreads(acc);
 #else
       for (uint32_t i = 1; i < size; ++i)
         c[i] += c[i - 1];
@@ -177,7 +177,7 @@ namespace cms {
           }
         }
 
-        //alpaka::syncBlockThreads(acc);
+        alpaka::syncBlockThreads(acc);
 
         auto&& ws = alpaka::declareSharedVar<T[32], __COUNTER__>(acc);
         blockPrefixScan(acc, psum, psum, numBlocks, ws);
