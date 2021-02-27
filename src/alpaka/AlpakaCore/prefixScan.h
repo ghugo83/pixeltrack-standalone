@@ -48,12 +48,13 @@ namespace cms {
 #endif
     ) {
 #if defined ALPAKA_ACC_GPU_CUDA_ENABLED and __CUDA_ARCH__
-      uint32_t const blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Threads>(acc)[0u]);
+      //uint32_t const blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Threads>(acc)[0u]);
+      const uint32_t blockDimension(1u);
       uint32_t const gridBlockIdx(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
       uint32_t const blockThreadIdx(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[0u]);
-      assert(ws);
-      assert(size <= 1024);
-      assert(0 == blockDimension % 32);
+      //assert(ws);
+      //assert(size <= 1024);
+      //assert(0 == blockDimension % 32);
       auto first = blockThreadIdx;
       auto mask = __ballot_sync(0xffffffff, first < size);
       auto laneId = blockThreadIdx & 0x1f;
@@ -61,7 +62,7 @@ namespace cms {
       for (auto i = first; i < size; i += blockDimension) {
         warpPrefixScan(laneId, ci, co, i, mask);
         auto warpId = i / 32;
-        assert(warpId < 32);
+        //assert(warpId < 32);
         if (31 == laneId)
           ws[warpId] = co[i];
         mask = __ballot_sync(mask, i + blockDimension < size);
@@ -96,12 +97,13 @@ namespace cms {
 #endif
     ) {
 #if defined ALPAKA_ACC_GPU_CUDA_ENABLED and __CUDA_ARCH__
-      uint32_t const blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Threads>(acc)[0u]);
+      //uint32_t const blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Threads>(acc)[0u]);
+      const uint32_t blockDimension(1u);
       uint32_t const gridBlockIdx(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
       uint32_t const blockThreadIdx(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[0u]);
-      assert(ws);
-      assert(size <= 1024);
-      assert(0 == blockDimension % 32);
+      //assert(ws);
+      //assert(size <= 1024);
+      //assert(0 == blockDimension % 32);
       auto first = blockThreadIdx;
       auto mask = __ballot_sync(0xffffffff, first < size);
       auto laneId = blockThreadIdx & 0x1f;
@@ -109,7 +111,7 @@ namespace cms {
       for (auto i = first; i < size; i += blockDimension) {
         warpPrefixScan(laneId, c, i, mask);
         auto warpId = i / 32;
-        assert(warpId < 32);
+        //assert(warpId < 32);
         if (31 == laneId)
           ws[warpId] = c[i];
         mask = __ballot_sync(mask, i + blockDimension < size);
@@ -137,7 +139,7 @@ namespace cms {
     struct multiBlockPrefixScanFirstStep {
       template <typename T_Acc>
       ALPAKA_FN_ACC void operator()(const T_Acc& acc, T const* ci, T* co, int32_t size) const {
-        uint32_t const gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
+        //uint32_t const gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
         uint32_t const blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Threads>(acc)[0u]);
         uint32_t const threadDimension(alpaka::getWorkDiv<alpaka::Thread, alpaka::Elems>(acc)[0u]);
 
@@ -145,7 +147,7 @@ namespace cms {
 
         auto&& ws = alpaka::declareSharedVar<T[32], __COUNTER__>(acc);
         // first each block does a scan of size 1024; (better be enough blocks....)
-        assert(gridDimension / threadDimension <= 1024);
+        //assert(gridDimension / threadDimension <= 1024);
         int off = blockDimension * blockIdx * threadDimension;
         if (size - off > 0)
           blockPrefixScan(acc, ci + off, co + off, std::min(int(blockDimension * threadDimension), size - off), ws);
@@ -165,7 +167,7 @@ namespace cms {
         auto* const psum(alpaka::getDynSharedMem<T>(acc));
 
         // first each block does a scan of size 1024; (better be enough blocks....)
-        assert(static_cast<int32_t>(blockDimension * threadDimension) >= numBlocks);
+        //assert(static_cast<int32_t>(blockDimension * threadDimension) >= numBlocks);
         for (int elemId = 0; elemId < static_cast<int>(threadDimension); ++elemId) {
           int index = +threadIdx * threadDimension + elemId;
 

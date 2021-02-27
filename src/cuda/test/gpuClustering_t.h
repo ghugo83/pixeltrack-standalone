@@ -8,6 +8,7 @@
 #include <numeric>
 #include <set>
 #include <vector>
+#include <chrono>
 
 #ifdef __CUDACC__
 
@@ -27,6 +28,16 @@ int main(void) {
 #endif
 
   using namespace gpuClustering;
+
+
+int maxEvents = 10;
+  auto start = std::chrono::high_resolution_clock::now();
+
+  for (int i = 0; i < maxEvents; ++i) {
+
+
+
+  
 
   int numElements = 256 * 2000;
   // these in reality are already on GPU
@@ -397,5 +408,18 @@ int main(void) {
       }
     // << " and " << seeds.size() << " seeds" << std::endl;
   }  /// end loop kkk
+
+
+
+
+}
+auto stop = std::chrono::high_resolution_clock::now();
+
+auto diff = stop - start;
+auto time = static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(diff).count()) / 1e6;
+std::cout << "Processed " << maxEvents << " events in " << std::scientific << time << " seconds, throughput "
+<< std::defaultfloat << (maxEvents / time) << " events/s." << std::endl;
+
+
   return 0;
 }

@@ -28,8 +28,8 @@ namespace gpuClustering {
 
       auto firstPixel = moduleStart[1 + blockIdx];
       auto thisModuleId = id[firstPixel];
-      assert(thisModuleId < MaxNumModules);
-      assert(thisModuleId == moduleId[blockIdx]);
+      //assert(thisModuleId < MaxNumModules);
+      //assert(thisModuleId == moduleId[blockIdx]);
 
       auto nclus = nClustersInModule[thisModuleId];
       if (nclus == 0)
@@ -44,7 +44,8 @@ namespace gpuClustering {
                MaxNumClustersPerModules);
 
       // Stride = block size.
-      const uint32_t blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[0u]);
+      //const uint32_t blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[0u]);
+      const uint32_t blockDimension(1u);
 
       // Get thread / CPU element indices in block.
       const auto& [firstElementIdxNoStride, endElementIdxNoStride] =
@@ -80,7 +81,7 @@ namespace gpuClustering {
       auto&& ok = alpaka::declareSharedVar<uint8_t[MaxNumClustersPerModules], __COUNTER__>(acc);
       auto&& newclusId = alpaka::declareSharedVar<uint16_t[MaxNumClustersPerModules], __COUNTER__>(acc);
 
-      assert(nclus <= MaxNumClustersPerModules);
+      //assert(nclus <= MaxNumClustersPerModules);
       cms::alpakatools::for_each_element_1D_block_stride(acc, nclus, [&](uint32_t i) { charge[i] = 0; });
       alpaka::syncBlockThreads(acc);
 
@@ -107,7 +108,7 @@ namespace gpuClustering {
       auto&& ws = alpaka::declareSharedVar<uint16_t[32], __COUNTER__>(acc);
       cms::alpakatools::blockPrefixScan(acc, newclusId, nclus, ws);
 
-      assert(nclus >= newclusId[nclus - 1]);
+      //assert(nclus >= newclusId[nclus - 1]);
 
       if (nclus == newclusId[nclus - 1])
         return;

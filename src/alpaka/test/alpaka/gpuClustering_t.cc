@@ -269,8 +269,8 @@ int maxEvents = 10;
 #endif
     const WorkDiv1& workDivCountModules = cms::alpakatools::make_workdiv(Vec1::all(blocksPerGridCountModules),
                                                                          Vec1::all(threadsPerBlockOrElementsPerThread));
-    std::cout << "CUDA countModules kernel launch with " << blocksPerGridCountModules << " blocks of "
-              << threadsPerBlockOrElementsPerThread << " threads (GPU) or elements (CPU). \n";
+    //std::cout << "CUDA countModules kernel launch with " << blocksPerGridCountModules << " blocks of "
+    //<< threadsPerBlockOrElementsPerThread << " threads (GPU) or elements (CPU). \n";
 
     alpaka::enqueue(queue,
                            alpaka::createTaskKernel<ALPAKA_ACCELERATOR_NAMESPACE::Acc1>(
@@ -284,8 +284,8 @@ int maxEvents = 10;
     // FIND CLUSTER
     const WorkDiv1& workDivMaxNumModules =
         cms::alpakatools::make_workdiv(Vec1::all(MaxNumModules), Vec1::all(threadsPerBlockOrElementsPerThread));
-    std::cout << "CUDA findModules kernel launch with " << MaxNumModules << " blocks of "
-              << threadsPerBlockOrElementsPerThread << " threads (GPU) or elements (CPU). \n";
+    //std::cout << "CUDA findModules kernel launch with " << MaxNumModules << " blocks of "
+    //<< threadsPerBlockOrElementsPerThread << " threads (GPU) or elements (CPU). \n";
 
     alpaka::memset(queue, d_clusInModule_buf, 0, MaxNumModules);
 

@@ -25,10 +25,10 @@ namespace cms {
         const uint32_t nt = offsets[nh];
         cms::alpakatools::for_each_element_1D_grid_stride(acc, nt, [&](uint32_t i) {
           auto off = alpaka_std::upper_bound(offsets, offsets + nh + 1, i);
-          assert((*off) > 0);
+          //assert((*off) > 0);
           int32_t ih = off - offsets - 1;
-          assert(ih >= 0);
-          assert(ih < int(nh));
+          //assert(ih >= 0);
+          //assert(ih < int(nh));
           h->count(acc, v[i], ih);
         });
       }
@@ -44,10 +44,10 @@ namespace cms {
         const uint32_t nt = offsets[nh];
         cms::alpakatools::for_each_element_1D_grid_stride(acc, nt, [&](uint32_t i) {
           auto off = alpaka_std::upper_bound(offsets, offsets + nh + 1, i);
-          assert((*off) > 0);
+          //assert((*off) > 0);
           int32_t ih = off - offsets - 1;
-          assert(ih >= 0);
-          assert(ih < int(nh));
+          //assert(ih >= 0);
+          //assert(ih < int(nh));
           h->fill(acc, v[i], i, ih);
         });
       }
@@ -127,7 +127,7 @@ namespace cms {
       int bs = Hist::bin(value);
       int be = std::min(int(Hist::nbins() - 1), bs + n);
       bs = std::max(0, bs - n);
-      assert(be >= bs);
+      //assert(be >= bs);
       for (auto pj = hist.begin(bs); pj < hist.end(be); ++pj) {
         func(*pj);
       }
@@ -138,7 +138,7 @@ namespace cms {
     ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE void forEachInWindow(Hist const &hist, V wmin, V wmax, Func const &func) {
       auto bs = Hist::bin(wmin);
       auto be = Hist::bin(wmax);
-      assert(be >= bs);
+      //assert(be >= bs);
       for (auto pj = hist.begin(bs); pj < hist.end(be); ++pj) {
         func(*pj);
       }
@@ -212,15 +212,15 @@ namespace cms {
 
       template <typename T_Acc>
       ALPAKA_FN_ACC ALPAKA_FN_INLINE void countDirect(const T_Acc &acc, T b) {
-        assert(b < nbins());
+        //assert(b < nbins());
         atomicIncrement(acc, off[b]);
       }
 
       template <typename T_Acc>
       ALPAKA_FN_ACC ALPAKA_FN_INLINE void fillDirect(const T_Acc &acc, T b, index_type j) {
-        assert(b < nbins());
+        //assert(b < nbins());
         auto w = atomicDecrement(acc, off[b]);
-        assert(w > 0);
+        //assert(w > 0);
         bins[w - 1] = j;
       }
 
@@ -257,44 +257,44 @@ namespace cms {
       template <typename T_Acc>
       ALPAKA_FN_ACC ALPAKA_FN_INLINE void count(const T_Acc &acc, T t) {
         uint32_t b = bin(t);
-        assert(b < nbins());
+        //assert(b < nbins());
         atomicIncrement(acc, off[b]);
       }
 
       template <typename T_Acc>
       ALPAKA_FN_ACC ALPAKA_FN_INLINE void fill(const T_Acc &acc, T t, index_type j) {
         uint32_t b = bin(t);
-        assert(b < nbins());
+        //assert(b < nbins());
         auto w = atomicDecrement(acc, off[b]);
-        assert(w > 0);
+        //assert(w > 0);
         bins[w - 1] = j;
       }
 
       template <typename T_Acc>
       ALPAKA_FN_ACC ALPAKA_FN_INLINE void count(const T_Acc &acc, T t, uint32_t nh) {
         uint32_t b = bin(t);
-        assert(b < nbins());
+        //assert(b < nbins());
         b += histOff(nh);
-        assert(b < totbins());
+        //assert(b < totbins());
         atomicIncrement(acc, off[b]);
       }
 
       template <typename T_Acc>
       ALPAKA_FN_ACC ALPAKA_FN_INLINE void fill(const T_Acc &acc, T t, index_type j, uint32_t nh) {
         uint32_t b = bin(t);
-        assert(b < nbins());
+        //assert(b < nbins());
         b += histOff(nh);
-        assert(b < totbins());
+        //assert(b < totbins());
         auto w = atomicDecrement(acc, off[b]);
-        assert(w > 0);
+        //assert(w > 0);
         bins[w - 1] = j;
       }
 
       template <typename T_Acc>
       ALPAKA_FN_ACC ALPAKA_FN_INLINE void finalize(const T_Acc &acc, Counter *ws = nullptr) {
-        assert(off[totbins() - 1] == 0);
+        //assert(off[totbins() - 1] == 0);
         blockPrefixScan(acc, off, totbins(), ws);
-        assert(off[totbins() - 1] == off[totbins() - 2]);
+        //assert(off[totbins() - 1] == off[totbins() - 2]);
       }
 
       constexpr auto size() const { return uint32_t(off[totbins() - 1]); }
