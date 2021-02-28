@@ -35,7 +35,6 @@ namespace cms {
     template <typename T_Acc>
     ALPAKA_FN_ACC bool once_per_block_1D(const T_Acc& acc, uint32_t i) {
       const uint32_t blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[0u]);
-      //const uint32_t blockDimension(1u);
       return (i % blockDimension == 0);
     }
 
@@ -191,8 +190,8 @@ namespace cms {
                                                                    const Func& func) {
       // Take into account the block index in grid to compute the element indices.
       const uint32_t blockIdxInGrid(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
-      const uint32_t blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[0u]);
-      //const uint32_t blockDimension(1u);
+      //const uint32_t blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[0u]);
+      const uint32_t blockDimension(1u);
       elementIdxShift += blockIdxInGrid * blockDimension;
 
       for_each_element_in_thread_1D_index_in_block(acc, maxNumberOfElements, elementIdxShift, func);
