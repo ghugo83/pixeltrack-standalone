@@ -78,8 +78,8 @@ namespace gpuClustering {
       alpaka::syncBlockThreads(acc);
 
       // Stride = block size.
-      //const uint32_t blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[0u]);
-      const uint32_t blockDimension(1u);
+      const uint32_t blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[0u]);
+      //const uint32_t blockDimension(1u);
 
       // Get thread / CPU element indices in block.
       const auto& [firstElementIdxNoStride, endElementIdxNoStride] =
