@@ -26,11 +26,16 @@ int main(void) {
 
 
 
-int maxEvents = 10;
-  auto start = std::chrono::high_resolution_clock::now();
+  
+  std::vector<double> results;
 
-  for (int i = 0; i < maxEvents; ++i) {
+  int numTrials = 10;
+  int maxEvents = 10;
 
+  for (int t = 0; t < numTrials; ++t) {
+      
+    auto start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < maxEvents; ++i) {
 
 
 
@@ -239,7 +244,7 @@ int maxEvents = 10;
     ncl = 0;
     generateClusters(kkk);
 
-    std::cout << "created " << n << " digis in " << ncl << " clusters" << std::endl;
+    //std::cout << "created " << n << " digis in " << ncl << " clusters" << std::endl;
     assert(n <= numElements);
 
     auto h_nModules_buf = alpaka::allocBuf<uint32_t, Idx>(host, 1u);
@@ -313,11 +318,11 @@ int maxEvents = 10;
     auto h_moduleId_buf = alpaka::allocBuf<uint32_t, Idx>(host, nModules[0]);
     //auto moduleId = alpaka::getPtrNative(h_moduleId_buf);
 
-    std::cout << "before charge cut found " << std::accumulate(nclus, nclus + MaxNumModules, 0) << " clusters"
-              << std::endl;
+    //std::cout << "before charge cut found " << std::accumulate(nclus, nclus + MaxNumModules, 0) << " clusters"
+    //<< std::endl;
     for (auto i = MaxNumModules; i > 0; i--)
       if (nclus[i - 1] > 0) {
-        std::cout << "last module is " << i - 1 << ' ' << nclus[i - 1] << std::endl;
+        //std::cout << "last module is " << i - 1 << ' ' << nclus[i - 1] << std::endl;
         break;
       }
     if (ncl != std::accumulate(nclus, nclus + MaxNumModules, 0))
@@ -342,7 +347,7 @@ int maxEvents = 10;
 
     // Wait for memory transfers to be completed
     alpaka::wait(queue);
-    std::cout << "found " << nModules[0] << " Modules active" << std::endl;
+    //std::cout << "found " << nModules[0] << " Modules active" << std::endl;
 
     // CROSS-CHECK
     std::set<unsigned int> clids;
@@ -362,8 +367,8 @@ int maxEvents = 10;
     assert(0 == (*p) % 1000);
     auto c = p;
     ++c;
-    std::cout << "first clusters " << *p << ' ' << *c << ' ' << nclus[cmid] << ' ' << nclus[(*c) / 1000] << std::endl;
-    std::cout << "last cluster " << *clids.rbegin() << ' ' << nclus[(*clids.rbegin()) / 1000] << std::endl;
+    //std::cout << "first clusters " << *p << ' ' << *c << ' ' << nclus[cmid] << ' ' << nclus[(*c) / 1000] << std::endl;
+    //std::cout << "last cluster " << *clids.rbegin() << ' ' << nclus[(*clids.rbegin()) / 1000] << std::endl;
     for (; c != clids.end(); ++c) {
       auto cc = *c;
       auto pp = *p;
@@ -384,11 +389,11 @@ int maxEvents = 10;
         std::cout << "error " << mid << ": " << nc << ' ' << pnc << std::endl;
     }
 
-    std::cout << "found " << std::accumulate(nclus, nclus + MaxNumModules, 0) << ' ' << clids.size() << " clusters"
-              << std::endl;
+    //std::cout << "found " << std::accumulate(nclus, nclus + MaxNumModules, 0) << ' ' << clids.size() << " clusters"
+    //<< std::endl;
     for (auto i = MaxNumModules; i > 0; i--)
       if (nclus[i - 1] > 0) {
-        std::cout << "last module is " << i - 1 << ' ' << nclus[i - 1] << std::endl;
+	// std::cout << "last module is " << i - 1 << ' ' << nclus[i - 1] << std::endl;
         break;
       }
     // << " and " << seeds.size() << " seeds" << std::endl;
@@ -401,18 +406,22 @@ int maxEvents = 10;
 
 
 
-}
-auto stop = std::chrono::high_resolution_clock::now();
+    }
+    auto stop = std::chrono::high_resolution_clock::now();
 
-auto diff = stop - start;
-auto time = static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(diff).count()) / 1e6;
-std::cout << "Processed " << maxEvents << " events in " << std::scientific << time << " seconds, throughput "
-<< std::defaultfloat << (maxEvents / time) << " events/s." << std::endl;
+    auto diff = stop - start;
+    auto time = static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(diff).count()) / 1e6;
+    //std::cout << "Processed " << maxEvents << " events in " << std::scientific << time << " seconds, throughput "
+    //<< std::defaultfloat << (maxEvents / time) << " events/s." << std::endl;
+    results.emplace_back(maxEvents/time);
+
+  }
 
 
 
-
-
+  for (const auto& t : results) {
+    std::cout << t << std::endl;
+  }
 
 
 

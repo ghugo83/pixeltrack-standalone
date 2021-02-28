@@ -51,9 +51,9 @@ namespace cms {
 #endif
     ) {
 #ifdef __CUDA_ARCH__
-      assert(ws);
-      assert(size <= 1024);
-      assert(0 == blockDim.x % 32);
+      //assert(ws);
+      //assert(size <= 1024);
+      //assert(0 == blockDim.x % 32);
       auto first = threadIdx.x;
       auto mask = __ballot_sync(0xffffffff, first < size);
 
@@ -61,7 +61,7 @@ namespace cms {
         warpPrefixScan(ci, co, i, mask);
         auto laneId = threadIdx.x & 0x1f;
         auto warpId = i / 32;
-        assert(warpId < 32);
+        //assert(warpId < 32);
         if (31 == laneId)
           ws[warpId] = co[i];
         mask = __ballot_sync(mask, i + blockDim.x < size);
@@ -95,9 +95,9 @@ namespace cms {
 #endif
     ) {
 #ifdef __CUDA_ARCH__
-      assert(ws);
-      assert(size <= 1024);
-      assert(0 == blockDim.x % 32);
+      //assert(ws);
+      //assert(size <= 1024);
+      //assert(0 == blockDim.x % 32);
       auto first = threadIdx.x;
       auto mask = __ballot_sync(0xffffffff, first < size);
 
@@ -105,7 +105,7 @@ namespace cms {
         warpPrefixScan(c, i, mask);
         auto laneId = threadIdx.x & 0x1f;
         auto warpId = i / 32;
-        assert(warpId < 32);
+        //assert(warpId < 32);
         if (31 == laneId)
           ws[warpId] = c[i];
         mask = __ballot_sync(mask, i + blockDim.x < size);
@@ -143,9 +143,9 @@ namespace cms {
       volatile T* co = ico;
       __shared__ T ws[32];
 #ifdef __CUDA_ARCH__
-      assert(sizeof(T) * gridDim.x <= dynamic_smem_size());  // size of psum below
+      //assert(sizeof(T) * gridDim.x <= dynamic_smem_size());  // size of psum below
 #endif
-      assert(blockDim.x * gridDim.x >= size);
+      //assert(blockDim.x * gridDim.x >= size);
       // first each block does a scan
       int off = blockDim.x * blockIdx.x;
       if (size - off > 0)
@@ -164,7 +164,7 @@ namespace cms {
       if (!isLastBlockDone)
         return;
 
-      assert(int(gridDim.x) == *pc);
+      //assert(int(gridDim.x) == *pc);
 
       // good each block has done its work and now we are left in last block
 

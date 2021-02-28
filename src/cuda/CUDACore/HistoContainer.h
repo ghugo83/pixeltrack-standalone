@@ -26,10 +26,10 @@ namespace cms {
       int first = blockDim.x * blockIdx.x + threadIdx.x;
       for (int i = first, nt = offsets[nh]; i < nt; i += gridDim.x * blockDim.x) {
         auto off = cuda_std::upper_bound(offsets, offsets + nh + 1, i);
-        assert((*off) > 0);
+        //assert((*off) > 0);
         int32_t ih = off - offsets - 1;
-        assert(ih >= 0);
-        assert(ih < int(nh));
+        //assert(ih >= 0);
+        //assert(ih < int(nh));
         (*h).count(v[i], ih);
       }
     }
@@ -42,10 +42,10 @@ namespace cms {
       int first = blockDim.x * blockIdx.x + threadIdx.x;
       for (int i = first, nt = offsets[nh]; i < nt; i += gridDim.x * blockDim.x) {
         auto off = cuda_std::upper_bound(offsets, offsets + nh + 1, i);
-        assert((*off) > 0);
+        //assert((*off) > 0);
         int32_t ih = off - offsets - 1;
-        assert(ih >= 0);
-        assert(ih < int(nh));
+        //assert(ih >= 0);
+        //assert(ih < int(nh));
         (*h).fill(v[i], i, ih);
       }
     }
@@ -59,7 +59,7 @@ namespace cms {
     ) {
       uint32_t *poff = (uint32_t *)((char *)(h) + offsetof(Histo, off));
       int32_t size = offsetof(Histo, bins) - offsetof(Histo, off);
-      assert(size >= int(sizeof(uint32_t) * Histo::totbins()));
+      //assert(size >= int(sizeof(uint32_t) * Histo::totbins()));
 #ifdef __CUDACC__
       cudaCheck(cudaMemsetAsync(poff, 0, size, stream));
 #else
@@ -125,7 +125,7 @@ namespace cms {
       int bs = Hist::bin(value);
       int be = std::min(int(Hist::nbins() - 1), bs + n);
       bs = std::max(0, bs - n);
-      assert(be >= bs);
+      //assert(be >= bs);
       for (auto pj = hist.begin(bs); pj < hist.end(be); ++pj) {
         func(*pj);
       }
@@ -136,7 +136,7 @@ namespace cms {
     __host__ __device__ __forceinline__ void forEachInWindow(Hist const &hist, V wmin, V wmax, Func const &func) {
       auto bs = Hist::bin(wmin);
       auto be = Hist::bin(wmax);
-      assert(be >= bs);
+      //assert(be >= bs);
       for (auto pj = hist.begin(bs); pj < hist.end(be); ++pj) {
         func(*pj);
       }
@@ -221,14 +221,14 @@ namespace cms {
       }
 
       __host__ __device__ __forceinline__ void countDirect(T b) {
-        assert(b < nbins());
+        //assert(b < nbins());
         atomicIncrement(off[b]);
       }
 
       __host__ __device__ __forceinline__ void fillDirect(T b, index_type j) {
-        assert(b < nbins());
+        //assert(b < nbins());
         auto w = atomicDecrement(off[b]);
-        assert(w > 0);
+        //assert(w > 0);
         bins[w - 1] = j;
       }
 
@@ -261,40 +261,40 @@ namespace cms {
 
       __host__ __device__ __forceinline__ void count(T t) {
         uint32_t b = bin(t);
-        assert(b < nbins());
+        //assert(b < nbins());
         atomicIncrement(off[b]);
       }
 
       __host__ __device__ __forceinline__ void fill(T t, index_type j) {
         uint32_t b = bin(t);
-        assert(b < nbins());
+        //assert(b < nbins());
         auto w = atomicDecrement(off[b]);
-        assert(w > 0);
+        //assert(w > 0);
         bins[w - 1] = j;
       }
 
       __host__ __device__ __forceinline__ void count(T t, uint32_t nh) {
         uint32_t b = bin(t);
-        assert(b < nbins());
+        //assert(b < nbins());
         b += histOff(nh);
-        assert(b < totbins());
+        //assert(b < totbins());
         atomicIncrement(off[b]);
       }
 
       __host__ __device__ __forceinline__ void fill(T t, index_type j, uint32_t nh) {
         uint32_t b = bin(t);
-        assert(b < nbins());
+        //assert(b < nbins());
         b += histOff(nh);
-        assert(b < totbins());
+        //assert(b < totbins());
         auto w = atomicDecrement(off[b]);
-        assert(w > 0);
+        //assert(w > 0);
         bins[w - 1] = j;
       }
 
       __host__ __device__ __forceinline__ void finalize(Counter *ws = nullptr) {
-        assert(off[totbins() - 1] == 0);
+        //assert(off[totbins() - 1] == 0);
         blockPrefixScan(off, totbins(), ws);
-        assert(off[totbins() - 1] == off[totbins() - 2]);
+        //assert(off[totbins() - 1] == off[totbins() - 2]);
       }
 
       constexpr auto size() const { return uint32_t(off[totbins() - 1]); }
