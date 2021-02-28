@@ -48,8 +48,8 @@ namespace cms {
 #endif
     ) {
 #if defined ALPAKA_ACC_GPU_CUDA_ENABLED and __CUDA_ARCH__
-      //uint32_t const blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Threads>(acc)[0u]);
-      const uint32_t blockDimension(1u);
+      uint32_t const blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Threads>(acc)[0u]);
+      //const uint32_t blockDimension(1u);
       uint32_t const gridBlockIdx(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
       uint32_t const blockThreadIdx(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[0u]);
       //assert(ws);
@@ -97,8 +97,8 @@ namespace cms {
 #endif
     ) {
 #if defined ALPAKA_ACC_GPU_CUDA_ENABLED and __CUDA_ARCH__
-      //uint32_t const blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Threads>(acc)[0u]);
-      const uint32_t blockDimension(1u);
+      uint32_t const blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Threads>(acc)[0u]);
+      //const uint32_t blockDimension(1u);
       uint32_t const gridBlockIdx(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
       uint32_t const blockThreadIdx(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[0u]);
       //assert(ws);
