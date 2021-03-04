@@ -319,6 +319,55 @@ namespace cms {
       return isNextStrideElementValid;
     }
 
+
+
+
+
+    template <typename T1, typename T2>
+      ALPAKA_FN_HOST_ACC T1 atomicCAS(T1* address, T1 compare, T2 val) {
+      T1 old = *address;
+      *address = old == compare ? val : old;
+      return old;
+    }
+
+    template <typename T1, typename T2>
+      ALPAKA_FN_HOST_ACC T1 atomicInc(T1* a, T2 b) {
+      auto ret = *a;
+      if ((*a) < T1(b))
+        (*a)++;
+      return ret;
+    }
+
+    template <typename T1, typename T2>
+      ALPAKA_FN_HOST_ACC T1 atomicAdd(T1* a, T2 b) {
+      auto ret = *a;
+      (*a) += b;
+      return ret;
+    }
+
+    template <typename T1, typename T2>
+      ALPAKA_FN_HOST_ACC T1 atomicSub(T1* a, T2 b) {
+      auto ret = *a;
+      (*a) -= b;
+      return ret;
+    }
+
+    template <typename T1, typename T2>
+      ALPAKA_FN_HOST_ACC T1 atomicMin(T1* a, T2 b) {
+      auto ret = *a;
+      *a = std::min(*a, T1(b));
+      return ret;
+    }
+    template <typename T1, typename T2>
+      ALPAKA_FN_HOST_ACC T1 atomicMax(T1* a, T2 b) {
+      auto ret = *a;
+      *a = std::max(*a, T1(b));
+      return ret;
+    }
+
+
+
+
   }  // namespace alpakatools
 }  // namespace cms
 

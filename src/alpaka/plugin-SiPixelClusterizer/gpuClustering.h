@@ -34,7 +34,8 @@ namespace gpuClustering {
             static_assert(MaxNumModules == 2000u,
                           "MaxNumModules not copied to device code to preserve same interface. Hardcoded value "
                           "assuming MaxNumModules == 2000.");
-            auto loc = alpaka::atomicOp<alpaka::AtomicInc>(acc, moduleStart, 2000u);
+            //auto loc = alpaka::atomicOp<alpaka::AtomicInc>(acc, moduleStart, 2000u);
+	    auto loc = cms::alpakatools::atomicInc(moduleStart, 2000u);
 
             moduleStart[loc + 1] = i;
           }
@@ -95,7 +96,8 @@ namespace gpuClustering {
         if (id[i] == InvId)  // skip invalid pixels
           continue;
         if (id[i] != thisModuleId) {  // find the first pixel in a different module
-          alpaka::atomicOp<alpaka::AtomicMin>(acc, &msize, i);
+          //alpaka::atomicOp<alpaka::AtomicMin>(acc, &msize, i);
+	  cms::alpakatools::atomicMin(&msize, i);
           break;
         }
       }
@@ -197,9 +199,11 @@ namespace gpuClustering {
       alpaka::syncBlockThreads(acc);
       cms::alpakatools::for_each_element_1D_block_stride(acc, Hist::nbins(), [&](uint32_t j) {
         if (hist.size(j) > 60)
-          alpaka::atomicOp<alpaka::AtomicAdd>(acc, &n60, 1u);
+          //alpaka::atomicOp<alpaka::AtomicAdd>(acc, &n60, 1u);
+	  cms::alpakatools::atomicAdd(&n60, 1u);
         if (hist.size(j) > 40)
-          alpaka::atomicOp<alpaka::AtomicAdd>(acc, &n40, 1u);
+          //alpaka::atomicOp<alpaka::AtomicAdd>(acc, &n40, 1u);
+	  cms::alpakatools::atomicAdd( &n40, 1u);
       });
       alpaka::syncBlockThreads(acc);
       if (0 == threadIdxLocal) {
@@ -268,12 +272,14 @@ namespace gpuClustering {
               auto l = nn[k][jEquivalentClass][kk];
               auto m = l + firstPixel;
               //assert(m != i);
-              auto old = alpaka::atomicOp<alpaka::AtomicMin>(acc, &clusterId[m], clusterId[i]);
+              //auto old = alpaka::atomicOp<alpaka::AtomicMin>(acc, &clusterId[m], clusterId[i]);
+	      auto old = cms::alpakatools::atomicMin(&clusterId[m], clusterId[i]);
               if (old != clusterId[i]) {
                 // end the loop only if no changes were applied
                 more = true;
               }
-              alpaka::atomicOp<alpaka::AtomicMin>(acc, &clusterId[i], old);
+              //alpaka::atomicOp<alpaka::AtomicMin>(acc, &clusterId[i], old);
+	      cms::alpakatools::atomicMin(&clusterId[i], old);
             }  // nnloop
           });  // pixel loop
         }
@@ -303,7 +309,8 @@ namespace gpuClustering {
       cms::alpakatools::for_each_element_1D_block_stride(acc, msize, firstPixel, [&](uint32_t i) {
         if (id[i] != InvId) {  // skip invalid pixels
           if (clusterId[i] == static_cast<int>(i)) {
-            auto old = alpaka::atomicOp<alpaka::AtomicInc>(acc, &foundClusters, 0xffffffff);
+            //auto old = alpaka::atomicOp<alpaka::AtomicInc>(acc, &foundClusters, 0xffffffff);
+	    auto old = cms::alpakatools::atomicInc(&foundClusters, 0xffffffff);
             clusterId[i] = -(old + 1);
           }
         }
