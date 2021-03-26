@@ -123,7 +123,7 @@ namespace cms {
 
     // iteratate over N bins left and right of the one containing "v"
     template <typename Hist, typename V, typename Func>
-    ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE void forEachInBins(Hist const &hist, V value, int n, Func func) {
+    ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) void forEachInBins(Hist const &hist, V value, int n, Func func) {
       int bs = Hist::bin(value);
       int be = std::min(int(Hist::nbins() - 1), bs + n);
       bs = std::max(0, bs - n);
@@ -135,7 +135,7 @@ namespace cms {
 
     // iteratate over bins containing all values in window wmin, wmax
     template <typename Hist, typename V, typename Func>
-    ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE void forEachInWindow(Hist const &hist, V wmin, V wmax, Func const &func) {
+    ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) void forEachInWindow(Hist const &hist, V wmin, V wmax, Func const &func) {
       auto bs = Hist::bin(wmin);
       auto be = Hist::bin(wmax);
       //assert(be >= bs);
@@ -194,30 +194,30 @@ namespace cms {
       }
 
       template <typename T_Acc>
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE void add(const T_Acc &acc, CountersOnly const &co) {
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) void add(const T_Acc &acc, CountersOnly const &co) {
         for (uint32_t i = 0; i < totbins(); ++i) {
           alpaka::atomicOp<alpaka::AtomicAdd>(acc, off + i, co.off[i]);
         }
       }
 
       template <typename T_Acc>
-      static ALPAKA_FN_ACC ALPAKA_FN_INLINE uint32_t atomicIncrement(const T_Acc &acc, Counter &x) {
+      static ALPAKA_FN_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) uint32_t atomicIncrement(const T_Acc &acc, Counter &x) {
         return alpaka::atomicOp<alpaka::AtomicAdd>(acc, &x, 1u);
       }
 
       template <typename T_Acc>
-      static ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE uint32_t atomicDecrement(const T_Acc &acc, Counter &x) {
+      static ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) uint32_t atomicDecrement(const T_Acc &acc, Counter &x) {
         return alpaka::atomicOp<alpaka::AtomicSub>(acc, &x, 1u);
       }
 
       template <typename T_Acc>
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE void countDirect(const T_Acc &acc, T b) {
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) void countDirect(const T_Acc &acc, T b) {
         //assert(b < nbins());
         atomicIncrement(acc, off[b]);
       }
 
       template <typename T_Acc>
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE void fillDirect(const T_Acc &acc, T b, index_type j) {
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) void fillDirect(const T_Acc &acc, T b, index_type j) {
         //assert(b < nbins());
         auto w = atomicDecrement(acc, off[b]);
         //assert(w > 0);
@@ -225,7 +225,7 @@ namespace cms {
       }
 
       template <typename T_Acc>
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE int32_t
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) int32_t
       bulkFill(const T_Acc &acc, AtomicPairCounter &apc, index_type const *v, uint32_t n) {
         auto c = apc.add(acc, n);
         if (c.m >= nbins())
@@ -237,12 +237,12 @@ namespace cms {
       }
 
       template <typename T_Acc>
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE void bulkFinalize(const T_Acc &acc, AtomicPairCounter const &apc) {
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) void bulkFinalize(const T_Acc &acc, AtomicPairCounter const &apc) {
         off[apc.get().m] = apc.get().n;
       }
 
       template <typename T_Acc>
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE void bulkFinalizeFill(const T_Acc &acc, AtomicPairCounter const &apc) {
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) void bulkFinalizeFill(const T_Acc &acc, AtomicPairCounter const &apc) {
         auto m = apc.get().m;
         auto n = apc.get().n;
 
@@ -255,14 +255,14 @@ namespace cms {
       }
 
       template <typename T_Acc>
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE void count(const T_Acc &acc, T t) {
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) void count(const T_Acc &acc, T t) {
         uint32_t b = bin(t);
         //assert(b < nbins());
         atomicIncrement(acc, off[b]);
       }
 
       template <typename T_Acc>
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE void fill(const T_Acc &acc, T t, index_type j) {
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) void fill(const T_Acc &acc, T t, index_type j) {
         uint32_t b = bin(t);
         //assert(b < nbins());
         auto w = atomicDecrement(acc, off[b]);
@@ -271,7 +271,7 @@ namespace cms {
       }
 
       template <typename T_Acc>
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE void count(const T_Acc &acc, T t, uint32_t nh) {
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) void count(const T_Acc &acc, T t, uint32_t nh) {
         uint32_t b = bin(t);
         //assert(b < nbins());
         b += histOff(nh);
@@ -280,7 +280,7 @@ namespace cms {
       }
 
       template <typename T_Acc>
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE void fill(const T_Acc &acc, T t, index_type j, uint32_t nh) {
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) void fill(const T_Acc &acc, T t, index_type j, uint32_t nh) {
         uint32_t b = bin(t);
         //assert(b < nbins());
         b += histOff(nh);
@@ -291,7 +291,7 @@ namespace cms {
       }
 
       template <typename T_Acc>
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE void finalize(const T_Acc &acc, Counter *ws = nullptr) {
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) void finalize(const T_Acc &acc, Counter *ws = nullptr) {
         //assert(off[totbins() - 1] == 0);
         blockPrefixScan(acc, off, totbins(), ws);
         //assert(off[totbins() - 1] == off[totbins() - 2]);

@@ -34,7 +34,7 @@ int main(void) {
  
   std::vector<double> results;
 
-  int numTrials = 10;
+  int numTrials = 1;
   int maxEvents = 10;
 
   for (int t = 0; t < numTrials; ++t) {
@@ -248,6 +248,7 @@ int main(void) {
     }
   };  // end lambda
   for (auto kkk = 0; kkk < 5; ++kkk) {
+  //for (auto kkk = 0; kkk < 1; ++kkk) {
     n = 0;
     ncl = 0;
     generateClusters(kkk);

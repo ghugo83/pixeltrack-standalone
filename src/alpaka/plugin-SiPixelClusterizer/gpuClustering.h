@@ -47,7 +47,8 @@ namespace gpuClustering {
   struct findClus {
     template <typename T_Acc>
     ALPAKA_FN_ACC void operator()(
-        const T_Acc& acc,
+				  const T_Acc& acc,
+				  const uint32_t blockIdx,
         uint16_t const* __restrict__ id,           // module id of each pixel
         uint16_t const* __restrict__ x,            // local coordinates of each pixel
         uint16_t const* __restrict__ y,            //
@@ -56,7 +57,7 @@ namespace gpuClustering {
         uint32_t* __restrict__ moduleId,           // output: module id of each module
         int32_t* __restrict__ clusterId,           // output: cluster id of each pixel
         const unsigned int numElements) const {
-      const uint32_t blockIdx(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
+      //const uint32_t blockIdx(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
       if (blockIdx >= moduleStart[0])
         return;
 
@@ -73,13 +74,18 @@ namespace gpuClustering {
 #endif
 
       // find the index of the first pixel not belonging to this module (or invalid)
-      auto&& msize = alpaka::declareSharedVar<unsigned int, __COUNTER__>(acc);
+      //auto msize = alpaka::declareSharedVar<unsigned int, __COUNTER__>(acc);
+      unsigned int msize;
       msize = numElements;
       alpaka::syncBlockThreads(acc);
 
       // Stride = block size.
-      const uint32_t blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[0u]);
-      //const uint32_t blockDimension(1u);
+      //std::cout << "In findClus, critical call to alpaka::getWorkDiv" << std::endl;
+      //const uint32_t blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[0u]);
+      //const uint32_t blockDimension(acc.getCheatWorkDiv()[0u]);
+      //const uint32_t blockDimension(acc.getCaca()[0u]);
+      const uint32_t blockDimension(1u);
+
 
       // Get thread / CPU element indices in block.
       const auto& [firstElementIdxNoStride, endElementIdxNoStride] =
@@ -89,9 +95,16 @@ namespace gpuClustering {
 
       // skip threads not associated to an existing pixel
       for (uint32_t i = firstElementIdx; i < numElements; ++i) {
-        if (!cms::alpakatools::get_next_element_1D_index_stride(
-                i, firstElementIdx, endElementIdx, blockDimension, numElements))
-          break;
+	//cms::alpakatools::Info info = cms::alpakatools::get_next_element_1D_index_stride_cheat( i, firstElementIdx, endElementIdx, blockDimension, numElements);
+        //if (!info.isNextStrideElementValid)
+        //  break;
+	//i = info.i;
+	//firstElementIdx = info.firstElementIdx;
+	//endElementIdx = info.endElementIdx;
+
+	if (!cms::alpakatools::get_next_element_1D_index_stride( i, firstElementIdx, endElementIdx, blockDimension, numElements))
+	  break;
+
         if (id[i] == InvId)  // skip invalid pixels
           continue;
         if (id[i] != thisModuleId) {  // find the first pixel in a different module
@@ -104,8 +117,10 @@ namespace gpuClustering {
       constexpr uint32_t maxPixInModule = 4000;
       constexpr auto nbins = phase1PixelTopology::numColsInModule + 2;  //2+2;
       using Hist = cms::alpakatools::HistoContainer<uint16_t, nbins, maxPixInModule, 9, uint16_t>;
-      auto&& hist = alpaka::declareSharedVar<Hist, __COUNTER__>(acc);
-      auto&& ws = alpaka::declareSharedVar<Hist::Counter[32], __COUNTER__>(acc);
+      //auto hist = alpaka::declareSharedVar<Hist, __COUNTER__>(acc);
+      //auto ws = alpaka::declareSharedVar<Hist::Counter[32], __COUNTER__>(acc);
+      Hist hist;
+      typename Hist::Counter ws[32];
 
       cms::alpakatools::for_each_element_1D_block_stride(acc, Hist::totbins(), [&](uint32_t j) { hist.off[j] = 0; });
       alpaka::syncBlockThreads(acc);
@@ -264,7 +279,8 @@ namespace gpuClustering {
             const uint32_t jEquivalentClass = j % threadDimension;
             auto p = hist.begin() + j;
             auto i = *p + firstPixel;
-            for (int kk = 0; kk < nnn[k][jEquivalentClass]; ++kk) {
+	    const auto max = nnn[k][jEquivalentClass];
+            for (int kk = 0; kk < max; ++kk) {
               auto l = nn[k][jEquivalentClass][kk];
               auto m = l + firstPixel;
               //assert(m != i);
@@ -294,7 +310,8 @@ namespace gpuClustering {
       }
 #endif
 
-      auto&& foundClusters = alpaka::declareSharedVar<unsigned int, __COUNTER__>(acc);
+      //auto foundClusters = alpaka::declareSharedVar<unsigned int, __COUNTER__>(acc);
+      unsigned int foundClusters;
       foundClusters = 0;
       alpaka::syncBlockThreads(acc);
 

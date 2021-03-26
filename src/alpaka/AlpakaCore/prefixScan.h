@@ -8,7 +8,7 @@
 #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
 
 template <typename T>
-ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE void warpPrefixScan(uint32_t laneId, T const* ci, T* co, uint32_t i, uint32_t mask) {
+ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) void warpPrefixScan(uint32_t laneId, T const* ci, T* co, uint32_t i, uint32_t mask) {
   // ci and co may be the same
   auto x = ci[i];
   CMS_UNROLL_LOOP
@@ -21,7 +21,7 @@ ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE void warpPrefixScan(uint32_t laneId, T const
 }
 
 template <typename T>
-ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE void warpPrefixScan(uint32_t laneId, T* c, uint32_t i, uint32_t mask) {
+ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) void warpPrefixScan(uint32_t laneId, T* c, uint32_t i, uint32_t mask) {
   auto x = c[i];
   CMS_UNROLL_LOOP
   for (int offset = 1; offset < 32; offset <<= 1) {
@@ -38,7 +38,7 @@ namespace cms {
   namespace alpakatools {
     // limited to 32*32 elements....
     template <typename T_Acc, typename T>
-    ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE void blockPrefixScan(const T_Acc& acc,
+    ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) void blockPrefixScan(const T_Acc& acc,
                                                              T const* ci,
                                                              T* co,
                                                              uint32_t size,
@@ -88,7 +88,7 @@ namespace cms {
     }
 
     template <typename T_Acc, typename T>
-    ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE void blockPrefixScan(const T_Acc& acc,
+    ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) void blockPrefixScan(const T_Acc& acc,
                                                              T* __restrict__ c,
                                                              uint32_t size,
                                                              T* __restrict__ ws
@@ -145,7 +145,7 @@ namespace cms {
 
         uint32_t const blockIdx(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
 
-        auto&& ws = alpaka::declareSharedVar<T[32], __COUNTER__>(acc);
+        auto ws = alpaka::declareSharedVar<T[32], __COUNTER__>(acc);
         // first each block does a scan of size 1024; (better be enough blocks....)
         //assert(gridDimension / threadDimension <= 1024);
         int off = blockDimension * blockIdx * threadDimension;
@@ -181,7 +181,7 @@ namespace cms {
 
         alpaka::syncBlockThreads(acc);
 
-        auto&& ws = alpaka::declareSharedVar<T[32], __COUNTER__>(acc);
+        auto ws = alpaka::declareSharedVar<T[32], __COUNTER__>(acc);
         blockPrefixScan(acc, psum, psum, numBlocks, ws);
 
         for (int elemId = 0; elemId < static_cast<int>(threadDimension); ++elemId) {
@@ -207,7 +207,7 @@ namespace alpaka {
       //-----------------------------------------------------------------------------
       //! \return The size of the shared memory allocated for a block.
       template <typename TVec>
-        ALPAKA_FN_HOST_ACC static auto getBlockSharedMemDynSizeBytes(
+        ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) static auto getBlockSharedMemDynSizeBytes(
 								     cms::alpakatools::multiBlockPrefixScanSecondStep<T> const& myKernel,
 								     TVec const& blockThreadExtent,
 								     TVec const& threadElemExtent,

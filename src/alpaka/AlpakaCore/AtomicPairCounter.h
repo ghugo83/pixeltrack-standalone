@@ -34,7 +34,7 @@ namespace cms {
 
       // increment n by 1 and m by i.  return previous value
       template <typename T_Acc>
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE Counters add(const T_Acc& acc, uint32_t i) {
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) Counters add(const T_Acc& acc, uint32_t i) {
         c_type c = i;
         c += incr;
 
