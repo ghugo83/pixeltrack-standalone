@@ -172,9 +172,9 @@ namespace pixelgpudetails {
 
   SiPixelRawToClusterGPUKernel() : 
     nModules_Clusters_h{cms::alpakatools::allocHostBuf<uint32_t>(host, 2u)},
-      digis_d{SiPixelDigisAlpaka(pixelgpudetails::MAX_FED_WORDS)},
-	clusters_d{SiPixelClustersAlpaka(gpuClustering::MaxNumModules)},
-	  digiErrors_d{SiPixelDigiErrorsAlpaka(pixelgpudetails::MAX_FED_WORDS)}
+      digis_d{SiPixelDigisAlpaka(0u)},
+	clusters_d{SiPixelClustersAlpaka(0u)},
+	digiErrors_d{SiPixelDigiErrorsAlpaka(0u)}
 	  {};
 	  ~SiPixelRawToClusterGPUKernel() = default;
 
@@ -207,6 +207,10 @@ namespace pixelgpudetails {
       // the CUDA streams are cached within the cms::cuda::StreamCache, but it is
       // still better to release as early as possible
       //nModules_Clusters_h.reset();
+
+      // TO DO:added
+      alpaka::wait(host);
+      alpaka::wait(device);
       return std::make_pair(std::move(digis_d), std::move(clusters_d));
     }
 

@@ -17,16 +17,17 @@ public:
     error_d{cms::alpakatools::allocDeviceBuf<cms::alpakatools::SimpleVector<PixelErrorCompact>>(device)},
       error_h{cms::alpakatools::allocHostBuf<cms::alpakatools::SimpleVector<PixelErrorCompact>>(host)}
       //, formatterErrors_h{std::move(errors)}
-	 {
-	  auto perror_h = alpaka::getPtrNative(error_h);
-	  perror_h->construct(maxFedWords, alpaka::getPtrNative(data_d));
-	  assert(perror_h->empty());
-	  assert(perror_h->capacity() == static_cast<int>(maxFedWords));
+      {
+	std::cout << "SiPixelDigiErrorsAlpaka constructor" << std::endl;
+	auto perror_h = alpaka::getPtrNative(error_h);
+	perror_h->construct(maxFedWords, alpaka::getPtrNative(data_d));
+	assert(perror_h->empty());
+	assert(perror_h->capacity() == static_cast<int>(maxFedWords));
 
-    // TO DO: nothing really async in here for now... Pass the queue in constructor argument instead, and don't wait anymore!
-    Queue queue(device);
-    cms::alpakatools::memcpy(queue, error_d, error_h);
-    alpaka::wait(queue);
+	// TO DO: nothing really async in here for now... Pass the queue in constructor argument instead, and don't wait anymore!
+	Queue queue(device);
+	cms::alpakatools::memcpy(queue, error_d, error_h);
+	alpaka::wait(queue);
   }
   ~SiPixelDigiErrorsAlpaka() = default;
 

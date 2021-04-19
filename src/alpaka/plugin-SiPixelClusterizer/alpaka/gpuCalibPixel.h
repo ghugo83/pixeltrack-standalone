@@ -41,6 +41,63 @@ ALPAKA_FN_ACC void operator()(const T_Acc& acc,
 //int first = blockDim.x * blockIdx.x + threadIdx.x;
   const uint32_t threadIdxGlobal(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u]);
 
+
+  
+  if (threadIdxGlobal == 0) {
+
+    /*
+    for (uint32_t i = 0; i < 48316; ++i) {
+      printf("digis_d.moduleInd()[i] = %d \n", id[i]);
+    }
+    for (uint32_t i = 0; i < 48316; ++i) {
+      printf("digis_d.c_xx()[i] = %d \n", x[i]);
+    }
+    for (uint32_t i = 0; i < 48316; ++i) {
+      printf("digis_d.c_yy()[i] = %d \n", y[i]);
+    }
+    */
+
+    /*
+    for (uint32_t i = 0; i < 48316; ++i) {
+      printf("KERNEL START adc[i] = %u \n", adc[i]);
+      }*/
+
+
+    /*
+    //for (uint32_t i = 0; i < 1544192u; ++i) {
+    for (uint32_t i = 0; i < 1u; ++i) {
+      printf("gains->getVpedestals()->gain = %d \n", v_pedestals[i].gain);
+      printf("gains->getVpedestals()->ped = %d \n", v_pedestals[i].ped);
+    }
+
+    for (uint32_t i = 0; i < 2000u; ++i) {
+      printf("rangePtr[i].first.first = %d \n", rangeAndCols[i].first.first);
+      printf("rangePtr[i].first.second = %d \n", rangeAndCols[i].first.second);
+      printf("rangePtr[i].second = %d \n", rangeAndCols[i].second);
+    }
+
+    printf("gains->getFields()->minPed_ = %.6f \n", fields->minPed_);
+    printf("gains->getFields()->maxPed_ = %.6f \n", fields->maxPed_);
+    printf("gains->getFields()->minGain_ = %.6f \n", fields->minGain_);
+    printf("gains->getFields()->maxGain_ = %.6f \n", fields->maxGain_);
+    printf("gains->getFields()->pedPrecision = %.6f \n", fields->pedPrecision);
+    printf("gains->getFields()->gainPrecision = %.6f \n", fields->gainPrecision);
+    printf("gains->getFields()->numberOfRowsAveragedOver_ = %d \n", fields->numberOfRowsAveragedOver_);
+    printf("gains->getFields()->nBinsToUseForEncoding_ = %d \n", fields->nBinsToUseForEncoding_);
+    printf("gains->getFields()->deadFlag_ = %d \n", fields->deadFlag_);
+    printf("gains->getFields()->noisyFlag_ = %d \n", fields->noisyFlag_);
+    */
+
+
+    }
+    
+
+
+
+
+
+
+
   // zero for next kernels...
   if (threadIdxGlobal == 0) {
     clusModuleStart[0] = moduleStart[0] = 0;
@@ -72,9 +129,11 @@ ALPAKA_FN_ACC void operator()(const T_Acc& acc,
 	} else {
 	  float vcal = adc[i] * gain - pedestal * gain;
 	  adc[i] = std::max(100, int(vcal * conversionFactor + offset));
+	  //printf("KERNEL CALIB i = %u, adc[i] = %u \n", i, adc[i]);
 	}
       }
     });
+
 
   }
 };
