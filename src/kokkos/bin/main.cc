@@ -136,12 +136,13 @@ int main(int argc, char** argv) {
       if (std::find(backends.begin(), backends.end(), backend) != backends.end()) {
         edmodules.emplace_back(prefix + "BeamSpotToKokkos");
         edmodules.emplace_back(prefix + "SiPixelRawToCluster");
+	/*
         edmodules.emplace_back(prefix + "SiPixelRecHitKokkos");
         edmodules.emplace_back(prefix + "CAHitNtupletKokkos");
-        edmodules.emplace_back(prefix + "PixelVertexProducerKokkos");
+        edmodules.emplace_back(prefix + "PixelVertexProducerKokkos");*/
         if (transfer) {
-          edmodules.emplace_back(prefix + "PixelTrackSoAFromKokkos");
-          edmodules.emplace_back(prefix + "PixelVertexSoAFromKokkos");
+          /*edmodules.emplace_back(prefix + "PixelTrackSoAFromKokkos");
+	    edmodules.emplace_back(prefix + "PixelVertexSoAFromKokkos");*/
         }
         if (validation) {
           edmodules.emplace_back(prefix + "CountValidator");
@@ -152,7 +153,7 @@ int main(int argc, char** argv) {
 
         esmodules.emplace_back(prefix + "SiPixelFedCablingMapESProducer");
         esmodules.emplace_back(prefix + "SiPixelGainCalibrationForHLTESProducer");
-        esmodules.emplace_back(prefix + "PixelCPEFastESProducer");
+        //esmodules.emplace_back(prefix + "PixelCPEFastESProducer");
       }
     };
     addModules("kokkos_serial::", Backend::SERIAL);
