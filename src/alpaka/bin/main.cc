@@ -116,8 +116,8 @@ int main(int argc, char** argv) {
         if (std::find(backends.begin(), backends.end(), backend) != backends.end()) {
           edmodules.emplace_back(prefix + "BeamSpotToAlpaka");
           edmodules.emplace_back(prefix + "SiPixelRawToCluster");
-          /*edmodules.emplace_back(prefix + "SiPixelRecHitAlpaka");
-	    edmodules.emplace_back(prefix + "CAHitNtupletAlpaka");
+          edmodules.emplace_back(prefix + "SiPixelRecHitAlpaka");
+	  /*edmodules.emplace_back(prefix + "CAHitNtupletAlpaka");
 	    edmodules.emplace_back(prefix + "PixelVertexProducerAlpaka");*/
           if (transfer) {
             /*edmodules.emplace_back(prefix + "PixelTrackSoAFromAlpaka");
