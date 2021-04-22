@@ -3,7 +3,7 @@
 //#include "AlpakaDataFormats/PixelTrackAlpaka.h"
 #include "AlpakaDataFormats/SiPixelClustersAlpaka.h"
 #include "AlpakaDataFormats/SiPixelDigisAlpaka.h"
-//#include "AlpakaDataFormats/TrackingRecHit2DAlpaka.h"
+#include "AlpakaDataFormats/TrackingRecHit2DAlpaka.h"
 //#include "DataFormats/ZVertexSoA.h"
 #include "Framework/EventSetup.h"
 #include "Framework/Event.h"
@@ -32,7 +32,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     edm::EDGetTokenT<SiPixelDigisAlpaka> digiToken_;
     edm::EDGetTokenT<SiPixelClustersAlpaka> clusterToken_;
-    //edm::EDGetTokenT<TrackingRecHit2DAlpaka> hitToken_;
+    edm::EDGetTokenT<TrackingRecHit2DAlpaka> hitToken_;
     //edm::EDGetTokenT<PixelTrackHeterogeneous> trackToken_;
     //edm::EDGetTokenT<ZVertexHeterogeneous> vertexToken_;
 
@@ -76,8 +76,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   HistoValidator::HistoValidator(edm::ProductRegistry& reg)
       : digiToken_(reg.consumes<SiPixelDigisAlpaka>()),
-        clusterToken_(reg.consumes<SiPixelClustersAlpaka>())  //,
-                                                              //hitToken_(reg.consumes<TrackingRecHit2DAlpaka>()),
+        clusterToken_(reg.consumes<SiPixelClustersAlpaka>()),
+      hitToken_(reg.consumes<TrackingRecHit2DAlpaka>())//,
                                                               //trackToken_(reg.consumes<PixelTrackHeterogeneous>()),
                                                               //vertexToken_(reg.consumes<ZVertexHeterogeneous>())
   {}
@@ -112,7 +112,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   void HistoValidator::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     auto const& digis = iEvent.get(digiToken_);
     auto const& clusters = iEvent.get(clusterToken_);
-    //auto const& hits = iEvent.get(hitToken_);
+    auto const& hits = iEvent.get(hitToken_);
 
     auto const nDigis = digis.nDigis();
     auto const nModules = digis.nModules();
@@ -127,19 +127,30 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     alpaka::memcpy(queue, h_clusInModuleBuf, d_clusInModuleView, gpuClustering::MaxNumModules);
     auto h_clusInModule = alpaka::getPtrNative(h_clusInModuleBuf);
 
-    /*
-  auto const nHits = hits.nHits();
-  auto const h_lx = hits.xlToHostAsync();
-  auto const h_ly = hits.ylToHostAsync();
-  auto const h_lex = hits.xerrToHostAsync();
-  auto const h_ley = hits.yerrToHostAsync();
-  auto const h_gx = hits.xgToHostAsync();
-  auto const h_gy = hits.ygToHostAsync();
-  auto const h_gz = hits.zgToHostAsync();
-  auto const h_gr = hits.rgToHostAsync();
-  auto const h_charge = hits.chargeToHostAsync();
-  auto const h_sizex = hits.xsizeToHostAsync();
-  auto const h_sizey = hits.ysizeToHostAsync();*/
+    
+    auto const nHits = hits.nHits();
+    auto const h_lxBuf = hits.xlToHost();
+    auto const h_lx = alpaka::getPtrNative(h_lxBuf);
+    auto const h_lyBuf = hits.ylToHost();
+    auto const h_ly = alpaka::getPtrNative(h_lyBuf);
+    auto const h_lexBuf = hits.xerrToHost();
+    auto const h_lex = alpaka::getPtrNative(h_lexBuf);
+    auto const h_leyBuf = hits.yerrToHost();
+    auto const h_ley = alpaka::getPtrNative(h_leyBuf);
+    auto const h_gxBuf = hits.xgToHost();
+    auto const h_gx = alpaka::getPtrNative(h_gxBuf);
+    auto const h_gyBuf = hits.ygToHost();
+    auto const h_gy = alpaka::getPtrNative(h_gyBuf);
+    auto const h_gzBuf = hits.zgToHost();
+    auto const h_gz = alpaka::getPtrNative(h_gzBuf);
+    auto const h_grBuf = hits.rgToHost();
+    auto const h_gr = alpaka::getPtrNative(h_grBuf);
+    auto const h_chargeBuf = hits.chargeToHost();
+    auto const h_charge = alpaka::getPtrNative(h_chargeBuf);
+    auto const h_sizexBuf = hits.xsizeToHost();
+    auto const h_sizex = alpaka::getPtrNative(h_sizexBuf);
+    auto const h_sizeyBuf = hits.ysizeToHost();
+    auto const h_sizey = alpaka::getPtrNative(h_sizeyBuf);
 
     alpaka::wait(queue);
 
@@ -154,26 +165,22 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       histos["cluster_per_module_n"].fill(h_clusInModule[i]);
     }
 
-    /*
-  histos["hit_n"].fill(nHits);
-  for (uint32_t i = 0; i < nHits; ++i) {
-    histos["hit_lx"].fill(h_localCoord[i]);
-    histos["hit_ly"].fill(h_localCoord[i + nHits]);
-    histos["hit_lex"].fill(h_localCoord[i + 2 * nHits]);
-    histos["hit_ley"].fill(h_localCoord[i + 3 * nHits]);
-    histos["hit_gx"].fill(h_globalCoord[i]);
-    histos["hit_gy"].fill(h_globalCoord[i + nHits]);
-    histos["hit_gz"].fill(h_globalCoord[i + 2 * nHits]);
-    histos["hit_gr"].fill(h_globalCoord[i + 3 * nHits]);
-    histos["hit_charge"].fill(h_charge[i]);
-    histos["hit_sizex"].fill(h_size[i]);
-    histos["hit_sizey"].fill(h_size[i + nHits]);
-  }
-  h_localCoord.reset();
-  h_globalCoord.reset();
-  h_charge.reset();
-  h_size.reset();
+    histos["hit_n"].fill(nHits);
+    for (uint32_t i = 0; i < nHits; ++i) {
+      histos["hit_lx"].fill(h_lx[i]);
+      histos["hit_ly"].fill(h_ly[i]);
+      histos["hit_lex"].fill(h_lex[i]);
+      histos["hit_ley"].fill(h_ley[i]);
+      histos["hit_gx"].fill(h_gx[i]);
+      histos["hit_gy"].fill(h_gy[i]);
+      histos["hit_gz"].fill(h_gz[i]);
+      histos["hit_gr"].fill(h_gr[i]);
+      histos["hit_charge"].fill(h_charge[i]);
+      histos["hit_sizex"].fill(h_sizex[i]);
+      histos["hit_sizey"].fill(h_sizey[i]);
+    }
 
+    /*
   {
     auto const& tracks = iEvent.get(trackToken_);
 
