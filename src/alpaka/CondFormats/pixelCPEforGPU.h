@@ -56,7 +56,7 @@ namespace pixelCPEforGPU {
   };
 
   struct ParamsOnGPU {
-    CommonParams const* __restrict__ m_commonParams; // TO DO: NB: added __restrict__ versus legacy
+    CommonParams const* __restrict__ m_commonParams;  // TO DO: NB: added __restrict__ versus legacy
     DetParams const* __restrict__ m_detParams;
     LayerGeometry const* __restrict__ m_layerGeometry;
     AverageGeometry const* __restrict__ m_averageGeometry;
@@ -72,7 +72,8 @@ namespace pixelCPEforGPU {
     constexpr LayerGeometry const& __restrict__ layerGeometry() const { return *m_layerGeometry; }
     constexpr AverageGeometry const& __restrict__ averageGeometry() const { return *m_averageGeometry; }
 
-ALPAKA_FN_ACC  uint8_t layer(uint16_t id) const { // TO DO: removed __ldg from legacy, check impact on perf. If [] does not work, can also try return *(m_layerGeometry->layer + id / phase1PixelTopology::maxModuleStride);
+    ALPAKA_FN_ACC uint8_t layer(uint16_t id)
+        const {  // TO DO: removed __ldg from legacy, check impact on perf. If [] does not work, can also try return *(m_layerGeometry->layer + id / phase1PixelTopology::maxModuleStride);
       return m_layerGeometry->layer[id / phase1PixelTopology::maxModuleStride];
     };
   };

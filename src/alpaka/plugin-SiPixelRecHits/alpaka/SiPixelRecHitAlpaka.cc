@@ -14,30 +14,29 @@
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
-class SiPixelRecHitAlpaka : public edm::EDProducer {
-public:
-  explicit SiPixelRecHitAlpaka(edm::ProductRegistry& reg);
-  ~SiPixelRecHitAlpaka() override = default;
+  class SiPixelRecHitAlpaka : public edm::EDProducer {
+  public:
+    explicit SiPixelRecHitAlpaka(edm::ProductRegistry& reg);
+    ~SiPixelRecHitAlpaka() override = default;
 
-private:
-  void produce(edm::Event& iEvent, const edm::EventSetup& iSetup) override;
+  private:
+    void produce(edm::Event& iEvent, const edm::EventSetup& iSetup) override;
 
-  // The mess with inputs will be cleaned up when migrating to the new framework
-  edm::EDGetTokenT<BeamSpotAlpaka> tBeamSpot;
-  edm::EDGetTokenT<SiPixelClustersAlpaka> token_;
-  edm::EDGetTokenT<SiPixelDigisAlpaka> tokenDigi_;
+    // The mess with inputs will be cleaned up when migrating to the new framework
+    edm::EDGetTokenT<BeamSpotAlpaka> tBeamSpot;
+    edm::EDGetTokenT<SiPixelClustersAlpaka> token_;
+    edm::EDGetTokenT<SiPixelDigisAlpaka> tokenDigi_;
 
-  edm::EDPutTokenT<TrackingRecHit2DAlpaka> tokenHit_;
+    edm::EDPutTokenT<TrackingRecHit2DAlpaka> tokenHit_;
 
-  pixelgpudetails::PixelRecHitGPUKernel gpuAlgo_;
-};
+    pixelgpudetails::PixelRecHitGPUKernel gpuAlgo_;
+  };
 
   SiPixelRecHitAlpaka::SiPixelRecHitAlpaka(edm::ProductRegistry& reg)
-    : tBeamSpot(reg.consumes<BeamSpotAlpaka>()),
-      token_(reg.consumes<SiPixelClustersAlpaka>()),
-      tokenDigi_(reg.consumes<SiPixelDigisAlpaka>()),
-      tokenHit_(reg.produces<TrackingRecHit2DAlpaka>()) 
-  {}
+      : tBeamSpot(reg.consumes<BeamSpotAlpaka>()),
+        token_(reg.consumes<SiPixelClustersAlpaka>()),
+        tokenDigi_(reg.consumes<SiPixelDigisAlpaka>()),
+        tokenHit_(reg.produces<TrackingRecHit2DAlpaka>()) {}
 
   void SiPixelRecHitAlpaka::produce(edm::Event& iEvent, const edm::EventSetup& es) {
     auto const& fcpe = es.get<PixelCPEFast>();
@@ -51,6 +50,7 @@ private:
       std::cout << "Clusters/Hits Overflow " << nHits << " >= " << TrackingRecHit2DSOAView::maxHits() << std::endl;
     }
 
+    // TO DO: Async: Would need to add a queue as a parameter, not async for now!
     iEvent.emplace(tokenHit_, gpuAlgo_.makeHitsAsync(digis, clusters, bs, fcpe.params()));
   }
 
