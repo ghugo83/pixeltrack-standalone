@@ -113,8 +113,6 @@ ALPAKA_FN_ACC void operator()(const T_Acc& acc,
         clusParams.Q_l_Y[ic] = 0;
 	});
 
-      first += threadIdxLocal;
-
       alpaka::syncBlockThreads(acc);
 
       // one thead per "digi"
