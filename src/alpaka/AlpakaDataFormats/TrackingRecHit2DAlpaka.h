@@ -94,81 +94,59 @@ public:
   auto iphi() { return alpaka::getPtrNative(m_iphi); }
   auto const *c_iphi() const { return alpaka::getPtrNative(m_iphi); }
 
-auto xlToHost() const {
-  Queue queue(device);
+auto xlToHostAsync(Queue& queue) const {
   auto ret = cms::alpakatools::allocHostBuf<float>(nHits());
   alpaka::memcpy(queue, ret, m_xl, nHits());
-  alpaka::wait(queue);
   return ret;
 }
-auto ylToHost() const {
-  Queue queue(device);
+auto ylToHostAsync(Queue& queue) const {
   auto ret = cms::alpakatools::allocHostBuf<float>(nHits());
-  alpaka::memcpy(queue, ret, m_yl, nHits());
-  alpaka::wait(queue);
+  alpaka::memcpy(queue, ret, m_yl, nHits());  
   return ret;
 }
-auto xerrToHost() const {
-  Queue queue(device);
+auto xerrToHostAsync(Queue& queue) const {  
   auto ret = cms::alpakatools::allocHostBuf<float>(nHits());
   alpaka::memcpy(queue, ret, m_xerr, nHits());
-  alpaka::wait(queue);
   return ret;
 }
-auto yerrToHost() const {
-  Queue queue(device);
+auto yerrToHostAsync(Queue& queue) const {  
   auto ret = cms::alpakatools::allocHostBuf<float>(nHits());
   alpaka::memcpy(queue, ret, m_yerr, nHits());
-  alpaka::wait(queue);
   return ret;
 }
-auto xgToHost() const {
-  Queue queue(device);
+auto xgToHostAsync(Queue& queue) const {  
   auto ret = cms::alpakatools::allocHostBuf<float>(nHits());
-  alpaka::memcpy(queue, ret, m_xg, nHits());
-  alpaka::wait(queue);
+  alpaka::memcpy(queue, ret, m_xg, nHits()); 
   return ret;
 }
-auto ygToHost() const {
-  Queue queue(device);
+auto ygToHostAsync(Queue& queue) const {  
   auto ret = cms::alpakatools::allocHostBuf<float>(nHits());
-  alpaka::memcpy(queue, ret, m_yg, nHits());
-  alpaka::wait(queue);
+  alpaka::memcpy(queue, ret, m_yg, nHits()); 
   return ret;
 }
-auto zgToHost() const {
-  Queue queue(device);
+auto zgToHostAsync(Queue& queue) const {  
   auto ret = cms::alpakatools::allocHostBuf<float>(nHits());
   alpaka::memcpy(queue, ret, m_zg, nHits());
-  alpaka::wait(queue);
   return ret;
 }
-auto rgToHost() const {
-  Queue queue(device);
+auto rgToHostAsync(Queue& queue) const {
   auto ret = cms::alpakatools::allocHostBuf<float>(nHits());
   alpaka::memcpy(queue, ret, m_rg, nHits());
-  alpaka::wait(queue);
   return ret;
 }
-auto chargeToHost() const {
-  Queue queue(device);
+auto chargeToHostAsync(Queue& queue) const { 
   auto ret = cms::alpakatools::allocHostBuf<int32_t>(nHits());
   alpaka::memcpy(queue, ret, m_charge, nHits());
-  alpaka::wait(queue);
   return ret;
 }
-auto xsizeToHost() const {
-  Queue queue(device);
+auto xsizeToHostAsync(Queue& queue) const { 
   auto ret = cms::alpakatools::allocHostBuf<int16_t>(nHits());
   alpaka::memcpy(queue, ret, m_xsize, nHits());
-  alpaka::wait(queue);
   return ret;
 }
-auto ysizeToHost() const {
-  Queue queue(device);
+auto ysizeToHostAsync(Queue& queue) const { 
   auto ret = cms::alpakatools::allocHostBuf<int16_t>(nHits());
   alpaka::memcpy(queue, ret, m_ysize, nHits());
-  alpaka::wait(queue);
   return ret;
 }
 #ifdef TODO

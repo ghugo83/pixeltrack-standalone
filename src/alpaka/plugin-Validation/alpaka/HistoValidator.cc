@@ -116,40 +116,40 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     auto const nDigis = digis.nDigis();
     auto const nModules = digis.nModules();
-    auto const h_adcBuf = digis.adcToHost();
+    Queue queue(device);
+    auto const h_adcBuf = digis.adcToHostAsync(queue);
     auto const h_adc = alpaka::getPtrNative(h_adcBuf);
 
     auto const nClusters = clusters.nClusters();
     auto const d_clusInModuleView =
         cms::alpakatools::createDeviceView<uint32_t>(clusters.clusInModule(), gpuClustering::MaxNumModules);
     auto h_clusInModuleBuf{cms::alpakatools::allocHostBuf<uint32_t>(gpuClustering::MaxNumModules)};
-    Queue queue(device);
     alpaka::memcpy(queue, h_clusInModuleBuf, d_clusInModuleView, gpuClustering::MaxNumModules);
     auto h_clusInModule = alpaka::getPtrNative(h_clusInModuleBuf);
 
     
     auto const nHits = hits.nHits();
-    auto const h_lxBuf = hits.xlToHost();
+    auto const h_lxBuf = hits.xlToHostAsync(queue);
     auto const h_lx = alpaka::getPtrNative(h_lxBuf);
-    auto const h_lyBuf = hits.ylToHost();
+    auto const h_lyBuf = hits.ylToHostAsync(queue);
     auto const h_ly = alpaka::getPtrNative(h_lyBuf);
-    auto const h_lexBuf = hits.xerrToHost();
+    auto const h_lexBuf = hits.xerrToHostAsync(queue);
     auto const h_lex = alpaka::getPtrNative(h_lexBuf);
-    auto const h_leyBuf = hits.yerrToHost();
+    auto const h_leyBuf = hits.yerrToHostAsync(queue);
     auto const h_ley = alpaka::getPtrNative(h_leyBuf);
-    auto const h_gxBuf = hits.xgToHost();
+    auto const h_gxBuf = hits.xgToHostAsync(queue);
     auto const h_gx = alpaka::getPtrNative(h_gxBuf);
-    auto const h_gyBuf = hits.ygToHost();
+    auto const h_gyBuf = hits.ygToHostAsync(queue);
     auto const h_gy = alpaka::getPtrNative(h_gyBuf);
-    auto const h_gzBuf = hits.zgToHost();
+    auto const h_gzBuf = hits.zgToHostAsync(queue);
     auto const h_gz = alpaka::getPtrNative(h_gzBuf);
-    auto const h_grBuf = hits.rgToHost();
+    auto const h_grBuf = hits.rgToHostAsync(queue);
     auto const h_gr = alpaka::getPtrNative(h_grBuf);
-    auto const h_chargeBuf = hits.chargeToHost();
+    auto const h_chargeBuf = hits.chargeToHostAsync(queue);
     auto const h_charge = alpaka::getPtrNative(h_chargeBuf);
-    auto const h_sizexBuf = hits.xsizeToHost();
+    auto const h_sizexBuf = hits.xsizeToHostAsync(queue);
     auto const h_sizex = alpaka::getPtrNative(h_sizexBuf);
-    auto const h_sizeyBuf = hits.ysizeToHost();
+    auto const h_sizeyBuf = hits.ysizeToHostAsync(queue);
     auto const h_sizey = alpaka::getPtrNative(h_sizeyBuf);
 
     alpaka::wait(queue);
