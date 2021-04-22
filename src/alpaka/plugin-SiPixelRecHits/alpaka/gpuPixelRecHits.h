@@ -125,8 +125,6 @@ ALPAKA_FN_ACC void operator()(const T_Acc& acc,
       for (uint32_t i = rowsColsFirstElementIdx; i < numElements; ++i) {
 	if (!cms::alpakatools::get_next_element_1D_index_stride(i, rowsColsFirstElementIdx, rowsColsEndElementIdx, blockDimension, numElements))
 	  break;
-	// TO DO: all this to be able to keep break/continue statements: worth it?
-	//cms::alpakatools::for_each_element_1D_block_stride(acc, numElements, first, [&](uint32_t i) {
         auto id = digis.moduleInd(i);
         if (id == InvId)
           continue;  // not valid
@@ -156,8 +154,6 @@ ALPAKA_FN_ACC void operator()(const T_Acc& acc,
       for (uint32_t i = chargeFirstElementIdx; i < numElements; ++i) {
         if (!cms::alpakatools::get_next_element_1D_index_stride(i, chargeFirstElementIdx, chargeEndElementIdx, blockDimension, numElements))
 	  break;
-	// TO DO: all this to be able to keep break/continue statements: worth it?
-	//cms::alpakatools::for_each_element_1D_block_stride(acc, numElements, first, [&](uint32_t i) {
         auto id = digis.moduleInd(i);
         if (id == InvId)
           continue;  // not valid
