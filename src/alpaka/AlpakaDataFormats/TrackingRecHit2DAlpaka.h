@@ -2,6 +2,7 @@
 #define CUDADataFormats_TrackingRecHit_interface_TrackingRecHit2DHeterogeneous_h
 
 #include "AlpakaDataFormats/TrackingRecHit2DSOAView.h"
+#include "AlpakaCore/alpakaCommon.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
@@ -13,7 +14,66 @@ public:
 
   explicit TrackingRecHit2DAlpaka(uint32_t nHits,
                                   const pixelCPEforGPU::ParamsOnGPU* cpeParams,
-                                  const uint32_t* hitsModuleStart);
+                                  const uint32_t* hitsModuleStart)
+: m_nHits(nHits),
+  // NON-OWNING DEVICE POINTERS:
+  m_hitsModuleStart(hitsModuleStart),
+  // OWNING DEVICE POINTERS:
+  m_xl{cms::alpakatools::allocDeviceBuf<float>(nHits)},
+  m_yl{cms::alpakatools::allocDeviceBuf<float>(nHits)},
+  m_xerr{cms::alpakatools::allocDeviceBuf<float>(nHits)},
+  m_yerr{cms::alpakatools::allocDeviceBuf<float>(nHits)},
+  m_xg{cms::alpakatools::allocDeviceBuf<float>(nHits)},
+  m_yg{cms::alpakatools::allocDeviceBuf<float>(nHits)},
+  m_zg{cms::alpakatools::allocDeviceBuf<float>(nHits)},
+  m_rg{cms::alpakatools::allocDeviceBuf<float>(nHits)},
+  m_iphi{cms::alpakatools::allocDeviceBuf<int16_t>(nHits)},
+  m_charge{cms::alpakatools::allocDeviceBuf<int32_t>(nHits)},
+  m_xsize{cms::alpakatools::allocDeviceBuf<int16_t>(nHits)},
+  m_ysize{cms::alpakatools::allocDeviceBuf<int16_t>(nHits)},
+  m_detInd{cms::alpakatools::allocDeviceBuf<uint16_t>(nHits)},
+  m_averageGeometry{cms::alpakatools::allocDeviceBuf<TrackingRecHit2DSOAView::AverageGeometry>(1u)},
+  m_hitsLayerStart{cms::alpakatools::allocDeviceBuf<uint32_t>(nHits)},
+  m_hist{cms::alpakatools::allocDeviceBuf<Hist>(1u)},
+    // SOA view:
+  m_view{cms::alpakatools::allocDeviceBuf<TrackingRecHit2DSOAView>(1u)} {
+  // the hits are actually accessed in order only in building
+  // if ordering is relevant they may have to be stored phi-ordered by layer or so
+  // this will break 1to1 correspondence with cluster and module locality
+  // so unless proven VERY inefficient we keep it ordered as generated
+
+    // Copy data to the SOA view:
+    TrackingRecHit2DSOAView view;
+    view.m_nHits = nHits; // By value.
+    view.m_hitsModuleStart = hitsModuleStart; // Raw pointer to data already owned in the event by SiPixelClusterAlpaka object.
+    view.m_cpeParams = cpeParams; // Raw pointer to data already owned in the eventSetup by PixelCPEFast object.
+    // Raw pointers to data owned here in TrackingRecHit2DAlpaka object:
+
+#define SET(name) view.name = alpaka::getPtrNative(name)
+    SET(m_xl);
+    SET(m_yl);
+    SET(m_xerr);
+    SET(m_yerr);
+    SET(m_xg);
+    SET(m_yg);
+    SET(m_zg);
+    SET(m_rg);
+    SET(m_iphi);
+    SET(m_charge);
+    SET(m_xsize);
+    SET(m_ysize);
+    SET(m_detInd);
+    SET(m_averageGeometry);
+    SET(m_hitsLayerStart);
+    SET(m_hist);
+#undef SET
+    
+    // SoA view on device:
+    Queue queue(device);
+    auto view_h{cms::alpakatools::createHostView<TrackingRecHit2DSOAView>(&view, 1u)};
+    alpaka::memcpy(queue, m_view, view_h, 1u);
+    alpaka::wait(queue);
+  }
 
   ~TrackingRecHit2DAlpaka() = default;
 
@@ -103,70 +163,6 @@ private:
   // while the data itself is owned here in the TrackingRecHit2DAlpaka instance.
   AlpakaDeviceBuf<TrackingRecHit2DSOAView> m_view;
 };
-
-
-TrackingRecHit2DAlpaka::TrackingRecHit2DAlpaka(uint32_t nHits,
-					       const pixelCPEforGPU::ParamsOnGPU* cpeParams,
-					       const uint32_t* hitsModuleStart)
-: m_nHits(nHits),
-  // NON-OWNING DEVICE POINTERS:
-  m_hitsModuleStart(hitsModuleStart),
-  // OWNING DEVICE POINTERS:
-  m_xl{cms::alpakatools::allocDeviceBuf<float>(nHits)},
-  m_yl{cms::alpakatools::allocDeviceBuf<float>(nHits)},
-  m_xerr{cms::alpakatools::allocDeviceBuf<float>(nHits)},
-  m_yerr{cms::alpakatools::allocDeviceBuf<float>(nHits)},
-  m_xg{cms::alpakatools::allocDeviceBuf<float>(nHits)},
-  m_yg{cms::alpakatools::allocDeviceBuf<float>(nHits)},
-  m_zg{cms::alpakatools::allocDeviceBuf<float>(nHits)},
-  m_rg{cms::alpakatools::allocDeviceBuf<float>(nHits)},
-  m_iphi{cms::alpakatools::allocDeviceBuf<int16_t>(nHits)},
-  m_charge{cms::alpakatools::allocDeviceBuf<int32_t>(nHits)},
-  m_xsize{cms::alpakatools::allocDeviceBuf<int16_t>(nHits)},
-  m_ysize{cms::alpakatools::allocDeviceBuf<int16_t>(nHits)},
-  m_detInd{cms::alpakatools::allocDeviceBuf<uint16_t>(nHits)},
-  m_averageGeometry{cms::alpakatools::allocDeviceBuf<TrackingRecHit2DSOAView::AverageGeometry>(1u)},
-  m_hitsLayerStart{cms::alpakatools::allocDeviceBuf<uint32_t>(nHits)},
-  m_hist{cms::alpakatools::allocDeviceBuf<Hist>(1u)},
-    // SOA view:
-  m_view{cms::alpakatools::allocDeviceBuf<TrackingRecHit2DSOAView>(1u)} {
-  // the hits are actually accessed in order only in building
-  // if ordering is relevant they may have to be stored phi-ordered by layer or so
-  // this will break 1to1 correspondence with cluster and module locality
-  // so unless proven VERY inefficient we keep it ordered as generated
-
-    // Copy data to the SOA view:
-    TrackingRecHit2DSOAView view;
-    view.m_nHits = nHits; // By value.
-    view.m_hitsModuleStart = hitsModuleStart; // Raw pointer to data already owned in the event by SiPixelClusterAlpaka object.
-    view.m_cpeParams = cpeParams; // Raw pointer to data already owned in the eventSetup by PixelCPEFast object.
-    // Raw pointers to data owned here in TrackingRecHit2DAlpaka object:
-
-#define SET(name) view.name = alpaka::getPtrNative(name)
-    SET(m_xl);
-    SET(m_yl);
-    SET(m_xerr);
-    SET(m_yerr);
-    SET(m_xg);
-    SET(m_yg);
-    SET(m_zg);
-    SET(m_rg);
-    SET(m_iphi);
-    SET(m_charge);
-    SET(m_xsize);
-    SET(m_ysize);
-    SET(m_detInd);
-    SET(m_averageGeometry);
-    SET(m_hitsLayerStart);
-    SET(m_hist);
-#undef SET
-    
-    // SoA view on device:
-    Queue queue(device);
-    auto view_h{cms::alpakatools::createHostView<TrackingRecHit2DSOAView>(&view, 1u)};
-    alpaka::memcpy(queue, m_view, view_h, 1u);
-    alpaka::wait(queue);
-  }
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
