@@ -42,7 +42,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     alpaka::wait(queue);
 
-    eventSetup.put(std::make_unique<AlpakaDeviceBuf<unsigned char>>(std::move(modToUnp_d)));   
+    eventSetup.put(std::make_unique<AlpakaDeviceBuf<unsigned char>>(std::move(modToUnp_d)));
   }
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE

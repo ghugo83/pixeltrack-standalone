@@ -77,9 +77,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   HistoValidator::HistoValidator(edm::ProductRegistry& reg)
       : digiToken_(reg.consumes<SiPixelDigisAlpaka>()),
         clusterToken_(reg.consumes<SiPixelClustersAlpaka>()),
-      hitToken_(reg.consumes<TrackingRecHit2DAlpaka>())//,
-                                                              //trackToken_(reg.consumes<PixelTrackHeterogeneous>()),
-                                                              //vertexToken_(reg.consumes<ZVertexHeterogeneous>())
+        hitToken_(reg.consumes<TrackingRecHit2DAlpaka>())  //,
+                                                           //trackToken_(reg.consumes<PixelTrackHeterogeneous>()),
+                                                           //vertexToken_(reg.consumes<ZVertexHeterogeneous>())
   {}
 
 #ifdef TODO
@@ -127,7 +127,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     alpaka::memcpy(queue, h_clusInModuleBuf, d_clusInModuleView, gpuClustering::MaxNumModules);
     auto h_clusInModule = alpaka::getPtrNative(h_clusInModuleBuf);
 
-    
     auto const nHits = hits.nHits();
     auto const h_lxBuf = hits.xlToHostAsync(queue);
     auto const h_lx = alpaka::getPtrNative(h_lxBuf);
