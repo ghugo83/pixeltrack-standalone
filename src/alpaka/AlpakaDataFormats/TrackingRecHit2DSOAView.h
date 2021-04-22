@@ -1,8 +1,6 @@
 #ifndef CUDADataFormats_TrackingRecHit_interface_TrackingRecHit2DSOAView_h
 #define CUDADataFormats_TrackingRecHit_interface_TrackingRecHit2DSOAView_h
 
-#include "AlpakaCore/alpakaCommon.h"
-
 #include "AlpakaDataFormats/gpuClusteringConstants.h"
 #include "AlpakaCore/HistoContainer.h"
 #include "Geometry/phase1PixelTopology.h"
