@@ -1,8 +1,3 @@
-#ifdef TODO
-#include "plugin-SiPixelClusterizer/kokkos/SiPixelRawToClusterGPUKernel.h"  // !
-#include "plugin-SiPixelClusterizer/gpuClusteringConstants.h"               // !
-#endif
-
 #include "CondFormats/pixelCPEforGPU.h"
 
 #include "PixelRecHits.h"
