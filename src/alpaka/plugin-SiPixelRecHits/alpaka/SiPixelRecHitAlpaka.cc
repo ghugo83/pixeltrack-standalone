@@ -8,7 +8,7 @@
 #include "Framework/EDProducer.h"
 #include "CondFormats/PixelCPEFast.h"
 
-//#include "PixelRecHits.h"  // TODO : spit product from kernel
+#include "PixelRecHits.h"  // TODO : spit product from kernel
 
 #include "AlpakaCore/alpakaCommon.h"
 
@@ -27,32 +27,32 @@ private:
   edm::EDGetTokenT<SiPixelClustersAlpaka> token_;
   edm::EDGetTokenT<SiPixelDigisAlpaka> tokenDigi_;
 
-//edm::EDPutTokenT<TrackingRecHit2DAlpaka> tokenHit_;
+  edm::EDPutTokenT<TrackingRecHit2DAlpaka> tokenHit_;
 
-//pixelgpudetails::PixelRecHitGPUKernel gpuAlgo_;
+  pixelgpudetails::PixelRecHitGPUKernel gpuAlgo_;
 };
 
-SiPixelRecHitAlpaka::SiPixelRecHitAlpaka(edm::ProductRegistry& reg)
+  SiPixelRecHitAlpaka::SiPixelRecHitAlpaka(edm::ProductRegistry& reg)
     : tBeamSpot(reg.consumes<BeamSpotAlpaka>()),
       token_(reg.consumes<SiPixelClustersAlpaka>()),
-      tokenDigi_(reg.consumes<SiPixelDigisAlpaka>())//,
-      //tokenHit_(reg.produces<TrackingRecHit2DAlpaka>()) 
-{}
+      tokenDigi_(reg.consumes<SiPixelDigisAlpaka>()),
+      tokenHit_(reg.produces<TrackingRecHit2DAlpaka>()) 
+  {}
 
   void SiPixelRecHitAlpaka::produce(edm::Event& iEvent, const edm::EventSetup& es) {
-auto const& fcpe = es.get<PixelCPEFast>();
+    auto const& fcpe = es.get<PixelCPEFast>();
 
-auto const& bs = iEvent.get(tBeamSpot);
-auto const& clusters = iEvent.get(token_);
-auto const& digis = iEvent.get(tokenDigi_);
+    auto const& bs = iEvent.get(tBeamSpot);
+    auto const& clusters = iEvent.get(token_);
+    auto const& digis = iEvent.get(tokenDigi_);
 
-auto nHits = clusters.nClusters();
-//if (nHits >= TrackingRecHit2DSOAView::maxHits()) {
-  //std::cout << "Clusters/Hits Overflow " << nHits << " >= " << TrackingRecHit2DSOAView::maxHits() << std::endl;
-//}
+    auto nHits = clusters.nClusters();
+    if (nHits >= TrackingRecHit2DSOAView::maxHits()) {
+      std::cout << "Clusters/Hits Overflow " << nHits << " >= " << TrackingRecHit2DSOAView::maxHits() << std::endl;
+    }
 
-//iEvent.emplace(tokenHit_, gpuAlgo_.makeHitsAsync(digis, clusters, bs, fcpe.params(), KokkosExecSpace()));
-}
+    iEvent.emplace(tokenHit_, gpuAlgo_.makeHitsAsync(digis, clusters, bs, fcpe.params()));
+  }
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
