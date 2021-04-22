@@ -29,8 +29,10 @@ public:
   auto hitsModuleStart() const { return m_hitsModuleStart; }
 
   auto hitsLayerStart() { return alpaka::getPtrNative(m_hitsLayerStart); }
+  auto const *c_hitsLayerStart() const { return alpaka::getPtrNative(m_hitsLayerStart); }
   auto phiBinner() { return alpaka::getPtrNative(m_hist); }
   auto iphi() { return alpaka::getPtrNative(m_iphi); }
+  auto const *c_iphi() const { return alpaka::getPtrNative(m_iphi); }
 
 
   /*
