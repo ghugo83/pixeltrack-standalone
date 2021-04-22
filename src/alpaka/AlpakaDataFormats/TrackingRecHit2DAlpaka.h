@@ -44,12 +44,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       // Copy data to the SOA view:
       TrackingRecHit2DSOAView view;
-      view.m_nHits = nHits;  // By value.
-      view.m_hitsModuleStart =
-          hitsModuleStart;           // Raw pointer to data already owned in the event by SiPixelClusterAlpaka object.
-      view.m_cpeParams = cpeParams;  // Raw pointer to data already owned in the eventSetup by PixelCPEFast object.
-                                     // Raw pointers to data owned here in TrackingRecHit2DAlpaka object:
+      // By value.
+      view.m_nHits = nHits;
+      // Raw pointer to data already owned in the event by SiPixelClusterAlpaka object:
+      view.m_hitsModuleStart = hitsModuleStart;
+      // Raw pointer to data already owned in the eventSetup by PixelCPEFast object:
+      view.m_cpeParams = cpeParams;
 
+      // Raw pointers to data owned here in TrackingRecHit2DAlpaka object:
 #define SET(name) view.name = alpaka::getPtrNative(name)
       SET(m_xl);
       SET(m_yl);
