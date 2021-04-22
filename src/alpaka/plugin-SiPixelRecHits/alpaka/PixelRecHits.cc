@@ -45,7 +45,6 @@ namespace pixelgpudetails {
 Queue queue(device);
 
 if (blocks) { // protect from empty events
-// TO DO: digis_d.view() and clusters_d.view() passed by value, is it ok???
 alpaka::enqueue(queue,
 		  alpaka::createTaskKernel<Acc1>(getHitsWorkDiv,
 						   gpuPixelRecHits::getHits(),

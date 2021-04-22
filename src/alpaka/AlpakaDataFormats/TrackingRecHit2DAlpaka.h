@@ -94,35 +94,89 @@ public:
   auto iphi() { return alpaka::getPtrNative(m_iphi); }
   auto const *c_iphi() const { return alpaka::getPtrNative(m_iphi); }
 
-
-  /*
-#define TO_HOST_ASYNC(name)
-  auto name##ToHostAsync() const {
-    Queue queue(device);
-    auto ret = cms::alpakatools::allocHostBuf<m_##name.type()>(m_##name.extent());
-    alpaka::memcpy(queue, ret, m_##name, m_##name.extent());
-    alpaka::wait(queue);
-    return ret;
-  }
-  TO_HOST_ASYNC(xl);
-  TO_HOST_ASYNC(yl);
-  TO_HOST_ASYNC(xerr);
-  TO_HOST_ASYNC(yerr);
-  TO_HOST_ASYNC(xg);
-  TO_HOST_ASYNC(yg);
-  TO_HOST_ASYNC(zg);
-  TO_HOST_ASYNC(rg);
-  TO_HOST_ASYNC(charge);
-  TO_HOST_ASYNC(xsize);
-  TO_HOST_ASYNC(ysize);
-#undef TO_HOST_ASYNC
-  */
-
+auto xlToHost() const {
+  Queue queue(device);
+  auto ret = cms::alpakatools::allocHostBuf<float>(nHits());
+  alpaka::memcpy(queue, ret, m_xl, nHits());
+  alpaka::wait(queue);
+  return ret;
+}
+auto ylToHost() const {
+  Queue queue(device);
+  auto ret = cms::alpakatools::allocHostBuf<float>(nHits());
+  alpaka::memcpy(queue, ret, m_yl, nHits());
+  alpaka::wait(queue);
+  return ret;
+}
+auto xerrToHost() const {
+  Queue queue(device);
+  auto ret = cms::alpakatools::allocHostBuf<float>(nHits());
+  alpaka::memcpy(queue, ret, m_xerr, nHits());
+  alpaka::wait(queue);
+  return ret;
+}
+auto yerrToHost() const {
+  Queue queue(device);
+  auto ret = cms::alpakatools::allocHostBuf<float>(nHits());
+  alpaka::memcpy(queue, ret, m_yerr, nHits());
+  alpaka::wait(queue);
+  return ret;
+}
+auto xgToHost() const {
+  Queue queue(device);
+  auto ret = cms::alpakatools::allocHostBuf<float>(nHits());
+  alpaka::memcpy(queue, ret, m_xg, nHits());
+  alpaka::wait(queue);
+  return ret;
+}
+auto ygToHost() const {
+  Queue queue(device);
+  auto ret = cms::alpakatools::allocHostBuf<float>(nHits());
+  alpaka::memcpy(queue, ret, m_yg, nHits());
+  alpaka::wait(queue);
+  return ret;
+}
+auto zgToHost() const {
+  Queue queue(device);
+  auto ret = cms::alpakatools::allocHostBuf<float>(nHits());
+  alpaka::memcpy(queue, ret, m_zg, nHits());
+  alpaka::wait(queue);
+  return ret;
+}
+auto rgToHost() const {
+  Queue queue(device);
+  auto ret = cms::alpakatools::allocHostBuf<float>(nHits());
+  alpaka::memcpy(queue, ret, m_rg, nHits());
+  alpaka::wait(queue);
+  return ret;
+}
+auto chargeToHost() const {
+  Queue queue(device);
+  auto ret = cms::alpakatools::allocHostBuf<int32_t>(nHits());
+  alpaka::memcpy(queue, ret, m_charge, nHits());
+  alpaka::wait(queue);
+  return ret;
+}
+auto xsizeToHost() const {
+  Queue queue(device);
+  auto ret = cms::alpakatools::allocHostBuf<int16_t>(nHits());
+  alpaka::memcpy(queue, ret, m_xsize, nHits());
+  alpaka::wait(queue);
+  return ret;
+}
+auto ysizeToHost() const {
+  Queue queue(device);
+  auto ret = cms::alpakatools::allocHostBuf<int16_t>(nHits());
+  alpaka::memcpy(queue, ret, m_ysize, nHits());
+  alpaka::wait(queue);
+  return ret;
+}
 #ifdef TODO
   // only the local coord and detector index
   cms::cuda::host::unique_ptr<uint16_t[]> detIndexToHostAsync(cudaStream_t stream) const;
   cms::cuda::host::unique_ptr<uint32_t[]> hitsModuleStartToHostAsync(cudaStream_t stream) const;
 #endif
+
 
 private:
   uint32_t m_nHits;
@@ -157,7 +211,6 @@ private:
   AlpakaDeviceBuf<uint32_t> m_hitsLayerStart;
   AlpakaDeviceBuf<Hist> m_hist;
 
-  // Addition from Gab from reverse-engineering this mess:
   // This is a SoA view which itself gathers non-owning pointers to the data owned above (in TrackingRecHit2DAlpaka instance).
   // This is used to access and modify data on GPU in a SoA format (TrackingRecHit2DSOAView),
   // while the data itself is owned here in the TrackingRecHit2DAlpaka instance.
