@@ -4,6 +4,8 @@
 #include "../choleskyInversion.h"
 #include "FitResult.h"
 
+namespace ALPAKA_ACCELERATOR_NAMESPACE {
+
 namespace Rfit {
 
   constexpr double d = 1.e-4;  //!< used in numerical derivative (J2 in Circle_fit())
@@ -240,5 +242,7 @@ namespace Rfit {
   }
 
 }  // namespace Rfit
+
+}
 
 #endif  // RecoPixelVertexing_PixelTrackFitting_interface_FitUtils_h
