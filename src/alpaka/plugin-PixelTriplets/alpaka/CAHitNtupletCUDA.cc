@@ -21,14 +21,14 @@ private:
   void produce(edm::Event& iEvent, const edm::EventSetup& iSetup) override;
 
   edm::EDGetTokenT<TrackingRecHit2DAlpaka> tokenHitGPU_;
-//edm::EDPutTokenT<PixelTrackHeterogeneous> tokenTrackGPU_;
+edm::EDPutTokenT<PixelTrackHeterogeneous> tokenTrackGPU_;
 
 //CAHitNtupletGeneratorOnGPU gpuAlgo_;
 };
 
 CAHitNtupletAlpaka::CAHitNtupletAlpaka(edm::ProductRegistry& reg)
-  : tokenHitGPU_{reg.consumes<TrackingRecHit2DAlpaka>()}//,
-//tokenTrackGPU_{reg.produces<PixelTrackHeterogeneous>()},
+  : tokenHitGPU_{reg.consumes<TrackingRecHit2DAlpaka>()},
+  tokenTrackGPU_{reg.produces<PixelTrackHeterogeneous>()}//,
 //gpuAlgo_(reg) 
 {}
 
