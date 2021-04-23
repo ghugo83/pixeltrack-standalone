@@ -72,7 +72,7 @@ namespace pixelTrack {
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 //using PixelTrackHeterogeneous = HeterogeneousSoA<pixelTrack::TrackSoA>;
-using PixelTrackHeterogeneous = AlpakaDeviceBuf<pixelTrack::TrackSoA>;
+using PixelTrackAlpaka = AlpakaDeviceBuf<pixelTrack::TrackSoA>;
 
 // TO DO:ANOTHER OPTION IS TO CREATE A HeterogeneousSoA class, 
 // with a AlpakaDeviceBuf<pixelTrack::TrackSoA> as a data member
