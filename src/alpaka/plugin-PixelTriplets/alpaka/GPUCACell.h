@@ -15,7 +15,7 @@
 #include "AlpakaDataFormats/TrackingRecHit2DAlpaka.h"
 
 #include "CAConstants.h"
-#include "CircleEq.h"
+#include "../CircleEq.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
