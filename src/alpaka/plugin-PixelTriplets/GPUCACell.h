@@ -7,6 +7,8 @@
 
 // #define ONLY_TRIPLETS_IN_HOLE
 
+#include "AlpakaCore/alpakaCommon.h"
+
 #include "AlpakaCore/SimpleVector.h"
 #include "AlpakaCore/VecArray.h"
 #include "AlpakaDataFormats/PixelTrackAlpaka.h"
@@ -15,15 +17,15 @@
 #include "CAConstants.h"
 #include "CircleEq.h"
 
-//namespace ALPAKA_ACCELERATOR_NAMESPACE {
+namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
-/*namespace ALPAKA_ACCELERATOR_NAMESPACE {
+// NOOOOOOOOO
+/*
   ALPAKA_FN_ACC auto userDefinedThreadFence() -> void
   {
 #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
     __threadfence();
 #endif
-  }
   }*/
 
 class GPUCACell {
@@ -95,7 +97,9 @@ public:
 	// TO DO: Alpaka equivalent???
 	//__threadfence();
 	//ALPAKA_ACCELERATOR_NAMESPACE::userDefinedThreadFence();
-    return outerNeighbors().push_back(acc, t);
+	alpaka::wait(device);
+
+	return outerNeighbors().push_back(acc, t);
   }
 
 	template <typename T_Acc>
@@ -113,8 +117,11 @@ public:
       } else
         return -1;
     }
+    // NOOOOOOOOO
     // TO DO: Alpaka equivalent???
     //__threadfence();
+    alpaka::wait(device);
+
     return tracks().push_back(acc, t);
   }
 
@@ -360,5 +367,7 @@ private:
   hindex_type theInnerHitId;
   hindex_type theOuterHitId;
 };
+
+}  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
 #endif  // RecoPixelVertexing_PixelTriplets_plugins_GPUCACell_h
