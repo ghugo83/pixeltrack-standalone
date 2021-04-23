@@ -1,7 +1,7 @@
 #ifndef CUDADataFormatsVertexZVertexHeterogeneous_H
 #define CUDADataFormatsVertexZVertexHeterogeneous_H
 
-#include "CUDADataFormats/ZVertexSoA.h"
+#include "AlpakaDataFormats/ZVertexSoA.h"
 
 #include "AlpakaCore/alpakaCommon.h"
 
