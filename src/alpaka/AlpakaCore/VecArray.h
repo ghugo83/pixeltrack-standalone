@@ -49,7 +49,8 @@ namespace cms {
       }
 
       // thread-safe version of the vector, when used in a CUDA kernel
-      ALPAKA_FN_ACC int push_back(const T &element) {
+template <typename T_Acc>
+      ALPAKA_FN_ACC int push_back(const T_Acc &acc, const T &element) {
         auto previousSize = alpaka::atomicOp<alpaka::AtomicAdd>(acc, &m_size, 1);
         if (previousSize < maxSize) {
           m_data[previousSize] = element;
@@ -60,8 +61,8 @@ namespace cms {
         }
       }
 
-      template <class... Ts>
-      ALPAKA_FN_ACC int emplace_back(Ts &&... args) {
+template <typename T_Acc, class... Ts>
+      ALPAKA_FN_ACC int emplace_back(const T_Acc &acc, Ts &&... args) {
         auto previousSize = alpaka::atomicOp<alpaka::AtomicAdd>(acc, &m_size, 1);
         if (previousSize < maxSize) {
           (new (&m_data[previousSize]) T(std::forward<Ts>(args)...));

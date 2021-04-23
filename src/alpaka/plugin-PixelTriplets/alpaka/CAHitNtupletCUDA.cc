@@ -7,6 +7,9 @@
 #include "AlpakaDataFormats/PixelTrackAlpaka.h"
 #include "AlpakaDataFormats/TrackingRecHit2DAlpaka.h"
 
+#include "../GPUCACell.h"
+#include "../choleskyInversion.h"
+
 #include "AlpakaCore/alpakaCommon.h"
 
 
