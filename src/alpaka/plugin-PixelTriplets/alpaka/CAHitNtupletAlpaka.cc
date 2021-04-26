@@ -3,44 +3,44 @@
 #include "Framework/PluginFactory.h"
 #include "Framework/EDProducer.h"
 
-//#include "CAHitNtupletGeneratorOnGPU.h"
+#include "CAHitNtupletGeneratorOnGPU.h"
 #include "AlpakaDataFormats/PixelTrackAlpaka.h"
 #include "AlpakaDataFormats/TrackingRecHit2DAlpaka.h"
 
 #include "AlpakaCore/alpakaCommon.h"
 
-#include "RiemannFitOnGPU.h"
-
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
-class CAHitNtupletAlpaka : public edm::EDProducer {
-public:
-  explicit CAHitNtupletAlpaka(edm::ProductRegistry& reg);
-  ~CAHitNtupletAlpaka() override = default;
+  class CAHitNtupletAlpaka : public edm::EDProducer {
+  public:
+    explicit CAHitNtupletAlpaka(edm::ProductRegistry& reg);
+    ~CAHitNtupletAlpaka() override = default;
 
-private:
-  void produce(edm::Event& iEvent, const edm::EventSetup& iSetup) override;
+  private:
+    void produce(edm::Event& iEvent, const edm::EventSetup& iSetup) override;
 
-  edm::EDGetTokenT<TrackingRecHit2DAlpaka> tokenHitGPU_;
-edm::EDPutTokenT<PixelTrackAlpaka> tokenTrackGPU_;
+    edm::EDGetTokenT<TrackingRecHit2DAlpaka> tokenHitGPU_;
+    edm::EDPutTokenT<PixelTrackAlpaka> tokenTrackGPU_;
 
-//CAHitNtupletGeneratorOnGPU gpuAlgo_;
-};
+    CAHitNtupletGeneratorOnGPU gpuAlgo_;
+  };
 
-CAHitNtupletAlpaka::CAHitNtupletAlpaka(edm::ProductRegistry& reg)
-  : tokenHitGPU_{reg.consumes<TrackingRecHit2DAlpaka>()},
-  tokenTrackGPU_{reg.produces<PixelTrackAlpaka>()}//,
-//gpuAlgo_(reg) 
-{}
+  CAHitNtupletAlpaka::CAHitNtupletAlpaka(edm::ProductRegistry& reg)
+    : tokenHitGPU_{reg.consumes<TrackingRecHit2DAlpaka>()},
+    tokenTrackGPU_{reg.produces<PixelTrackAlpaka>()},
+    gpuAlgo_(reg) 
+    {}
 
-void CAHitNtupletAlpaka::produce(edm::Event& iEvent, const edm::EventSetup& es) {
-auto bf = 0.0114256972711507;  // 1/fieldInGeV
+  void CAHitNtupletAlpaka::produce(edm::Event& iEvent, const edm::EventSetup& es) {
+    auto bf = 0.0114256972711507;  // 1/fieldInGeV
 
     auto const& hits = iEvent.get(tokenHitGPU_);
 
-// TO DO: Async: Would need to add a queue as a parameter, not async for now!
-//iEvent.emplace(tokenTrackGPU_, gpuAlgo_.makeTuples(hits, bf));
-}
+    // TO DO: Async: Would need to add a queue as a parameter, not async for now!
+    Queue queue(device);
+    iEvent.emplace(tokenTrackGPU_, gpuAlgo_.makeTuplesAsync(hits, bf, queue));
+    alpaka::wait(queue); // TO DO: is this really needed?
+  }
 
 } // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
