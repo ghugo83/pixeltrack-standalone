@@ -9,6 +9,7 @@
 
 #include "AlpakaCore/alpakaCommon.h"
 
+#include "RiemannFitOnGPU.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
