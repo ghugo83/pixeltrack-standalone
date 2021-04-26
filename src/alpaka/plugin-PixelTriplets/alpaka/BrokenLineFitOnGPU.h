@@ -22,9 +22,9 @@ using OutputSoA = pixelTrack::TrackSoA;
 
 // #define BL_DUMP_HITS
 
+ template <int N>
    struct kernelBLFastFit {
-     template <typename T_Acc, int N>
-     //template <int N>
+     template <typename T_Acc>
      ALPAKA_FN_ACC void operator()(const T_Acc& acc,
 				   Tuples const *__restrict__ foundNtuplets,
 				   CAConstants::TupleMultiplicity const *__restrict__ tupleMultiplicity,
@@ -124,9 +124,9 @@ using OutputSoA = pixelTrack::TrackSoA;
    }; // struct
 
 
+   template <int N>
      struct kernelBLFit {
-       template <typename T_Acc, int N>
-	 //template <int N>
+       template <typename T_Acc>
        ALPAKA_FN_ACC void operator()(const T_Acc& acc,
 				     CAConstants::TupleMultiplicity const *__restrict__ tupleMultiplicity,
 				     double B,
