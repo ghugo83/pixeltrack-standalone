@@ -12,7 +12,7 @@
 #include "CondFormats/pixelCPEforGPU.h"
 
 #include "CAConstants.h"
-//#include "CAHitNtupletGeneratorKernels.h"
+#include "CAHitNtupletGeneratorKernels.h"
 #include "GPUCACell.h"
 #include "gpuFishbone.h"
 #include "gpuPixelDoublets.h"
