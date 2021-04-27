@@ -25,8 +25,6 @@ private:
 #endif
   void produce(edm::Event& iEvent, edm::EventSetup const& iSetup) override;
 
-    using PixelTrackHost = AlpakaHostBuf<pixelTrack::TrackSoA>;
-
   edm::EDGetTokenT<PixelTrackAlpaka> tokenAlpaka_;
   edm::EDPutTokenT<PixelTrackHost> tokenSOA_;
 

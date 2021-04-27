@@ -1,6 +1,6 @@
 #include "AlpakaCore/alpakaCommon.h"
 #include "AlpakaDataFormats/gpuClusteringConstants.h"
-//#include "AlpakaDataFormats/PixelTrackAlpaka.h"
+#include "AlpakaDataFormats/PixelTrackAlpaka.h"
 #include "AlpakaDataFormats/SiPixelClustersAlpaka.h"
 #include "AlpakaDataFormats/SiPixelDigisAlpaka.h"
 #include "AlpakaDataFormats/TrackingRecHit2DAlpaka.h"
@@ -33,7 +33,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     edm::EDGetTokenT<SiPixelDigisAlpaka> digiToken_;
     edm::EDGetTokenT<SiPixelClustersAlpaka> clusterToken_;
     edm::EDGetTokenT<TrackingRecHit2DAlpaka> hitToken_;
-    //edm::EDGetTokenT<PixelTrackHeterogeneous> trackToken_;
+    edm::EDGetTokenT<PixelTrackHost> trackToken_;
     //edm::EDGetTokenT<ZVertexHeterogeneous> vertexToken_;
 
     static std::map<std::string, SimpleAtomicHisto> histos;
@@ -77,9 +77,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   HistoValidator::HistoValidator(edm::ProductRegistry& reg)
       : digiToken_(reg.consumes<SiPixelDigisAlpaka>()),
         clusterToken_(reg.consumes<SiPixelClustersAlpaka>()),
-        hitToken_(reg.consumes<TrackingRecHit2DAlpaka>())  //,
-                                                           //trackToken_(reg.consumes<PixelTrackHeterogeneous>()),
-                                                           //vertexToken_(reg.consumes<ZVertexHeterogeneous>())
+      hitToken_(reg.consumes<TrackingRecHit2DAlpaka>()),
+      trackToken_(reg.consumes<PixelTrackHeterogeneous>())//,
+	//vertexToken_(reg.consumes<ZVertexHeterogeneous>())
   {}
 
 #ifdef TODO
@@ -178,31 +178,32 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       histos["hit_sizex"].fill(h_sizex[i]);
       histos["hit_sizey"].fill(h_sizey[i]);
     }
+    
+    {
+      auto const& tracksBuf = iEvent.get(trackToken_);
+      auto const tracks = alpaka::getPtrNative(tracksBuf);
 
-    /*
-  {
-    auto const& tracks = iEvent.get(trackToken_);
-
-    int nTracks = 0;
-    for (int i = 0; i < tracks->stride(); ++i) {
-      if (tracks->nHits(i) > 0 and tracks->quality(i) >= trackQuality::loose) {
-        ++nTracks;
-        histos["track_nhits"].fill(tracks->nHits(i));
-        histos["track_chi2"].fill(tracks->chi2(i));
-        histos["track_pt"].fill(tracks->pt(i));
-        histos["track_eta"].fill(tracks->eta(i));
-        histos["track_phi"].fill(tracks->phi(i));
-        histos["track_tip"].fill(tracks->tip(i));
-        histos["track_tip_zoom"].fill(tracks->tip(i));
-        histos["track_zip"].fill(tracks->zip(i));
-        histos["track_zip_zoom"].fill(tracks->zip(i));
-        histos["track_quality"].fill(tracks->quality(i));
+      int nTracks = 0;
+      for (int i = 0; i < tracks->stride(); ++i) {
+	if (tracks->nHits(i) > 0 and tracks->quality(i) >= trackQuality::loose) {
+	  ++nTracks;
+	  histos["track_nhits"].fill(tracks->nHits(i));
+	  histos["track_chi2"].fill(tracks->chi2(i));
+	  histos["track_pt"].fill(tracks->pt(i));
+	  histos["track_eta"].fill(tracks->eta(i));
+	  histos["track_phi"].fill(tracks->phi(i));
+	  histos["track_tip"].fill(tracks->tip(i));
+	  histos["track_tip_zoom"].fill(tracks->tip(i));
+	  histos["track_zip"].fill(tracks->zip(i));
+	  histos["track_zip_zoom"].fill(tracks->zip(i));
+	  histos["track_quality"].fill(tracks->quality(i));
+	}
       }
+
+      histos["track_n"].fill(nTracks);
     }
 
-    histos["track_n"].fill(nTracks);
-  }
-
+  /*
   {
     auto const& vertices = iEvent.get(vertexToken_);
 
