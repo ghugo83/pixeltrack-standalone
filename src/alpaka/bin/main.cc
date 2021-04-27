@@ -129,8 +129,8 @@ int main(int argc, char** argv) {
           edmodules.emplace_back(prefix + "CAHitNtupletAlpaka");
 	  /*edmodules.emplace_back(prefix + "PixelVertexProducerAlpaka");*/
           if (transfer) {
-            /*edmodules.emplace_back(prefix + "PixelTrackSoAFromAlpaka");
-	      edmodules.emplace_back(prefix + "PixelVertexSoAFromAlpaka");*/
+            edmodules.emplace_back(prefix + "PixelTrackSoAFromAlpaka");
+	    /*edmodules.emplace_back(prefix + "PixelVertexSoAFromAlpaka");*/
           }
           if (validation) {
             edmodules.emplace_back(prefix + "CountValidator");
