@@ -44,10 +44,10 @@ using OutputSoA = pixelTrack::TrackSoA;
   assert(tupleMultiplicity);
 
   // look in bin for this hit multiplicity
-  //auto local_start = blockIdx.x * blockDim.x + threadIdx.x;
-  const uint32_t threadIdx(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u]);
+  //auto local_start = blockIdx.x * blockDim.x + threadIdx.x; 
 
 #ifdef BROKENLINE_DEBUG
+  const uint32_t threadIdx(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u]);
   if (0 == threadIdx) {
     printf("%d total Ntuple\n", foundNtuplets->nbins());
     printf("%d Ntuple of size %d for %d hits to fit\n", tupleMultiplicity->size(nHits), nHits, hitsInFit);

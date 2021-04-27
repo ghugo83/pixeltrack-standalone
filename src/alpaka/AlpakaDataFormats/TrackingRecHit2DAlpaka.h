@@ -157,6 +157,17 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     cms::cuda::host::unique_ptr<uint16_t[]> detIndexToHostAsync(cudaStream_t stream) const;
     cms::cuda::host::unique_ptr<uint32_t[]> hitsModuleStartToHostAsync(cudaStream_t stream) const;
 #endif
+    auto const* xl() const { return alpaka::getPtrNative(m_xl); }
+    auto const* yl() const { return alpaka::getPtrNative(m_yl); }
+    auto const* xerr() const { return alpaka::getPtrNative(m_xerr); }
+    auto const* yerr() const { return alpaka::getPtrNative(m_yerr); }
+    auto const* xg() const { return alpaka::getPtrNative(m_xg); }
+    auto const* yg() const { return alpaka::getPtrNative(m_yg); }
+    auto const* zg() const { return alpaka::getPtrNative(m_zg); }
+    auto const* rg() const { return alpaka::getPtrNative(m_rg); }
+    auto const* charge() const { return alpaka::getPtrNative(m_charge); }
+    auto const* xsize() const { return alpaka::getPtrNative(m_xsize); }
+    auto const* ysize() const { return alpaka::getPtrNative(m_ysize); }
 
   private:
     uint32_t m_nHits;
