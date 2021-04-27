@@ -97,7 +97,8 @@ public:
 	// TO DO: Alpaka equivalent???
 	//__threadfence();
 	//ALPAKA_ACCELERATOR_NAMESPACE::userDefinedThreadFence();
-	alpaka::wait(device);
+	//alpaka::wait(device);
+	alpaka::syncBlockThreads(acc);
 
 	return outerNeighbors().push_back(acc, t);
   }
@@ -120,7 +121,8 @@ public:
     // NOOOOOOOOO
     // TO DO: Alpaka equivalent???
     //__threadfence();
-    alpaka::wait(device);
+    //alpaka::wait(device);
+    alpaka::syncBlockThreads(acc);
 
     return tracks().push_back(acc, t);
   }
