@@ -47,7 +47,8 @@ const uint32_t dimIndexX = 1u;
 
 //for (int idy = firstY, nt = nHits; idy < nt; idy += gridDim.y * blockDim.y) {
 const uint32_t gridDimensionY(alpaka::getWorkDiv<alpaka::Grid, alpaka::Elems>(acc)[dimIndexY]);
-const auto& [firstElementIdxNoStrideY, endElementIdxNoStrideY] = cms::alpakatools::element_index_range_in_grid(acc, Vec1::all(0u), dimIndexY);
+Vec1 elementsShiftY(Vec1::all(0u));
+const auto& [firstElementIdxNoStrideY, endElementIdxNoStrideY] = cms::alpakatools::element_index_range_in_grid(acc, elementsShiftY, dimIndexY);
       uint32_t firstElementIdxY = firstElementIdxNoStrideY[0u];
       uint32_t endElementIdxY = endElementIdxNoStrideY[0u];
 for (uint32_t idy = firstElementIdxY, nt = nHits; idy < nt; ++idy) {
@@ -65,7 +66,7 @@ for (uint32_t idy = firstElementIdxY, nt = nHits; idy < nt; ++idy) {
       auto xo = c0.get_outer_x(hh);
       auto yo = c0.get_outer_y(hh);
       auto zo = c0.get_outer_z(hh);
-      auto sg = 0;
+      uint32_t sg = 0;
       for (int32_t ic = 0; ic < s; ++ic) {
         auto& ci = cells[vc[ic]];
         if (0 == ci.theUsed)
@@ -86,7 +87,8 @@ for (uint32_t idy = firstElementIdxY, nt = nHits; idy < nt; ++idy) {
       // here we parallelize
       //for (int32_t ic = firstX; ic < sg - 1; ic += blockDim.x) {
 const uint32_t blockDimensionX(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[dimIndexX]);
-const auto& [firstElementIdxNoStrideX, endElementIdxNoStrideX] = cms::alpakatools::element_index_range_in_block(acc, Vec1::all(0u), dimIndexX);
+Vec1 elementsShiftX(Vec1::all(0u));
+const auto& [firstElementIdxNoStrideX, endElementIdxNoStrideX] = cms::alpakatools::element_index_range_in_block(acc, elementsShiftX, dimIndexX);
 uint32_t firstElementIdxX = firstElementIdxNoStrideX[0u];
 uint32_t endElementIdxX = endElementIdxNoStrideX[0u];
 for (uint32_t ic = firstElementIdxX; ic < sg - 1; ++ic) {

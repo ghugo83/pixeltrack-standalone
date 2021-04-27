@@ -146,7 +146,7 @@ public:
 
   using HitsView = TrackingRecHit2DSOAView;
   using HitsOnGPU = TrackingRecHit2DSOAView;
-  using HitsOnCPU = TrackingRecHit2DAlpaka<Traits>;
+  using HitsOnCPU = TrackingRecHit2DAlpaka;
 
   using HitToTuple = CAConstants::HitToTuple;
   using TupleMultiplicity = CAConstants::TupleMultiplicity;
@@ -160,6 +160,8 @@ public:
     //////////////////////////////////////////////////////////
     // ALLOCATIONS FOR THE INTERMEDIATE RESULTS (STAYS ON WORKER)
     //////////////////////////////////////////////////////////
+    counters_{cms::alpakatools::allocDeviceBuf<Counters>(1u)},
+
     device_hitToTuple_{cms::alpakatools::allocDeviceBuf<HitToTuple>(1u)},
     device_tupleMultiplicity_{cms::alpakatools::allocDeviceBuf<TupleMultiplicity>(1u)},
 
@@ -183,14 +185,18 @@ public:
 		  device_nCells_{cms::alpakatools::allocDeviceBuf<uint32_t>(1u)}
 		  {
 		    Queue queue(device);
+
+		    alpaka::memset(queue, counters_, 0, 1u);
+
 		    alpaka::memset(queue, device_nCells_, 0, 1u);
 		    
 		    // NB: TO DO: launchZero is a kernel in Alpaka, is there really no way to avoid this??
 		    // Try alpaka::memset on a view??
-		    const WorkDiv1& workDiv = cms::alpakatools::make_workdiv(Vec1::all((Histo::totbins() + 255u) / 256u), Vec1::all(256u));
+		    WorkDiv1 workDiv = cms::alpakatools::make_workdiv(Vec1::all((TupleMultiplicity::totbins() + 255u) / 256u), Vec1::all(256u));
 		    alpaka::enqueue(queue,
 				    alpaka::createTaskKernel<Acc1>(workDiv, cms::alpakatools::launchZero(), alpaka::getPtrNative(device_tupleMultiplicity_)));
 
+		    workDiv = cms::alpakatools::make_workdiv(Vec1::all((HitToTuple::totbins() + 255u) / 256u), Vec1::all(256u));
 		    alpaka::enqueue(queue,
 				    alpaka::createTaskKernel<Acc1>(workDiv, cms::alpakatools::launchZero(), alpaka::getPtrNative(device_hitToTuple_)));
 		    // we may wish to keep it in the edm...
@@ -208,15 +214,17 @@ public:
 
   void fillHitDetIndices(HitsView const* hv, TkSoA* tuples_d, Queue& queue);
 
-  void buildDoublets(HitsOnCPU const& hh, cudaStream_t stream);
+  void buildDoublets(HitsOnCPU const& hh, Queue& queue);
   void cleanup(Queue& queue);
 
-  static void printCounters(Counters const* counters);
-  Counters* counters_ = nullptr;
+  void printCounters(Queue& queue);
+  //Counters* counters_ = nullptr; 
 
  private:
   // params
   Params const& m_params;
+
+  AlpakaDeviceBuf<Counters> counters_;
 
   // workspace
   AlpakaDeviceBuf<HitToTuple> device_hitToTuple_;
@@ -235,8 +243,8 @@ public:
 
   // AlpakaDeviceBuf<cms::alpakatools::AtomicPairCounter::c_type> device_storage_; // NB: In legacy
   // NB: Here, data from device_storage_ directly owned by the following:
-  AlpakaDeviceBuf<cms::alpakatools::AtomicPairCounter> device_hitToTuple_apc_; // Was non-owning in legacy!
   AlpakaDeviceBuf<cms::alpakatools::AtomicPairCounter> device_hitTuple_apc_; // Was non-owning in legacy!
+  AlpakaDeviceBuf<cms::alpakatools::AtomicPairCounter> device_hitToTuple_apc_; // Was non-owning in legacy!
   AlpakaDeviceBuf<uint32_t> device_nCells_; // Was non-owning in legacy!
 };
 

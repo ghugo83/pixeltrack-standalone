@@ -51,7 +51,7 @@ private:
 
   Params m_params;
 
-  AlpakaDeviceBuf<Counters> m_counters;
+  //AlpakaDeviceBuf<Counters> m_counters;
 };
 }
 

@@ -64,8 +64,9 @@ CAHitNtupletGeneratorOnGPU::CAHitNtupletGeneratorOnGPU(edm::ProductRegistry& reg
                0.0328407224959,   // hardCurvCut
                0.15000000596,     // dcaCutInnerTriplet
                0.25,              // dcaCutOuterTriplet
-               makeQualityCuts()),
-  m_counters{cms::alpakatools::allocDeviceBuf<Counters>(1u)}) {
+               makeQualityCuts())//,
+//m_counters{cms::alpakatools::allocDeviceBuf<Counters>(1u)} 
+{
 #ifdef DUMP_GPU_TK_TUPLES
   printf("TK: %s %s % %s %s %s %s %s %s %s %s %s %s %s %s %s\n",
          "tid",
@@ -85,16 +86,16 @@ CAHitNtupletGeneratorOnGPU::CAHitNtupletGeneratorOnGPU(edm::ProductRegistry& reg
          "h5");
 #endif
 
-  Queue queue(device);
+  /*Queue queue(device);
   alpaka::memset(queue, m_counters, 0, 1u);
-  alpaka::wait(queue);
+  alpaka::wait(queue);*/
 }
 
 CAHitNtupletGeneratorOnGPU::~CAHitNtupletGeneratorOnGPU() {
-  if (m_params.doStats_) {
+  /*if (m_params.doStats_) {
     // crash on multi-gpu processes
     CAHitNtupletGeneratorKernels::printCounters(alpaka::getPtrNative(m_counters));
-  }
+    }*/
 }
 
 PixelTrackAlpaka CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingRecHit2DAlpaka const& hits_d,
@@ -106,7 +107,7 @@ PixelTrackAlpaka CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingRecHit2DAlp
   auto* soa = alpaka::getPtrNative(tracks);
 
   CAHitNtupletGeneratorKernels kernels(m_params, hits_d.nHits());
-  kernels.counters_ = alpaka::getPtrNative(m_counters);
+  //kernels.counters_ = alpaka::getPtrNative(m_counters);
 
   kernels.buildDoublets(hits_d, queue);
   kernels.launchKernels(hits_d, soa, queue);
@@ -121,6 +122,10 @@ PixelTrackAlpaka CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingRecHit2DAlp
     fitter.launchBrokenLineKernels(hits_d.view(), hits_d.nHits(), CAConstants::maxNumberOfQuadruplets(), queue);
   }
   kernels.classifyTuples(hits_d, soa, queue);*/
+
+  if (m_params.doStats_) {
+    kernels.printCounters(queue);
+  }
 
   alpaka::wait(queue);
   return tracks;
