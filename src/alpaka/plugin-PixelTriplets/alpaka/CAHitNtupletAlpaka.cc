@@ -36,10 +36,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     auto const& hits = iEvent.get(tokenHitGPU_);
 
-    // TO DO: Async: Would need to add a queue as a parameter, not async for now!
     Queue queue(device);
     iEvent.emplace(tokenTrackGPU_, gpuAlgo_.makeTuplesAsync(hits, bf, queue));
-    alpaka::wait(queue); // TO DO: is this really needed?
   }
 
 } // namespace ALPAKA_ACCELERATOR_NAMESPACE
