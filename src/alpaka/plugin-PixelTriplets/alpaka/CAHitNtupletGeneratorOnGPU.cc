@@ -113,7 +113,7 @@ PixelTrackAlpaka CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingRecHit2DAlp
   kernels.launchKernels(hits_d, soa, queue);
   kernels.fillHitDetIndices(hits_d.view(), soa, queue);  // in principle needed only if Hits not "available"
 
-  /*
+  
   HelixFitOnGPU fitter(bfield, m_params.fit5as4_);
   fitter.allocateOnGPU(&(soa->hitIndices), kernels.tupleMultiplicity(), soa); // NOOOOOOO TO DO: &(soa->hitIndices): is it possible to get address on device like that???
   if (m_params.useRiemannFit_) {
@@ -121,7 +121,7 @@ PixelTrackAlpaka CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingRecHit2DAlp
   } else {
     fitter.launchBrokenLineKernels(hits_d.view(), hits_d.nHits(), CAConstants::maxNumberOfQuadruplets(), queue);
   }
-  kernels.classifyTuples(hits_d, soa, queue);*/
+  kernels.classifyTuples(hits_d, soa, queue);
 
   if (m_params.doStats_) {
     kernels.printCounters(queue);
