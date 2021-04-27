@@ -239,8 +239,8 @@ struct kernel_connect {
 				float dcaCutOuterTriplet) const {
     auto const &hh = *hhp;
 
-const uint32_t dimIndexY = 0u;
-const uint32_t dimIndexX = 1u;
+const uint32_t dimIndexY = 1u;
+const uint32_t dimIndexX = 0u;
 //auto firstCellIndex = threadIdx.y + blockIdx.y * blockDim.y;
 //auto first = threadIdx.x;
 //auto stride = blockDim.x;

@@ -38,8 +38,8 @@ ALPAKA_FN_ACC void operator()(const T_Acc& acc,
     // x run faster...
     //auto firstY = threadIdx.y + blockIdx.y * blockDim.y;
     //auto firstX = threadIdx.x;
-const uint32_t dimIndexY = 0u;
-const uint32_t dimIndexX = 1u;
+const uint32_t dimIndexY = 1u;
+const uint32_t dimIndexX = 0u;
 
     float x[maxCellsPerHit], y[maxCellsPerHit], z[maxCellsPerHit], n[maxCellsPerHit];
     uint16_t d[maxCellsPerHit];  // uint8_t l[maxCellsPerHit];
