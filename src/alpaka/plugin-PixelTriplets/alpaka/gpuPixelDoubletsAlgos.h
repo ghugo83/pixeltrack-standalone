@@ -96,7 +96,8 @@ namespace gpuPixelDoublets {
     //auto idy = blockIdx.y * blockDim.y + threadIdx.y;
     // for (auto j = idy; j < ntot; j += blockDim.y * gridDim.y) {
     const uint32_t gridDimensionY(alpaka::getWorkDiv<alpaka::Grid, alpaka::Elems>(acc)[dimIndexY]);
-    const auto& [firstElementIdxNoStrideY, endElementIdxNoStrideY] = cms::alpakatools::element_index_range_in_grid(acc, Vec1::all(0u), dimIndexY);
+    Vec1 elementsShiftY(Vec1::all(0u));
+    const auto& [firstElementIdxNoStrideY, endElementIdxNoStrideY] = cms::alpakatools::element_index_range_in_grid(acc, elementsShiftY, dimIndexY);
     uint32_t firstElementIdxY = firstElementIdxNoStrideY[0u];
     uint32_t endElementIdxY = endElementIdxNoStrideY[0u];
     for (uint32_t j = firstElementIdxY; j < ntot; ++j) {
@@ -222,7 +223,8 @@ namespace gpuPixelDoublets {
 	// here we parallelize
         //p += first;
         //for (; p < e; p += blockDimensionX) {
-	const auto& [firstElementIdxNoStrideX, endElementIdxNoStrideX] = cms::alpakatools::element_index_range_in_block(acc, Vec1::all(0u), dimIndexX);
+	Vec1 elementsShiftX(Vec1::all(0u));
+	const auto& [firstElementIdxNoStrideX, endElementIdxNoStrideX] = cms::alpakatools::element_index_range_in_block(acc, elementsShiftX, dimIndexX);
 	uint32_t firstElementIdxX = firstElementIdxNoStrideX[0u];
 	uint32_t endElementIdxX = endElementIdxNoStrideX[0u];
 	for (uint32_t pIndex = firstElementIdxX; pIndex < maxpIndex; ++pIndex) {
@@ -249,9 +251,9 @@ namespace gpuPixelDoublets {
           if (doPtCut && ptcut(oi, idphi))
             continue;
 
-          auto ind = alpaka::atomicOp<alpaka::AtomicAdd>(acc, nCells, 1);
+          auto ind = alpaka::atomicOp<alpaka::AtomicAdd>(acc, nCells, 1u);
           if (ind >= maxNumOfDoublets) {
-            alpaka::atomicOp<alpaka::AtomicSub>(acc, nCells, 1);
+            alpaka::atomicOp<alpaka::AtomicSub>(acc, nCells, 1u);
             break;
           }  // move to SimpleVector??
           // int layerPairId, int doubletId, int innerHitId, int outerHitId)
