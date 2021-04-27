@@ -39,7 +39,6 @@ using OutputSoA = pixelTrack::TrackSoA;
   assert(tupleMultiplicity);
 
   // look in bin for this hit multiplicity
-  //auto local_start = blockIdx.x * blockDim.x + threadIdx.x;
   
 #ifdef RIEMANN_DEBUG
   const uint32_t threadIdx(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u]);
@@ -47,8 +46,6 @@ using OutputSoA = pixelTrack::TrackSoA;
     printf("%d Ntuple of size %d for %d hits to fit\n", tupleMultiplicity->size(nHits), nHits, hitsInFit);
 #endif
 
-  //for (int local_idx = local_start, nt = Rfit::maxNumberOfConcurrentFits(); local_idx < nt;
-  //local_idx += gridDim.x * blockDim.x) {
   const auto nt = Rfit::maxNumberOfConcurrentFits();
   cms::alpakatools::for_each_element_1D_grid_stride(acc, nt, [&](uint32_t local_idx) {
     auto tuple_idx = local_idx + offset;
@@ -109,9 +106,6 @@ using OutputSoA = pixelTrack::TrackSoA;
   // same as above...
 
   // look in bin for this hit multiplicity
-  //auto local_start = blockIdx.x * blockDim.x + threadIdx.x;
-  //for (int local_idx = local_start, nt = Rfit::maxNumberOfConcurrentFits(); local_idx < nt;
-  //local_idx += gridDim.x * blockDim.x) {
   const auto nt = Rfit::maxNumberOfConcurrentFits();
   cms::alpakatools::for_each_element_1D_grid_stride(acc, nt, [&](uint32_t local_idx) {
     auto tuple_idx = local_idx + offset;
@@ -159,9 +153,6 @@ using OutputSoA = pixelTrack::TrackSoA;
   // same as above...
 
   // look in bin for this hit multiplicity
-  //auto local_start = (blockIdx.x * blockDim.x + threadIdx.x);
-  //for (int local_idx = local_start, nt = Rfit::maxNumberOfConcurrentFits(); local_idx < nt;
-  //local_idx += gridDim.x * blockDim.x) {
   const auto nt = Rfit::maxNumberOfConcurrentFits();
   cms::alpakatools::for_each_element_1D_grid_stride(acc, nt, [&](uint32_t local_idx) {
     auto tuple_idx = local_idx + offset;

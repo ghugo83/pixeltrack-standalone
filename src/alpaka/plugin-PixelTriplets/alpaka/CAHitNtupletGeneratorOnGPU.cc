@@ -65,7 +65,6 @@ CAHitNtupletGeneratorOnGPU::CAHitNtupletGeneratorOnGPU(edm::ProductRegistry& reg
                0.15000000596,     // dcaCutInnerTriplet
                0.25,              // dcaCutOuterTriplet
                makeQualityCuts())//,
-//m_counters{cms::alpakatools::allocDeviceBuf<Counters>(1u)} 
 {
 #ifdef DUMP_GPU_TK_TUPLES
   printf("TK: %s %s % %s %s %s %s %s %s %s %s %s %s %s %s %s\n",
@@ -85,29 +84,18 @@ CAHitNtupletGeneratorOnGPU::CAHitNtupletGeneratorOnGPU(edm::ProductRegistry& reg
          "h4",
          "h5");
 #endif
-
-  /*Queue queue(device);
-  alpaka::memset(queue, m_counters, 0, 1u);
-  alpaka::wait(queue);*/
 }
 
 CAHitNtupletGeneratorOnGPU::~CAHitNtupletGeneratorOnGPU() {
-  /*if (m_params.doStats_) {
-    // crash on multi-gpu processes
-    CAHitNtupletGeneratorKernels::printCounters(alpaka::getPtrNative(m_counters));
-    }*/
 }
 
 PixelTrackAlpaka CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingRecHit2DAlpaka const& hits_d,
 							float bfield,
 							Queue& queue) const {
   PixelTrackAlpaka tracks{cms::alpakatools::allocDeviceBuf<pixelTrack::TrackSoA>(1u)};
-    //(cms::cuda::make_device_unique<pixelTrack::TrackSoA>(stream));
-
   auto* soa = alpaka::getPtrNative(tracks);
 
   CAHitNtupletGeneratorKernels kernels(m_params, hits_d.nHits());
-  //kernels.counters_ = alpaka::getPtrNative(m_counters);
 
   kernels.buildDoublets(hits_d, queue);
   kernels.launchKernels(hits_d, soa, queue);
@@ -115,7 +103,7 @@ PixelTrackAlpaka CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingRecHit2DAlp
 
   
   HelixFitOnGPU fitter(bfield, m_params.fit5as4_);
-  fitter.allocateOnGPU(&(soa->hitIndices), kernels.tupleMultiplicity(), soa); // NOOOOOOO TO DO: &(soa->hitIndices): is it possible to get address on device like that???
+  fitter.allocateOnGPU(&(soa->hitIndices), kernels.tupleMultiplicity(), soa);
   if (m_params.useRiemannFit_) {
     fitter.launchRiemannKernels(hits_d.view(), hits_d.nHits(), CAConstants::maxNumberOfQuadruplets(), queue);
   } else {

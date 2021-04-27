@@ -68,9 +68,7 @@ namespace gpuPixelDoublets {
     // e.g. see  https://nvlabs.github.io/cub/classcub_1_1_warp_scan.html
     const int nPairsMax = CAConstants::maxNumberOfLayerPairs(); // add constexpr?
     assert(nPairs <= nPairsMax);
-    //__shared__ uint32_t innerLayerCumulativeSize[nPairsMax];
     auto&& innerLayerCumulativeSize = alpaka::declareSharedVar<uint32_t[nPairsMax], __COUNTER__>(acc);
-    //__shared__ uint32_t ntot;
     auto&& ntot = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);
 
     const uint32_t dimIndexY = 1u;
@@ -89,12 +87,8 @@ namespace gpuPixelDoublets {
     uint32_t pairLayerId = 0;  // cannot go backward
 
     // x runs faster
-    //auto first = threadIdx.x;
-    //auto stride = blockDim.x;
     const uint32_t blockDimensionX(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[dimIndexX]);
 
-    //auto idy = blockIdx.y * blockDim.y + threadIdx.y;
-    // for (auto j = idy; j < ntot; j += blockDim.y * gridDim.y) {
     const uint32_t gridDimensionY(alpaka::getWorkDiv<alpaka::Grid, alpaka::Elems>(acc)[dimIndexY]);
     Vec1 elementsShiftY(Vec1::all(0u));
     const auto& [firstElementIdxNoStrideY, endElementIdxNoStrideY] = cms::alpakatools::element_index_range_in_grid(acc, elementsShiftY, dimIndexY);

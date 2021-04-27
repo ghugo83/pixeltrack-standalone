@@ -74,8 +74,6 @@ namespace gpuPixelDoublets {
 				  CellTracksVector* cellTracks,
 				  CellTracks* cellTracksContainer) const {
       assert(isOuterHitOfCell);
-      //int first = blockIdx.x * blockDim.x + threadIdx.x;
-      //for (int i = first; i < nHits; i += gridDim.x * blockDim.x) {
       cms::alpakatools::for_each_element_1D_grid_stride(acc, nHits, [&](uint32_t i) {
 	  isOuterHitOfCell[i].reset();
 	});
@@ -100,6 +98,7 @@ namespace gpuPixelDoublets {
   /*#ifdef __CUDACC__
   __launch_bounds__(getDoubletsFromHistoMaxBlockSize, getDoubletsFromHistoMinBlocksPerMP)
   #endif*/
+  // TO DO: NB: Alpaka equivalent for this does not seem to exit.
     struct getDoubletsFromHisto {
       template <typename T_Acc>
       ALPAKA_FN_ACC void operator()(const T_Acc& acc,
