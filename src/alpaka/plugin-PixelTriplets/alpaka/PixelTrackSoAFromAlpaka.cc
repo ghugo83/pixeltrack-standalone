@@ -26,7 +26,9 @@ private:
   void produce(edm::Event& iEvent, edm::EventSetup const& iSetup) override;
 
   edm::EDGetTokenT<PixelTrackAlpaka> tokenAlpaka_;
+#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
   edm::EDPutTokenT<PixelTrackHost> tokenSOA_;
+#endif
 
 #ifdef TODO
   cms::cuda::host::unique_ptr<pixelTrack::TrackSoA> m_soa;
@@ -34,8 +36,11 @@ private:
 };
 
 PixelTrackSoAFromAlpaka::PixelTrackSoAFromAlpaka(edm::ProductRegistry& reg)
-    : tokenAlpaka_(reg.consumes<PixelTrackAlpaka>()),
-      tokenSOA_(reg.produces<PixelTrackHost>()) {}
+  : tokenAlpaka_(reg.consumes<PixelTrackAlpaka>())
+#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+  , tokenSOA_(reg.produces<PixelTrackHost>())
+#endif
+    {}
 
 #ifdef TODO
 void PixelTrackSoAFromAlpaka::acquire(edm::Event const& iEvent,
@@ -66,6 +71,7 @@ void PixelTrackSoAFromAlpaka::produce(edm::Event& iEvent, edm::EventSetup const&
   std::cout << "found " << nt << " tracks in cpu SoA at " << &tsoa << std::endl;
   */
 
+#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
     auto const& inputData = iEvent.get(tokenAlpaka_);
     auto outputData = cms::alpakatools::allocHostBuf<pixelTrack::TrackSoA>(1u);
     Queue queue(device);
@@ -75,6 +81,7 @@ void PixelTrackSoAFromAlpaka::produce(edm::Event& iEvent, edm::EventSetup const&
   // DO NOT  make a copy  (actually TWO....)
     iEvent.emplace(tokenSOA_, std::move(outputData));
     alpaka::wait(queue); // TO DO: is this really needed?
+#endif 
 }
 
 }
