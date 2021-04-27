@@ -116,18 +116,21 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     auto const nDigis = digis.nDigis();
     auto const nModules = digis.nModules();
+
+    auto const nClusters = clusters.nClusters();
+    auto const nHits = hits.nHits();
+
+#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
     Queue queue(device);
     auto const h_adcBuf = digis.adcToHostAsync(queue);
     auto const h_adc = alpaka::getPtrNative(h_adcBuf);
-
-    auto const nClusters = clusters.nClusters();
+    
     auto const d_clusInModuleView =
         cms::alpakatools::createDeviceView<uint32_t>(clusters.clusInModule(), gpuClustering::MaxNumModules);
     auto h_clusInModuleBuf{cms::alpakatools::allocHostBuf<uint32_t>(gpuClustering::MaxNumModules)};
     alpaka::memcpy(queue, h_clusInModuleBuf, d_clusInModuleView, gpuClustering::MaxNumModules);
     auto h_clusInModule = alpaka::getPtrNative(h_clusInModuleBuf);
 
-    auto const nHits = hits.nHits();
     auto const h_lxBuf = hits.xlToHostAsync(queue);
     auto const h_lx = alpaka::getPtrNative(h_lxBuf);
     auto const h_lyBuf = hits.ylToHostAsync(queue);
@@ -152,6 +155,23 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     auto const h_sizey = alpaka::getPtrNative(h_sizeyBuf);
 
     alpaka::wait(queue);
+#else
+    auto const h_adc = digis.adc();
+
+    auto const h_clusInModule = clusters.clusInModule();
+
+    auto const h_lx = hits.xl();
+    auto const h_ly = hits.yl();
+    auto const h_lex = hits.xerr();
+    auto const h_ley = hits.yerr();
+    auto const h_gx = hits.xg();
+    auto const h_gy = hits.yg();
+    auto const h_gz = hits.zg();
+    auto const h_gr = hits.rg();
+    auto const h_charge = hits.charge();
+    auto const h_sizex = hits.xsize();
+    auto const h_sizey = hits.ysize();
+#endif
 
     histos["digi_n"].fill(nDigis);
     for (uint32_t i = 0; i < nDigis; ++i) {
