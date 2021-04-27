@@ -124,7 +124,7 @@ alpaka::enqueue(queue,
 						     alpaka::getPtrNative(fast_fit_resultsGPU_),
 						     alpaka::getPtrNative(circle_fit_resultsGPU_),
 						     offset));
-      alpaka::wait(queue); // TO DO: can just put this in common after conditions?
+      alpaka::wait(queue);
     } else {
       // penta all 5
       alpaka::enqueue(queue,
@@ -156,7 +156,7 @@ alpaka::enqueue(queue,
 						     alpaka::getPtrNative(fast_fit_resultsGPU_),
 						     alpaka::getPtrNative(circle_fit_resultsGPU_),
 						     offset));
-      alpaka::wait(queue); // TO DO: can just put this in common after conditions?
+      alpaka::wait(queue);
     }
   }
 }

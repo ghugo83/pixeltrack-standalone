@@ -96,12 +96,10 @@ PixelTrackAlpaka CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingRecHit2DAlp
   auto* soa = alpaka::getPtrNative(tracks);
 
   CAHitNtupletGeneratorKernels kernels(m_params, hits_d.nHits());
-
   kernels.buildDoublets(hits_d, queue);
   kernels.launchKernels(hits_d, soa, queue);
   kernels.fillHitDetIndices(hits_d.view(), soa, queue);  // in principle needed only if Hits not "available"
 
-  
   HelixFitOnGPU fitter(bfield, m_params.fit5as4_);
   fitter.allocateOnGPU(&(soa->hitIndices), kernels.tupleMultiplicity(), soa);
   if (m_params.useRiemannFit_) {
