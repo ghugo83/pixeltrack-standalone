@@ -78,7 +78,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       : digiToken_(reg.consumes<SiPixelDigisAlpaka>()),
         clusterToken_(reg.consumes<SiPixelClustersAlpaka>()),
       hitToken_(reg.consumes<TrackingRecHit2DAlpaka>()),
-      trackToken_(reg.consumes<PixelTrackHeterogeneous>())//,
+      trackToken_(reg.consumes<PixelTrackHost>())//,
 	//vertexToken_(reg.consumes<ZVertexHeterogeneous>())
   {}
 
