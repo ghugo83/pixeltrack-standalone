@@ -18,7 +18,6 @@ alpaka::wait(queue);
 }
 
 void CAHitNtupletGeneratorKernels::launchKernels(HitsOnCPU const &hh, TkSoA *tracks_d, Queue& queue) {
-// NOOOOOOOO! Cam we really do that?
   // these are pointer on GPU!
   auto *tuples_d = &tracks_d->hitIndices;
   auto *quality_d = (Quality *)(&tracks_d->m_quality);
@@ -265,7 +264,6 @@ void CAHitNtupletGeneratorKernels::buildDoublets(HitsOnCPU const &hh, Queue& que
 }
 
 void CAHitNtupletGeneratorKernels::classifyTuples(HitsOnCPU const &hh, TkSoA *tracks_d, Queue& queue) {
-  // NOOOOOOOO! Cam we really do that?
   // these are pointer on GPU!
   auto const *tuples_d = &tracks_d->hitIndices;
   auto *quality_d = (Quality *)(&tracks_d->m_quality);

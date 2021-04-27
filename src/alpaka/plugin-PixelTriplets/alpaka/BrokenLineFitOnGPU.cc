@@ -77,7 +77,7 @@ alpaka::enqueue(queue,
                                                                    alpaka::getPtrNative(fast_fit_resultsGPU_),
                                                                    5,
 						   offset));
-alpaka::wait(queue); // TO DO: can just put this in common after conditions?
+ alpaka::wait(queue);
     } else {
       // fit penta (all 5)
 alpaka::enqueue(queue,
@@ -96,7 +96,7 @@ alpaka::enqueue(queue,
                                                                    alpaka::getPtrNative(fast_fit_resultsGPU_),
                                                                    5,
 						   offset));
-alpaka::wait(queue); // TO DO: can just put this in common after conditions?
+ alpaka::wait(queue);
     }
 
   }  // loop on concurrent fits
