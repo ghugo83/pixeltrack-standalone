@@ -76,11 +76,10 @@ void PixelTrackSoAFromAlpaka::produce(edm::Event& iEvent, edm::EventSetup const&
     auto outputData = cms::alpakatools::allocHostBuf<pixelTrack::TrackSoA>(1u);
     Queue queue(device);
     alpaka::memcpy(queue, outputData, inputData, 1u);
-    alpaka::wait(queue); // TO DO: is this really needed?
+    alpaka::wait(queue);
 
   // DO NOT  make a copy  (actually TWO....)
     iEvent.emplace(tokenSOA_, std::move(outputData));
-    alpaka::wait(queue); // TO DO: is this really needed?
 #endif 
 }
 
