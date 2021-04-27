@@ -68,7 +68,6 @@ const uint32_t threadIdx(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u])
     }
   }
 
-//for (int idx = first, nt = foundNtuplets->nbins(); idx < nt; idx += gridDim.x * blockDim.x) {
 const auto ntNbins = foundNtuplets->nbins();
 cms::alpakatools::for_each_element_1D_grid_stride(acc, ntNbins, [&](uint32_t idx) {
     if (foundNtuplets->size(idx) > 5)
@@ -90,7 +89,6 @@ cms::alpakatools::for_each_element_1D_grid_stride(acc, ntNbins, [&](uint32_t idx
       printf("cellTracks overflow\n");
   }
 
-//for (int idx = first, nt = (*nCells); idx < nt; idx += gridDim.x * blockDim.x) {
 const auto ntNCells = (*nCells);
 cms::alpakatools::for_each_element_1D_grid_stride(acc, ntNCells, [&](uint32_t idx) {
     auto const &thisCell = cells[idx];
@@ -106,7 +104,6 @@ cms::alpakatools::for_each_element_1D_grid_stride(acc, ntNCells, [&](uint32_t id
       alpaka::atomicOp<alpaka::AtomicAdd>(acc, &c.nZeroTrackCells, 1ull);
 });
 
-//for (int idx = first, nt = nHits; idx < nt; idx += gridDim.x * blockDim.x) {
 cms::alpakatools::for_each_element_1D_grid_stride(acc, nHits, [&](uint32_t idx) {
     if (isOuterHitOfCell[idx].full())  // ++tooManyOuterHitOfCell;
       printf("OuterHitOfCell overflow %d\n", idx);
@@ -121,8 +118,6 @@ struct kernel_fishboneCleaner {
 				GPUCACell const *cells, uint32_t const *__restrict__ nCells, Quality *quality) const {
   constexpr auto bad = trackQuality::bad;
 
-  //auto first = threadIdx.x + blockIdx.x * blockDim.x;
-  //for (int idx = first, nt = (*nCells); idx < nt; idx += gridDim.x * blockDim.x) {
   const auto ntNCells = (*nCells);
   cms::alpakatools::for_each_element_1D_grid_stride(acc, ntNCells, [&](uint32_t idx) {
     auto const &thisCell = cells[idx];
@@ -148,8 +143,6 @@ struct kernel_earlyDuplicateRemover {
   // constexpr auto loose = trackQuality::loose;
 
   assert(nCells);
-  //auto first = threadIdx.x + blockIdx.x * blockDim.x;
-  //for (int idx = first, nt = (*nCells); idx < nt; idx += gridDim.x * blockDim.x) {
   const auto ntNCells = (*nCells);
   cms::alpakatools::for_each_element_1D_grid_stride(acc, ntNCells, [&](uint32_t idx) {
     auto const &thisCell = cells[idx];
@@ -189,8 +182,6 @@ struct kernel_fastDuplicateRemover {
 
   assert(nCells);
 
-  //auto first = threadIdx.x + blockIdx.x * blockDim.x;
-  //for (int idx = first, nt = (*nCells); idx < nt; idx += gridDim.x * blockDim.x) {
   cms::alpakatools::for_each_element_1D_grid_stride(acc, (*nCells), [&](uint32_t idx) {
       auto const &thisCell = cells[idx];
       if (thisCell.tracks().size() >= 2) {
@@ -241,9 +232,6 @@ struct kernel_connect {
 
 const uint32_t dimIndexY = 1u;
 const uint32_t dimIndexX = 0u;
-//auto firstCellIndex = threadIdx.y + blockIdx.y * blockDim.y;
-//auto first = threadIdx.x;
-//auto stride = blockDim.x;
  const uint32_t threadIdxY(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[dimIndexY]);
  const uint32_t threadIdxLocalX(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[dimIndexX]);
 
@@ -252,7 +240,6 @@ const uint32_t dimIndexX = 0u;
     (*apc2) = 0;
   }  // ready for next kernel
 
-  //for (int idx = firstCellIndex, nt = (*nCells); idx < nt; idx += gridDim.y * blockDim.y) {
   cms::alpakatools::for_each_element_1D_grid_stride(acc, (*nCells), 0u, [&](uint32_t idx) {
     auto cellIndex = idx;
     auto &thisCell = cells[idx];
@@ -271,7 +258,6 @@ const uint32_t dimIndexX = 0u;
     auto zo = thisCell.get_outer_z(hh);
     auto isBarrel = thisCell.get_inner_detIndex(hh) < last_barrel_detIndex;
 
-    //for (int j = first; j < numberOfPossibleNeighbors; j += stride) {
     cms::alpakatools::for_each_element_1D_block_stride(acc, numberOfPossibleNeighbors, 0u, [&](uint32_t j) {
 	auto otherCell = vi[j];  // NB: Was with __ldg in legacy
       auto &oc = cells[otherCell];
@@ -346,8 +332,6 @@ struct kernel_mark_used {
 				GPUCACell *__restrict__ cells,
 				uint32_t const *nCells) const {
     // auto const &hh = *hhp;
-    //auto first = threadIdx.x + blockIdx.x * blockDim.x;
-    //for (int idx = first, nt = (*nCells); idx < nt; idx += gridDim.x * blockDim.x) {
     cms::alpakatools::for_each_element_1D_grid_stride(acc, (*nCells), [&](uint32_t idx) {
 	auto &thisCell = cells[idx];
 	if (!thisCell.tracks().empty())
@@ -363,8 +347,6 @@ struct kernel_countMultiplicity {
 				HitContainer const *__restrict__ foundNtuplets,
 				Quality const *__restrict__ quality,
 				CAConstants::TupleMultiplicity *tupleMultiplicity) const {
-    //auto first = blockIdx.x * blockDim.x + threadIdx.x;
-    //for (int it = first, nt = foundNtuplets->nbins(); it < nt; it += gridDim.x * blockDim.x) {
     cms::alpakatools::for_each_element_1D_grid_stride(acc, foundNtuplets->nbins(), [&](uint32_t it) {
 	auto nhits = foundNtuplets->size(it);
 	if (nhits >= 3 && quality[it] != trackQuality::dup) {
@@ -385,8 +367,6 @@ struct kernel_fillMultiplicity {
 				HitContainer const *__restrict__ foundNtuplets,
 				Quality const *__restrict__ quality,
 				CAConstants::TupleMultiplicity *tupleMultiplicity) const {
-    //auto first = blockIdx.x * blockDim.x + threadIdx.x;
-    //for (int it = first, nt = foundNtuplets->nbins(); it < nt; it += gridDim.x * blockDim.x) {
     cms::alpakatools::for_each_element_1D_grid_stride(acc, foundNtuplets->nbins(), [&](uint32_t it) {
 	auto nhits = foundNtuplets->size(it);
 	if (nhits >= 3 && quality[it] != trackQuality::dup) {
@@ -408,8 +388,6 @@ struct kernel_classifyTracks {
 				TkSoA const *__restrict__ tracks,
 				CAHitNtupletGeneratorKernels::QualityCuts cuts,
 				Quality *__restrict__ quality) const {
-    //int first = blockDim.x * blockIdx.x + threadIdx.x;
-    //for (int it = first, nt = tuples->nbins(); it < nt; it += gridDim.x * blockDim.x) {
     cms::alpakatools::for_each_element_1D_grid_stride(acc, tuples->nbins(), [&](uint32_t it) {
       auto nhits = tuples->size(it);
       if (nhits == 0)
@@ -476,8 +454,6 @@ struct kernel_doStatsForTracks {
 				HitContainer const *__restrict__ tuples,
 				Quality const *__restrict__ quality,
 				CAHitNtupletGeneratorKernels::Counters *counters) const {
-    //int first = blockDim.x * blockIdx.x + threadIdx.x;
-    //for (int idx = first, ntot = tuples->nbins(); idx < ntot; idx += gridDim.x * blockDim.x) {
     cms::alpakatools::for_each_element_1D_grid_stride(acc, tuples->nbins(), [&](uint32_t idx) {
 	if (tuples->size(idx) == 0)
 	  return;  //guard
@@ -495,8 +471,6 @@ struct kernel_countHitInTracks {
 				HitContainer const *__restrict__ tuples,
 				Quality const *__restrict__ quality,
 				CAHitNtupletGeneratorKernels::HitToTuple *hitToTuple) const {
-    //int first = blockDim.x * blockIdx.x + threadIdx.x;
-    //for (int idx = first, ntot = tuples->nbins(); idx < ntot; idx += gridDim.x * blockDim.x) {
     cms::alpakatools::for_each_element_1D_grid_stride(acc, tuples->nbins(), [&](uint32_t idx) {
 	if (tuples->size(idx) == 0)
 	  return;  // guard
@@ -515,8 +489,6 @@ struct kernel_fillHitInTracks {
 				HitContainer const *__restrict__ tuples,
 				Quality const *__restrict__ quality,
 				CAHitNtupletGeneratorKernels::HitToTuple *hitToTuple) const {
-    //int first = blockDim.x * blockIdx.x + threadIdx.x;
-    //for (int idx = first, ntot = tuples->nbins(); idx < ntot; idx += gridDim.x * blockDim.x) {
     cms::alpakatools::for_each_element_1D_grid_stride(acc, tuples->nbins(), [&](uint32_t idx) {
 	if (tuples->size(idx) == 0)
 	  return;  // guard
@@ -535,16 +507,13 @@ struct kernel_fillHitDetIndices {
 				HitContainer const *__restrict__ tuples,
 				TrackingRecHit2DSOAView const *__restrict__ hhp,
 				HitContainer *__restrict__ hitDetIndices) const {
-    //int first = blockDim.x * blockIdx.x + threadIdx.x;
     // copy offsets
-    //for (int idx = first, ntot = tuples->totbins(); idx < ntot; idx += gridDim.x * blockDim.x) {
     cms::alpakatools::for_each_element_1D_grid_stride(acc, tuples->totbins(), [&](uint32_t idx) {
 	hitDetIndices->off[idx] = tuples->off[idx];
       });
     // fill hit indices
     auto const &hh = *hhp;
     auto nhits = hh.nHits();
-    //for (int idx = first, ntot = tuples->size(); idx < ntot; idx += gridDim.x * blockDim.x) {
     cms::alpakatools::for_each_element_1D_grid_stride(acc, tuples->size(), [&](uint32_t idx) {
 	assert(tuples->bins[idx] < nhits);
 	hitDetIndices->bins[idx] = hh.detectorIndex(tuples->bins[idx]);
@@ -559,8 +528,6 @@ struct kernel_doStatsForHitInTracks {
 				CAHitNtupletGeneratorKernels::HitToTuple const *__restrict__ hitToTuple,
 				CAHitNtupletGeneratorKernels::Counters *counters) const {
     auto &c = *counters;
-    //int first = blockDim.x * blockIdx.x + threadIdx.x;
-    //for (int idx = first, ntot = hitToTuple->nbins(); idx < ntot; idx += gridDim.x * blockDim.x) {
     cms::alpakatools::for_each_element_1D_grid_stride(acc, hitToTuple->nbins(), [&](uint32_t idx) {
 	if (hitToTuple->size(idx) != 0) { // SHALL NOT BE break
 	  alpaka::atomicOp<alpaka::AtomicAdd>(acc, &c.nUsedHits, 1ull);
@@ -592,8 +559,6 @@ struct kernel_tripletCleaner {
   //  auto const & hh = *hhp;
   // auto l1end = hh.hitsLayerStart_d[1];
 
-  //int first = blockDim.x * blockIdx.x + threadIdx.x;
-  //for (int idx = first, ntot = hitToTuple.nbins(); idx < ntot; idx += gridDim.x * blockDim.x) {
   cms::alpakatools::for_each_element_1D_grid_stride(acc, phitToTuple->nbins(), [&](uint32_t idx) {
       if (hitToTuple.size(idx) >= 2) {
 
@@ -649,8 +614,6 @@ struct kernel_print_found_ntuplets {
 				int iev) const {
     auto const &foundNtuplets = *ptuples;
     auto const &tracks = *ptracks;
-    //int first = blockDim.x * blockIdx.x + threadIdx.x;
-    //for (int i = first, np = std::min(maxPrint, foundNtuplets.nbins()); i < np; i += blockDim.x * gridDim.x) {
     const auto np = std::min(maxPrint, foundNtuplets.nbins());
     cms::alpakatools::for_each_element_1D_grid_stride(acc, np, [&](uint32_t i) {
 	auto nh = foundNtuplets.size(i);

@@ -36,8 +36,6 @@ ALPAKA_FN_ACC void operator()(const T_Acc& acc,
     // auto layer = [&](uint16_t id) { return hh.cpeParams().layer(id); };
 
     // x run faster...
-    //auto firstY = threadIdx.y + blockIdx.y * blockDim.y;
-    //auto firstX = threadIdx.x;
 const uint32_t dimIndexY = 1u;
 const uint32_t dimIndexX = 0u;
 
@@ -45,7 +43,6 @@ const uint32_t dimIndexX = 0u;
     uint16_t d[maxCellsPerHit];  // uint8_t l[maxCellsPerHit];
     uint32_t cc[maxCellsPerHit];
 
-//for (int idy = firstY, nt = nHits; idy < nt; idy += gridDim.y * blockDim.y) {
 const uint32_t gridDimensionY(alpaka::getWorkDiv<alpaka::Grid, alpaka::Elems>(acc)[dimIndexY]);
 Vec1 elementsShiftY(Vec1::all(0u));
 const auto& [firstElementIdxNoStrideY, endElementIdxNoStrideY] = cms::alpakatools::element_index_range_in_grid(acc, elementsShiftY, dimIndexY);
@@ -85,7 +82,6 @@ for (uint32_t idy = firstElementIdxY, nt = nHits; idy < nt; ++idy) {
       if (sg < 2)
         continue;
       // here we parallelize
-      //for (int32_t ic = firstX; ic < sg - 1; ic += blockDim.x) {
 const uint32_t blockDimensionX(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[dimIndexX]);
 Vec1 elementsShiftX(Vec1::all(0u));
 const auto& [firstElementIdxNoStrideX, endElementIdxNoStrideX] = cms::alpakatools::element_index_range_in_block(acc, elementsShiftX, dimIndexX);
