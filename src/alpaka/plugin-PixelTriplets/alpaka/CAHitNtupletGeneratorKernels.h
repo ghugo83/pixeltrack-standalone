@@ -190,17 +190,10 @@ public:
 
 		    alpaka::memset(queue, device_nCells_, 0, 1u);
 		    
-		    // NB: TO DO: launchZero is a kernel in Alpaka, is there really no way to avoid this??
-		    // Try alpaka::memset on a view??
-		    WorkDiv1 workDiv = cms::alpakatools::make_workdiv(Vec1::all((TupleMultiplicity::totbins() + 255u) / 256u), Vec1::all(256u));
-		    alpaka::enqueue(queue,
-				    alpaka::createTaskKernel<Acc1>(workDiv, cms::alpakatools::launchZero(), alpaka::getPtrNative(device_tupleMultiplicity_)));
+		    launchZero(alpaka::getPtrNative(device_tupleMultiplicity_), queue);
+		    launchZero(alpaka::getPtrNative(device_hitToTuple_), queue);
 
-		    workDiv = cms::alpakatools::make_workdiv(Vec1::all((HitToTuple::totbins() + 255u) / 256u), Vec1::all(256u));
-		    alpaka::enqueue(queue,
-				    alpaka::createTaskKernel<Acc1>(workDiv, cms::alpakatools::launchZero(), alpaka::getPtrNative(device_hitToTuple_)));
 		    // we may wish to keep it in the edm...
-
 		    alpaka::wait(queue);
 		  }
 

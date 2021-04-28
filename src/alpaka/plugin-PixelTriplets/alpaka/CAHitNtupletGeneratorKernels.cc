@@ -23,12 +23,7 @@ void CAHitNtupletGeneratorKernels::launchKernels(HitsOnCPU const &hh, TkSoA *tra
   auto *quality_d = (Quality *)(&tracks_d->m_quality);
 
   // zero tuples
-  //cms::cuda::launchZero(tuples_d, cudaStream);
-  // NB: TO DO: launchZero is a kernel in Alpaka, is there really no way to avoid this??
-  // Try alpaka::memset on a view??
-  const WorkDiv1 launchZeroWorkDiv = cms::alpakatools::make_workdiv(Vec1::all((HitContainer::totbins() + 255u) / 256u), Vec1::all(256u));
-  alpaka::enqueue(queue,
-		  alpaka::createTaskKernel<Acc1>(launchZeroWorkDiv, cms::alpakatools::launchZero(), tuples_d));
+launchZero(tuples_d, queue);
 
   auto nhits = hh.nHits();
   assert(nhits <= pixelGPUConstants::maxNumberOfHits);

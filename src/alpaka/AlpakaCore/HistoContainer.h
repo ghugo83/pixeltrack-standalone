@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <type_traits>
 
-#include "AlpakaCore/alpakaKernelCommon.h"
+#include "AlpakaCore/alpakaCommon.h"
 #include "AlpakaCore/AtomicPairCounter.h"
 #include "AlpakaCore/alpakastdAlgorithm.h"
 #include "AlpakaCore/prefixScan.h"
@@ -51,20 +51,21 @@ namespace cms {
         });
       }
     };
+    
+    template <typename Histo>
+      inline __attribute__((always_inline)) void launchZero(Histo *__restrict__ h,
+							    ALPAKA_ACCELERATOR_NAMESPACE::Queue& queue) {
+      uint32_t *poff = (uint32_t *)(char *)(&(h->off));
+      auto histoOffView = cms::alpakatools::createDeviceView<typename Histo::Counter>(poff, Histo::totbins());
 
-    struct launchZero {
-      template <typename T_Acc, typename Histo>
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) void operator()(const T_Acc &acc,
-                                                                                    Histo *__restrict__ h) const {
-        cms::alpakatools::for_each_element_in_thread_1D_index_in_grid(
-            acc, Histo::totbins(), [&](uint32_t i) { h->off[i] = 0; });
-      }
-    };
+      alpaka::memset(queue, histoOffView, 0, Histo::totbins());
+      alpaka::wait(queue);
+    }
 
     template <typename Histo>
     ALPAKA_FN_HOST ALPAKA_FN_INLINE __attribute__((always_inline)) void launchFinalize(
         Histo *__restrict__ h, ALPAKA_ACCELERATOR_NAMESPACE::Queue &queue) {
-      uint32_t *poff = (uint32_t *)((char *)(h) + offsetof(Histo, off));
+      uint32_t *poff = (uint32_t *)(char *)(&(h->off));
 
       const int num_items = Histo::totbins();
 
@@ -95,12 +96,12 @@ namespace cms {
         uint32_t totSize,
         unsigned int nthreads,
         ALPAKA_ACCELERATOR_NAMESPACE::Queue &queue) {
+      launchZero(h, queue);
+
       const unsigned int nblocks = (totSize + nthreads - 1) / nthreads;
       const Vec1 blocksPerGrid(nblocks);
       const Vec1 threadsPerBlockOrElementsPerThread(nthreads);
       const WorkDiv1 &workDiv = cms::alpakatools::make_workdiv(blocksPerGrid, threadsPerBlockOrElementsPerThread);
-
-      alpaka::enqueue(queue, alpaka::createTaskKernel<ALPAKA_ACCELERATOR_NAMESPACE::Acc1>(workDiv, launchZero(), h));
 
       alpaka::enqueue(
           queue,

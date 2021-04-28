@@ -193,9 +193,7 @@ int main() {
   const Vec1 blocksPerGrid4N(nBlocks4N);
   const WorkDiv1& workDiv4N = cms::alpakatools::make_workdiv(blocksPerGrid4N, threadsPerBlockOrElementsPerThread);
 
-  alpaka::enqueue(queue,
-                  alpaka::createTaskKernel<ALPAKA_ACCELERATOR_NAMESPACE::Acc1>(
-                      workDiv4N, cms::alpakatools::launchZero(), alpaka::getPtrNative(a_dbuf)));
+  launchZero(alpaka::getPtrNative(a_dbuf), queue);
 
   alpaka::enqueue(queue,
                   alpaka::createTaskKernel<ALPAKA_ACCELERATOR_NAMESPACE::Acc1>(
@@ -315,13 +313,8 @@ int main() {
   auto m2_dbuf = alpaka::allocBuf<Multiplicity, Idx>(device, 1u);
   alpaka::memset(queue, m2_dbuf, 0, 1u);
 
-  alpaka::enqueue(queue,
-                  alpaka::createTaskKernel<ALPAKA_ACCELERATOR_NAMESPACE::Acc1>(
-                      workDiv4N, cms::alpakatools::launchZero(), alpaka::getPtrNative(m1_dbuf)));
-
-  alpaka::enqueue(queue,
-                  alpaka::createTaskKernel<ALPAKA_ACCELERATOR_NAMESPACE::Acc1>(
-                      workDiv4N, cms::alpakatools::launchZero(), alpaka::getPtrNative(m2_dbuf)));
+  launchZero(alpaka::getPtrNative(m1_dbuf), queue);
+  launchZero(alpaka::getPtrNative(m2_dbuf), queue);
 
   alpaka::enqueue(queue,
                   alpaka::createTaskKernel<ALPAKA_ACCELERATOR_NAMESPACE::Acc1>(
