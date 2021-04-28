@@ -44,8 +44,8 @@ namespace cms {
      */
     template <typename TAcc>
     ALPAKA_FN_ACC std::pair<Vec1, Vec1> element_index_range_in_block(const TAcc& acc,
-                                                                               const Vec1& elementIdxShift,
-									       const Idx dimIndex = 0u) {
+                                                                     const Vec1& elementIdxShift,
+                                                                     const Idx dimIndex = 0u) {
       Vec1 firstElementIdxVec = Vec1::zeros();
       Vec1 endElementIdxUncutVec = Vec1::zeros();
 
@@ -72,14 +72,15 @@ namespace cms {
      * Truncated by the max number of elements of interest.
      */
     template <typename TAcc>
-    ALPAKA_FN_ACC std::pair<Vec1, Vec1> element_index_range_in_block_truncated(const TAcc& acc, 
-											 const Vec1& maxNumberOfElements, 
-											 const Vec1& elementIdxShift, 
-											 const Idx dimIndex = 0u) {
+    ALPAKA_FN_ACC std::pair<Vec1, Vec1> element_index_range_in_block_truncated(const TAcc& acc,
+                                                                               const Vec1& maxNumberOfElements,
+                                                                               const Vec1& elementIdxShift,
+                                                                               const Idx dimIndex = 0u) {
       // Check dimension
       //static_assert(alpaka::Dim<TAcc>::value == Dim1::value,
       //              "Accelerator and maxNumberOfElements need to have same dimension.");
-      auto&& [firstElementIdxLocalVec, endElementIdxLocalVec] = element_index_range_in_block(acc, elementIdxShift, dimIndex);
+      auto&& [firstElementIdxLocalVec, endElementIdxLocalVec] =
+          element_index_range_in_block(acc, elementIdxShift, dimIndex);
 
       // Truncate
       endElementIdxLocalVec[0u] = std::min(endElementIdxLocalVec[0u], maxNumberOfElements[0u]);
@@ -94,8 +95,8 @@ namespace cms {
      */
     template <typename TAcc>
     ALPAKA_FN_ACC std::pair<Vec1, Vec1> element_index_range_in_grid(const TAcc& acc,
-                                                                              Vec1& elementIdxShift,
-									      const Idx dimIndex = 0u) {
+                                                                    Vec1& elementIdxShift,
+                                                                    const Idx dimIndex = 0u) {
       // Take into account the block index in grid.
       const uint32_t blockIdxInGrid(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[dimIndex]);
       const uint32_t blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[dimIndex]);
@@ -112,13 +113,15 @@ namespace cms {
      * Truncated by the max number of elements of interest.
      */
     template <typename TAcc>
-    ALPAKA_FN_ACC std::pair<Vec1, Vec1> element_index_range_in_grid_truncated(
-        const TAcc& acc, const Vec1& maxNumberOfElements, Vec1& elementIdxShift,
-	const Idx dimIndex = 0u) {
+    ALPAKA_FN_ACC std::pair<Vec1, Vec1> element_index_range_in_grid_truncated(const TAcc& acc,
+                                                                              const Vec1& maxNumberOfElements,
+                                                                              Vec1& elementIdxShift,
+                                                                              const Idx dimIndex = 0u) {
       // Check dimension
       //static_assert(dimIndex <= alpaka::Dim<TAcc>::value,
       //"Accelerator and maxNumberOfElements need to have same dimension.");
-      auto&& [firstElementIdxGlobalVec, endElementIdxGlobalVec] = element_index_range_in_grid(acc, elementIdxShift, dimIndex);
+      auto&& [firstElementIdxGlobalVec, endElementIdxGlobalVec] =
+          element_index_range_in_grid(acc, elementIdxShift, dimIndex);
 
       // Truncate
       endElementIdxGlobalVec[0u] = std::min(endElementIdxGlobalVec[0u], maxNumberOfElements[0u]);
@@ -132,7 +135,9 @@ namespace cms {
      * Truncated by the max number of elements of interest.
      */
     template <typename TAcc>
-    ALPAKA_FN_ACC std::pair<Vec1, Vec1> element_index_range_in_grid_truncated(const TAcc& acc, const Vec1& maxNumberOfElements, const Idx dimIndex = 0u) {
+    ALPAKA_FN_ACC std::pair<Vec1, Vec1> element_index_range_in_grid_truncated(const TAcc& acc,
+                                                                              const Vec1& maxNumberOfElements,
+                                                                              const Idx dimIndex = 0u) {
       Vec1 elementIdxShift = Vec1::zeros();
       return element_index_range_in_grid_truncated(acc, maxNumberOfElements, elementIdxShift, dimIndex);
     }
@@ -151,9 +156,9 @@ namespace cms {
                                                                     const uint32_t maxNumberOfElements,
                                                                     const uint32_t elementIdxShift,
                                                                     const Func func,
-								    const uint32_t dimIndex = 0) {
+                                                                    const uint32_t dimIndex = 0) {
       const auto& [firstElementIdx, endElementIdx] = cms::alpakatools::element_index_range_in_block_truncated(
-													      acc, Vec1::all(maxNumberOfElements), Vec1::all(elementIdxShift), dimIndex);
+          acc, Vec1::all(maxNumberOfElements), Vec1::all(elementIdxShift), dimIndex);
 
       for (uint32_t elementIdx = firstElementIdx[0u]; elementIdx < endElementIdx[0u]; ++elementIdx) {
         func(elementIdx);
@@ -167,9 +172,10 @@ namespace cms {
     ALPAKA_FN_ACC void for_each_element_in_thread_1D_index_in_block(const TAcc& acc,
                                                                     const uint32_t maxNumberOfElements,
                                                                     const Func func,
-								    const uint32_t dimIndex = 0) {
+                                                                    const uint32_t dimIndex = 0) {
       const uint32_t elementIdxShift = 0;
-      cms::alpakatools::for_each_element_in_thread_1D_index_in_block(acc, maxNumberOfElements, elementIdxShift, func, dimIndex);
+      cms::alpakatools::for_each_element_in_thread_1D_index_in_block(
+          acc, maxNumberOfElements, elementIdxShift, func, dimIndex);
     }
 
     /*
@@ -182,7 +188,7 @@ namespace cms {
                                                                    const uint32_t maxNumberOfElements,
                                                                    uint32_t elementIdxShift,
                                                                    const Func func,
-								   const uint32_t dimIndex = 0) {
+                                                                   const uint32_t dimIndex = 0) {
       // Take into account the block index in grid to compute the element indices.
       const uint32_t blockIdxInGrid(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[dimIndex]);
       const uint32_t blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[dimIndex]);
@@ -198,9 +204,10 @@ namespace cms {
     ALPAKA_FN_ACC void for_each_element_in_thread_1D_index_in_grid(const TAcc& acc,
                                                                    const uint32_t maxNumberOfElements,
                                                                    const Func func,
-								   const uint32_t dimIndex = 0) {
+                                                                   const uint32_t dimIndex = 0) {
       const uint32_t elementIdxShift = 0;
-      cms::alpakatools::for_each_element_in_thread_1D_index_in_grid(acc, maxNumberOfElements, elementIdxShift, func, dimIndex);
+      cms::alpakatools::for_each_element_in_thread_1D_index_in_grid(
+          acc, maxNumberOfElements, elementIdxShift, func, dimIndex);
     }
 
     /******************************************************************************
@@ -218,7 +225,7 @@ namespace cms {
                                                         const uint32_t maxNumberOfElements,
                                                         const uint32_t elementIdxShift,
                                                         const Func func,
-							const uint32_t dimIndex = 0) {
+                                                        const uint32_t dimIndex = 0) {
       // Get thread / element indices in block.
       const auto& [firstElementIdxNoStride, endElementIdxNoStride] =
           cms::alpakatools::element_index_range_in_block(acc, Vec1::all(elementIdxShift), dimIndex);
@@ -247,7 +254,7 @@ namespace cms {
     ALPAKA_FN_ACC void for_each_element_1D_block_stride(const TAcc& acc,
                                                         const uint32_t maxNumberOfElements,
                                                         const Func func,
-							const uint32_t dimIndex = 0) {
+                                                        const uint32_t dimIndex = 0) {
       const uint32_t elementIdxShift = 0;
       cms::alpakatools::for_each_element_1D_block_stride(acc, maxNumberOfElements, elementIdxShift, func, dimIndex);
     }
@@ -263,7 +270,7 @@ namespace cms {
                                                        const uint32_t maxNumberOfElements,
                                                        const uint32_t elementIdxShift,
                                                        const Func func,
-						       const uint32_t dimIndex = 0) {
+                                                       const uint32_t dimIndex = 0) {
       Vec1 elementIdxShiftVec = Vec1::all(elementIdxShift);
 
       // Get thread / element indices in block.
@@ -294,7 +301,7 @@ namespace cms {
     ALPAKA_FN_ACC void for_each_element_1D_grid_stride(const TAcc& acc,
                                                        const uint32_t maxNumberOfElements,
                                                        const Func func,
-						       const uint32_t dimIndex = 0) {
+                                                       const uint32_t dimIndex = 0) {
       const uint32_t elementIdxShift = 0;
       cms::alpakatools::for_each_element_1D_grid_stride(acc, maxNumberOfElements, elementIdxShift, func, dimIndex);
     }

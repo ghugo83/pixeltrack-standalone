@@ -6,13 +6,13 @@
 #define CONSTANT_VAR ALPAKA_STATIC_ACC_MEM_CONSTANT
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
-namespace gpuPixelDoublets {
+  namespace gpuPixelDoublets {
 
-  constexpr int nPairs = 13 + 2 + 4;
-  static_assert(nPairs <= CAConstants::maxNumberOfLayerPairs());
+    constexpr int nPairs = 13 + 2 + 4;
+    static_assert(nPairs <= CAConstants::maxNumberOfLayerPairs());
 
-  // start constants
-  // clang-format off
+    // start constants
+    // clang-format off
 
   CONSTANT_VAR const uint8_t layerPairs[2 * nPairs] = {
       0, 1, 0, 4, 0, 7,              // BPIX1 (3)
@@ -57,86 +57,84 @@ namespace gpuPixelDoublets {
       20., 9., 9., 20., 7., 7., 5., 5., 20., 6., 6., 5., 5., 20., 20., 9., 9., 9., 9.};
 
   // end constants
-  // clang-format on
+    // clang-format on
 
-  using CellNeighbors = CAConstants::CellNeighbors;
-  using CellTracks = CAConstants::CellTracks;
-  using CellNeighborsVector = CAConstants::CellNeighborsVector;
-  using CellTracksVector = CAConstants::CellTracksVector;
+    using CellNeighbors = CAConstants::CellNeighbors;
+    using CellTracks = CAConstants::CellTracks;
+    using CellNeighborsVector = CAConstants::CellNeighborsVector;
+    using CellTracksVector = CAConstants::CellTracksVector;
 
-  struct initDoublets {
-    template <typename T_Acc>
-    ALPAKA_FN_ACC void operator()(const T_Acc& acc,
-				  GPUCACell::OuterHitOfCell* isOuterHitOfCell,
-				  int nHits,
-				  CellNeighborsVector* cellNeighbors,
-				  CellNeighbors* cellNeighborsContainer,
-				  CellTracksVector* cellTracks,
-				  CellTracks* cellTracksContainer) const {
-      assert(isOuterHitOfCell);
-      cms::alpakatools::for_each_element_1D_grid_stride(acc, nHits, [&](uint32_t i) {
-	  isOuterHitOfCell[i].reset();
-	});
+    struct initDoublets {
+      template <typename T_Acc>
+      ALPAKA_FN_ACC void operator()(const T_Acc& acc,
+                                    GPUCACell::OuterHitOfCell* isOuterHitOfCell,
+                                    int nHits,
+                                    CellNeighborsVector* cellNeighbors,
+                                    CellNeighbors* cellNeighborsContainer,
+                                    CellTracksVector* cellTracks,
+                                    CellTracks* cellTracksContainer) const {
+        assert(isOuterHitOfCell);
+        cms::alpakatools::for_each_element_1D_grid_stride(acc, nHits, [&](uint32_t i) { isOuterHitOfCell[i].reset(); });
 
-      const uint32_t threadIdx(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u]);
-      if (0 == threadIdx) {
-	cellNeighbors->construct(CAConstants::maxNumOfActiveDoublets(), cellNeighborsContainer);
-	cellTracks->construct(CAConstants::maxNumOfActiveDoublets(), cellTracksContainer);
-	auto i = cellNeighbors->extend(acc);
-	assert(0 == i);
-	(*cellNeighbors)[0].reset();
-	i = cellTracks->extend(acc);
-	assert(0 == i);
-	(*cellTracks)[0].reset();
-      }
-    } // initDoublets kernel operator()
-  }; // initDoublets
+        const uint32_t threadIdx(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u]);
+        if (0 == threadIdx) {
+          cellNeighbors->construct(CAConstants::maxNumOfActiveDoublets(), cellNeighborsContainer);
+          cellTracks->construct(CAConstants::maxNumOfActiveDoublets(), cellTracksContainer);
+          auto i = cellNeighbors->extend(acc);
+          assert(0 == i);
+          (*cellNeighbors)[0].reset();
+          i = cellTracks->extend(acc);
+          assert(0 == i);
+          (*cellTracks)[0].reset();
+        }
+      }  // initDoublets kernel operator()
+    };   // initDoublets
 
-  constexpr auto getDoubletsFromHistoMaxBlockSize = 64;  // for both x and y
-  constexpr auto getDoubletsFromHistoMinBlocksPerMP = 16;
+    constexpr auto getDoubletsFromHistoMaxBlockSize = 64;  // for both x and y
+    constexpr auto getDoubletsFromHistoMinBlocksPerMP = 16;
 
-  /*#ifdef __CUDACC__
+    /*#ifdef __CUDACC__
   __launch_bounds__(getDoubletsFromHistoMaxBlockSize, getDoubletsFromHistoMinBlocksPerMP)
   #endif*/
-  // TO DO: NB: Alpaka equivalent for this does not seem to exit.
+    // TO DO: NB: Alpaka equivalent for this does not seem to exit.
     struct getDoubletsFromHisto {
       template <typename T_Acc>
       ALPAKA_FN_ACC void operator()(const T_Acc& acc,
-				    GPUCACell* cells,
-				    uint32_t* nCells,
-				    CellNeighborsVector* cellNeighbors,
-				    CellTracksVector* cellTracks,
-				    TrackingRecHit2DSOAView const* __restrict__ hhp,
-				    GPUCACell::OuterHitOfCell* isOuterHitOfCell,
-				    int nActualPairs,
-				    bool ideal_cond,
-				    bool doClusterCut,
-				    bool doZ0Cut,
-				    bool doPtCut,
-				    uint32_t maxNumOfDoublets) const {
-	auto const& __restrict__ hh = *hhp;
-	doubletsFromHisto(acc,
-    layerPairs,
-			  nActualPairs,
-			  cells,
-			  nCells,
-			  cellNeighbors,
-			  cellTracks,
-			  hh,
-			  isOuterHitOfCell,
-			  phicuts,
-			  minz,
-			  maxz,
-			  maxr,
-			  ideal_cond,
-			  doClusterCut,
-			  doZ0Cut,
-			  doPtCut,
-			  maxNumOfDoublets);
-      } // getDoubletsFromHisto kernel operator()
-    }; // getDoubletsFromHisto
+                                    GPUCACell* cells,
+                                    uint32_t* nCells,
+                                    CellNeighborsVector* cellNeighbors,
+                                    CellTracksVector* cellTracks,
+                                    TrackingRecHit2DSOAView const* __restrict__ hhp,
+                                    GPUCACell::OuterHitOfCell* isOuterHitOfCell,
+                                    int nActualPairs,
+                                    bool ideal_cond,
+                                    bool doClusterCut,
+                                    bool doZ0Cut,
+                                    bool doPtCut,
+                                    uint32_t maxNumOfDoublets) const {
+        auto const& __restrict__ hh = *hhp;
+        doubletsFromHisto(acc,
+                          layerPairs,
+                          nActualPairs,
+                          cells,
+                          nCells,
+                          cellNeighbors,
+                          cellTracks,
+                          hh,
+                          isOuterHitOfCell,
+                          phicuts,
+                          minz,
+                          maxz,
+                          maxr,
+                          ideal_cond,
+                          doClusterCut,
+                          doZ0Cut,
+                          doPtCut,
+                          maxNumOfDoublets);
+      }  // getDoubletsFromHisto kernel operator()
+    };   // getDoubletsFromHisto
 
-}  // namespace gpuPixelDoublets
-}
+  }  // namespace gpuPixelDoublets
+}  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
 #endif  // RecoLocalTracker_SiPixelRecHits_plugins_gpuPixelDouplets_h

@@ -26,10 +26,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   };
 
   CAHitNtupletAlpaka::CAHitNtupletAlpaka(edm::ProductRegistry& reg)
-    : tokenHitGPU_{reg.consumes<TrackingRecHit2DAlpaka>()},
-    tokenTrackGPU_{reg.produces<PixelTrackAlpaka>()},
-    gpuAlgo_(reg) 
-    {}
+      : tokenHitGPU_{reg.consumes<TrackingRecHit2DAlpaka>()},
+        tokenTrackGPU_{reg.produces<PixelTrackAlpaka>()},
+        gpuAlgo_(reg) {}
 
   void CAHitNtupletAlpaka::produce(edm::Event& iEvent, const edm::EventSetup& es) {
     auto bf = 0.0114256972711507;  // 1/fieldInGeV
@@ -40,6 +39,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     iEvent.emplace(tokenTrackGPU_, gpuAlgo_.makeTuplesAsync(hits, bf, queue));
   }
 
-} // namespace ALPAKA_ACCELERATOR_NAMESPACE
+}  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
 DEFINE_FWK_ALPAKA_MODULE(CAHitNtupletAlpaka);

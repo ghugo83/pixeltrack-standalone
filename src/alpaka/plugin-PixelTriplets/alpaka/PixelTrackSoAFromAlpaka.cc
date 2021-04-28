@@ -9,54 +9,55 @@
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
 #ifdef TODO
-class PixelTrackSoAFromAlpaka : public edm::EDProducerExternalWork {
+  class PixelTrackSoAFromAlpaka : public edm::EDProducerExternalWork {
 #else
   class PixelTrackSoAFromAlpaka : public edm::EDProducer {
 #endif
-public:
-  explicit PixelTrackSoAFromAlpaka(edm::ProductRegistry& reg);
-  ~PixelTrackSoAFromAlpaka() override = default;
+  public:
+    explicit PixelTrackSoAFromAlpaka(edm::ProductRegistry& reg);
+    ~PixelTrackSoAFromAlpaka() override = default;
 
-private:
+  private:
 #ifdef TODO
-  void acquire(edm::Event const& iEvent,
-               edm::EventSetup const& iSetup,
-               edm::WaitingTaskWithArenaHolder waitingTaskHolder) override;
+    void acquire(edm::Event const& iEvent,
+                 edm::EventSetup const& iSetup,
+                 edm::WaitingTaskWithArenaHolder waitingTaskHolder) override;
 #endif
-  void produce(edm::Event& iEvent, edm::EventSetup const& iSetup) override;
+    void produce(edm::Event& iEvent, edm::EventSetup const& iSetup) override;
 
-  edm::EDGetTokenT<PixelTrackAlpaka> tokenAlpaka_;
+    edm::EDGetTokenT<PixelTrackAlpaka> tokenAlpaka_;
 #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
-  edm::EDPutTokenT<PixelTrackHost> tokenSOA_;
+    edm::EDPutTokenT<PixelTrackHost> tokenSOA_;
 #endif
 
 #ifdef TODO
-  cms::cuda::host::unique_ptr<pixelTrack::TrackSoA> m_soa;
+    cms::cuda::host::unique_ptr<pixelTrack::TrackSoA> m_soa;
 #endif
-};
+  };
 
-PixelTrackSoAFromAlpaka::PixelTrackSoAFromAlpaka(edm::ProductRegistry& reg)
-  : tokenAlpaka_(reg.consumes<PixelTrackAlpaka>())
+  PixelTrackSoAFromAlpaka::PixelTrackSoAFromAlpaka(edm::ProductRegistry& reg)
+      : tokenAlpaka_(reg.consumes<PixelTrackAlpaka>())
 #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
-  , tokenSOA_(reg.produces<PixelTrackHost>())
+        ,
+        tokenSOA_(reg.produces<PixelTrackHost>())
 #endif
-    {}
+  {
+  }
 
 #ifdef TODO
-void PixelTrackSoAFromAlpaka::acquire(edm::Event const& iEvent,
-                                    edm::EventSetup const& iSetup,
-                                    edm::WaitingTaskWithArenaHolder waitingTaskHolder) {
-  cms::cuda::Product<PixelTrackHeterogeneous> const& inputDataWrapped = iEvent.get(tokenAlpaka_);
-  cms::cuda::ScopedContextAcquire ctx{inputDataWrapped, std::move(waitingTaskHolder)};
-  auto const& inputData = ctx.get(inputDataWrapped);
+  void PixelTrackSoAFromAlpaka::acquire(edm::Event const& iEvent,
+                                        edm::EventSetup const& iSetup,
+                                        edm::WaitingTaskWithArenaHolder waitingTaskHolder) {
+    cms::cuda::Product<PixelTrackHeterogeneous> const& inputDataWrapped = iEvent.get(tokenAlpaka_);
+    cms::cuda::ScopedContextAcquire ctx{inputDataWrapped, std::move(waitingTaskHolder)};
+    auto const& inputData = ctx.get(inputDataWrapped);
 
-  m_soa = inputData.toHostAsync(ctx.stream());
-}
+    m_soa = inputData.toHostAsync(ctx.stream());
+  }
 #endif
 
-void PixelTrackSoAFromAlpaka::produce(edm::Event& iEvent, edm::EventSetup const& iSetup) {
-    
-  /*
+  void PixelTrackSoAFromAlpaka::produce(edm::Event& iEvent, edm::EventSetup const& iSetup) {
+    /*
   auto const & tsoa = *m_soa;
   auto maxTracks = tsoa.stride();
   std::cout << "size of SoA" << sizeof(tsoa) << " stride " << maxTracks << std::endl;
@@ -78,11 +79,11 @@ void PixelTrackSoAFromAlpaka::produce(edm::Event& iEvent, edm::EventSetup const&
     alpaka::memcpy(queue, outputData, inputData, 1u);
     alpaka::wait(queue);
 
-  // DO NOT  make a copy  (actually TWO....)
+    // DO NOT  make a copy  (actually TWO....)
     iEvent.emplace(tokenSOA_, std::move(outputData));
-#endif 
-}
+#endif
+  }
 
-}
+}  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
 DEFINE_FWK_ALPAKA_MODULE(PixelTrackSoAFromAlpaka);
