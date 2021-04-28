@@ -86,9 +86,12 @@ namespace gpuPixelDoublets {
 
     uint32_t pairLayerId = 0;  // cannot go backward
 
-    // x runs faster
+    // X runs faster
     const uint32_t blockDimensionX(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[dimIndexX]);
+    Vec1 elementsShiftX(Vec1::all(0u));
+    const auto& [firstElementIdxNoStrideX, endElementIdxNoStrideX] = cms::alpakatools::element_index_range_in_block(acc, elementsShiftX, dimIndexX);
 
+    // Outermost loop on Y
     const uint32_t gridDimensionY(alpaka::getWorkDiv<alpaka::Grid, alpaka::Elems>(acc)[dimIndexY]);
     Vec1 elementsShiftY(Vec1::all(0u));
     const auto& [firstElementIdxNoStrideY, endElementIdxNoStrideY] = cms::alpakatools::element_index_range_in_grid(acc, elementsShiftY, dimIndexY);
@@ -214,11 +217,9 @@ namespace gpuPixelDoublets {
         auto const* __restrict__ p = hist.begin(kk + hoff);
         auto const* __restrict__ e = hist.end(kk + hoff);
 	auto const maxpIndex = e - p;
-	// here we parallelize
+	// Here we parallelize in X
         //p += first;
         //for (; p < e; p += blockDimensionX) {
-	Vec1 elementsShiftX(Vec1::all(0u));
-	const auto& [firstElementIdxNoStrideX, endElementIdxNoStrideX] = cms::alpakatools::element_index_range_in_block(acc, elementsShiftX, dimIndexX);
 	uint32_t firstElementIdxX = firstElementIdxNoStrideX[0u];
 	uint32_t endElementIdxX = endElementIdxNoStrideX[0u];
 	for (uint32_t pIndex = firstElementIdxX; pIndex < maxpIndex; ++pIndex) {

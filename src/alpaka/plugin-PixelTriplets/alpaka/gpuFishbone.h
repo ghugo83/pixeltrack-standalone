@@ -35,14 +35,18 @@ ALPAKA_FN_ACC void operator()(const T_Acc& acc,
     auto const& hh = *hhp;
     // auto layer = [&](uint16_t id) { return hh.cpeParams().layer(id); };
 
-    // x run faster...
-const uint32_t dimIndexY = 0u;
-const uint32_t dimIndexX = 1u;
-
     float x[maxCellsPerHit], y[maxCellsPerHit], z[maxCellsPerHit], n[maxCellsPerHit];
     uint16_t d[maxCellsPerHit];  // uint8_t l[maxCellsPerHit];
     uint32_t cc[maxCellsPerHit];
 
+// X run faster...
+const uint32_t dimIndexY = 0u;
+const uint32_t dimIndexX = 1u;
+const uint32_t blockDimensionX(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[dimIndexX]);
+Vec1 elementsShiftX(Vec1::all(0u));
+const auto& [firstElementIdxNoStrideX, endElementIdxNoStrideX] = cms::alpakatools::element_index_range_in_block(acc, elementsShiftX, dimIndexX);
+
+// Outermost loop on Y
 const uint32_t gridDimensionY(alpaka::getWorkDiv<alpaka::Grid, alpaka::Elems>(acc)[dimIndexY]);
 Vec1 elementsShiftY(Vec1::all(0u));
 const auto& [firstElementIdxNoStrideY, endElementIdxNoStrideY] = cms::alpakatools::element_index_range_in_grid(acc, elementsShiftY, dimIndexY);
@@ -81,10 +85,7 @@ for (uint32_t idy = firstElementIdxY, nt = nHits; idy < nt; ++idy) {
       }
       if (sg < 2)
         continue;
-      // here we parallelize
-const uint32_t blockDimensionX(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[dimIndexX]);
-Vec1 elementsShiftX(Vec1::all(0u));
-const auto& [firstElementIdxNoStrideX, endElementIdxNoStrideX] = cms::alpakatools::element_index_range_in_block(acc, elementsShiftX, dimIndexX);
+      // Here we parallelize in X
 uint32_t firstElementIdxX = firstElementIdxNoStrideX[0u];
 uint32_t endElementIdxX = endElementIdxNoStrideX[0u];
 for (uint32_t ic = firstElementIdxX; ic < sg - 1; ++ic) {
