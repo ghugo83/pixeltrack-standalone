@@ -2,8 +2,8 @@
 
 #include "gpuVertexFinder.h"
 #include "gpuClusterTracksByDensity.h"
-/*#include "gpuClusterTracksDBSCAN.h"
-#include "gpuClusterTracksIterative.h"
+#include "gpuClusterTracksDBSCAN.h"
+/*#include "gpuClusterTracksIterative.h"
 #include "gpuFitVertices.h"
 #include "gpuSortByPt2.h"
 #include "gpuSplitVertices.h"*/
