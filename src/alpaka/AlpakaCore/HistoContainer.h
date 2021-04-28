@@ -53,8 +53,8 @@ namespace cms {
     };
 
     template <typename Histo>
-    inline __attribute__((always_inline)) void launchZero(Histo *__restrict__ h,
-                                                          ALPAKA_ACCELERATOR_NAMESPACE::Queue &queue) {
+    ALPAKA_FN_HOST ALPAKA_FN_INLINE __attribute__((always_inline)) void launchZero(
+        Histo *__restrict__ h, ALPAKA_ACCELERATOR_NAMESPACE::Queue &queue) {
       uint32_t *poff = (uint32_t *)(char *)(&(h->off));
       auto histoOffView = cms::alpakatools::createDeviceView<typename Histo::Counter>(poff, Histo::totbins());
 
