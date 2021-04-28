@@ -71,8 +71,8 @@ namespace gpuPixelDoublets {
     auto&& innerLayerCumulativeSize = alpaka::declareSharedVar<uint32_t[nPairsMax], __COUNTER__>(acc);
     auto&& ntot = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);
 
-    const uint32_t dimIndexY = 1u;
-    const uint32_t dimIndexX = 0u;
+    const uint32_t dimIndexY = 0u;
+    const uint32_t dimIndexX = 1u;
     const uint32_t threadIdxLocalY(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[dimIndexY]);
     const uint32_t threadIdxLocalX(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[dimIndexX]);
     if (threadIdxLocalY == 0 && threadIdxLocalX == 0) {

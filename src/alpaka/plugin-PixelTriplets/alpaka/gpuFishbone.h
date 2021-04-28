@@ -36,8 +36,8 @@ ALPAKA_FN_ACC void operator()(const T_Acc& acc,
     // auto layer = [&](uint16_t id) { return hh.cpeParams().layer(id); };
 
     // x run faster...
-const uint32_t dimIndexY = 1u;
-const uint32_t dimIndexX = 0u;
+const uint32_t dimIndexY = 0u;
+const uint32_t dimIndexX = 1u;
 
     float x[maxCellsPerHit], y[maxCellsPerHit], z[maxCellsPerHit], n[maxCellsPerHit];
     uint16_t d[maxCellsPerHit];  // uint8_t l[maxCellsPerHit];

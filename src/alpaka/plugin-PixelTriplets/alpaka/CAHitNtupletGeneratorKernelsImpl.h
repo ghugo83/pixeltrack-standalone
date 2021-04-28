@@ -230,8 +230,8 @@ struct kernel_connect {
 				float dcaCutOuterTriplet) const {
     auto const &hh = *hhp;
 
-const uint32_t dimIndexY = 1u;
-const uint32_t dimIndexX = 0u;
+const uint32_t dimIndexY = 0u;
+const uint32_t dimIndexX = 1u;
  const uint32_t threadIdxY(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[dimIndexY]);
  const uint32_t threadIdxLocalX(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[dimIndexX]);
 
