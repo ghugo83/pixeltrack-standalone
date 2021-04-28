@@ -55,15 +55,15 @@ const uint32_t threadIdxLocal(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc
         sortInd[0] = 0;
       return;
     }
-//#ifdef __CUDA_ARCH__
+#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
     auto&& sws = alpaka::declareSharedVar<uint16_t[1024], __COUNTER__>(acc);
     // sort using only 16 bits
-cms::alpakatools::radixSort<float, 2>(acc, ptv2, sortInd, sws, nvFinal);
-/*#else
+    cms::alpakatools::radixSort<Acc1, float, 2>(acc, ptv2, sortInd, sws, nvFinal);
+#else
     for (uint16_t i = 0; i < nvFinal; ++i)
       sortInd[i] = i;
     std::sort(sortInd, sortInd + nvFinal, [&](auto i, auto j) { return ptv2[i] < ptv2[j]; });
-    #endif*/
+#endif
   }
 
       struct sortByPt2Kernel {

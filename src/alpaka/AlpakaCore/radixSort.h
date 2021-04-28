@@ -110,7 +110,7 @@ cms::alpakatools::for_each_element_1D_block_stride(acc, size, [&](uint32_t i) {
 });
 alpaka::syncBlockThreads(acc);
 
-  while (__syncthreads_and(p < w / d)) {
+ while (alpaka::syncBlockThreadsPredicate<alpaka::BlockAnd>(acc, (p < w / d))) {
 
     cms::alpakatools::for_each_element_in_thread_1D_index_in_block(acc, sb, [&](uint32_t i) {
 	c[i] = 0;
@@ -131,7 +131,7 @@ alpaka::syncBlockThreads(acc);
 
 	  for (int offset = 1; offset < 32; offset <<= 1) {
 	    auto y = __shfl_up_sync(0xffffffff, x, offset);
-	    if (laneId >= offset)
+	    if (laneId >= (uint32_t)offset)
 	      x += y;
 	  }
 	  ct[i] = x;
@@ -236,7 +236,7 @@ while (alpaka::syncBlockThreadsPredicate<alpaka::BlockAnd>(acc, ibs > 0)) {
           int NS = sizeof(T),  // number of significant bytes to use in sorting
           typename std::enable_if<std::is_unsigned<T>::value, T>::type* = nullptr>
 ALPAKA_FN_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) void radixSort(const T_Acc& acc, T const* a, uint16_t* ind, uint16_t* ind2, uint32_t size) {
-   radixSortImpl<T, NS>(acc, a, ind, ind2, size, dummyReorder<T>);
+   radixSortImpl<T_Acc, T, NS>(acc, a, ind, ind2, size, dummyReorder<T_Acc, T>);
 }
 
 template <typename T_Acc,
@@ -244,7 +244,7 @@ template <typename T_Acc,
           int NS = sizeof(T),  // number of significant bytes to use in sorting
           typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value, T>::type* = nullptr>
 ALPAKA_FN_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) void radixSort(const T_Acc& acc, T const* a, uint16_t* ind, uint16_t* ind2, uint32_t size) {
-  radixSortImpl<T, NS>(acc, a, ind, ind2, size, reorderSigned<T>);
+  radixSortImpl<T_Acc, T, NS>(acc, a, ind, ind2, size, reorderSigned<T_Acc, T>);
 }
 
   template <typename T_Acc,
@@ -253,7 +253,7 @@ ALPAKA_FN_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) void radixSort(con
   typename std::enable_if<std::is_floating_point<T>::value, T>::type* = nullptr>
   ALPAKA_FN_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) void radixSort(const T_Acc& acc, T const* a, uint16_t* ind, uint16_t* ind2, uint32_t size) {
     using I = int;
-    radixSortImpl<I, NS>(acc, (I const*)(a), ind, ind2, size, reorderFloat<I>);
+    radixSortImpl<T_Acc, I, NS>(acc, (I const*)(a), ind, ind2, size, reorderFloat<T_Acc, I>);
   }
 
 
