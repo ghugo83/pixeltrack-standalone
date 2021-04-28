@@ -1,8 +1,8 @@
 #include "AlpakaCore/alpakaCommon.h"
 
 #include "gpuVertexFinder.h"
-/*#include "gpuClusterTracksByDensity.h"
-#include "gpuClusterTracksDBSCAN.h"
+#include "gpuClusterTracksByDensity.h"
+/*#include "gpuClusterTracksDBSCAN.h"
 #include "gpuClusterTracksIterative.h"
 #include "gpuFitVertices.h"
 #include "gpuSortByPt2.h"
@@ -62,7 +62,7 @@ namespace gpuVertexFinder {
 				  float errmax,  // max error to be "seed"
 				  float chi2max  // max normalized distance to cluster
 				  ) const {
-      clusterTracksByDensity(pdata, pws, minT, eps, errmax, chi2max);
+      clusterTracksByDensity(acc, pdata, pws, minT, eps, errmax, chi2max);
       alpaka::syncBlockThreads(acc);
       fitVertices(pdata, pws, 50.);
       alpaka::syncBlockThreads(acc);
@@ -84,7 +84,7 @@ namespace gpuVertexFinder {
 				  float errmax,  // max error to be "seed"
 				  float chi2max  // max normalized distance to cluster,
 				  ) const {
-      clusterTracksByDensity(pdata, pws, minT, eps, errmax, chi2max);
+      clusterTracksByDensity(acc, pdata, pws, minT, eps, errmax, chi2max);
       alpaka::syncBlockThreads(acc);
       fitVertices(pdata, pws, 50.);
     }
