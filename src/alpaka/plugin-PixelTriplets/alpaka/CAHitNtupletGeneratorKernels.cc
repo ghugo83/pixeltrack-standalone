@@ -44,8 +44,8 @@ launchZero(tuples_d, queue);
   numberOfBlocks = (3 * m_params.maxNumberOfDoublets_ / 4 + blockSize - 1) / blockSize;
 assert(numberOfBlocks < 65536);
 assert(blockSize > 0 && 0 == blockSize % 16);
-const Vec2 blks(1u, numberOfBlocks);
-const Vec2 thrs(stride, blockSize);
+const Vec2 blks(numberOfBlocks, 1u);
+const Vec2 thrs(blockSize, stride);
 const WorkDiv2 kernelConnectWorkDiv = cms::alpakatools::make_workdiv(blks, thrs);
 alpaka::enqueue(queue,
 		  alpaka::createTaskKernel<Acc2>(kernelConnectWorkDiv,
@@ -69,8 +69,8 @@ const uint32_t nthTot = 128;
 const uint32_t stride = 16;
 const uint32_t blockSize = nthTot / stride;
     const uint32_t numberOfBlocks = (nhits + blockSize - 1) / blockSize;
-const Vec2 blks(1u, numberOfBlocks);
-const Vec2 thrs(stride, blockSize);
+const Vec2 blks(numberOfBlocks, 1u);
+const Vec2 thrs(blockSize, stride);
 const WorkDiv2 fishboneWorkDiv = cms::alpakatools::make_workdiv(blks, thrs);
 
 alpaka::enqueue(queue,
@@ -147,8 +147,8 @@ if (nhits > 1 && m_params.lateFishbone_) {
   const uint32_t blockSize = nthTot / stride;
   const uint32_t numberOfBlocks = (nhits + blockSize - 1) / blockSize;
 
-  const Vec2 blks(1u, numberOfBlocks);
-  const Vec2 thrs(stride, blockSize);
+const Vec2 blks(numberOfBlocks, 1u);
+const Vec2 thrs(blockSize, stride);
   const WorkDiv2 workDiv2D = cms::alpakatools::make_workdiv(blks, thrs);
   alpaka::enqueue(queue,
 		  alpaka::createTaskKernel<Acc2>(workDiv2D,
@@ -233,8 +233,8 @@ void CAHitNtupletGeneratorKernels::buildDoublets(HitsOnCPU const &hh, Queue& que
   const uint32_t stride = 4;
   const uint32_t threadsPerBlock = gpuPixelDoublets::getDoubletsFromHistoMaxBlockSize / stride;
   const uint32_t blocks = (4 * nhits + threadsPerBlock - 1) / threadsPerBlock;
-  const Vec2 blks(1u, blocks);
-  const Vec2 thrs(stride, threadsPerBlock);
+const Vec2 blks(blocks, 1u);
+const Vec2 thrs(threadsPerBlock, stride);
   const WorkDiv2 workDiv2D = cms::alpakatools::make_workdiv(blks, thrs);
   alpaka::enqueue(queue,
 		  alpaka::createTaskKernel<Acc2>(workDiv2D,
