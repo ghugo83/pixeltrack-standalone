@@ -34,12 +34,12 @@ template <typename T_Acc>
     assert(pdata);
     assert(zt);
 
-    constexpr int MAXTK = 512;
+    constexpr uint32_t MAXTK = 512;
 
     // one vertex per block
       cms::alpakatools::for_each_element_1D_block_stride(acc, nvFinal, [&](uint32_t kv) {
-	  if (nn[kv] >= 4 && chi2[kv] >= maxChi2 * float(nn[kv]) && nn[kv] < MAXTK) {
-	    assert(nn[kv] < MAXTK);
+	  if (nn[kv] >= 4 && chi2[kv] >= maxChi2 * float(nn[kv]) && nn[kv] < (int32_t)MAXTK) {
+	    assert(nn[kv] < (int32_t)MAXTK);
                      // too bad FIXME
       auto&& it = alpaka::declareSharedVar<uint32_t[MAXTK], __COUNTER__>(acc);   // track index
       auto&& zz = alpaka::declareSharedVar<float[MAXTK], __COUNTER__>(acc);      // z pos 
@@ -118,7 +118,7 @@ template <typename T_Acc>
 	  // get a new global vertex
 	  auto&& igv = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);
 	  if (0 == threadIdxLocal)
-	    igv = alpaka::atomicOp<alpaka::AtomicAdd>(acc, &ws.nvIntermediate, 1);
+	    igv = alpaka::atomicOp<alpaka::AtomicAdd>(acc, &ws.nvIntermediate, 1u);
 	  alpaka::syncBlockThreads(acc);
 	  cms::alpakatools::for_each_element_1D_block_stride(acc, nq, [&](uint32_t k) {
 	      if (1 == newV[k])

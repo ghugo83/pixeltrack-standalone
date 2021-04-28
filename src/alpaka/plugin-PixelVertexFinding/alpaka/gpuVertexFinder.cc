@@ -40,7 +40,7 @@ namespace gpuVertexFinder {
 	    return;
 
 	  auto& data = *pws;
-	  auto it = alpaka::atomicOp<alpaka::AtomicAdd>(acc, &data.ntrks, 1);
+	  auto it = alpaka::atomicOp<alpaka::AtomicAdd>(acc, &data.ntrks, 1u);
 	  data.itrk[it] = idx;
 	  data.zt[it] = tracks.zip(idx);
 	  data.ezt2[it] = fit.covariance(idx)(14);
@@ -49,7 +49,7 @@ namespace gpuVertexFinder {
 
   }
 };
-/*
+
 // #define THREE_KERNELS
 #ifndef THREE_KERNELS
   struct vertexFinderOneKernel {
@@ -99,7 +99,7 @@ namespace gpuVertexFinder {
       sortByPt2(acc, pdata, pws);
     }
   };
-  #endif*/
+#endif
 
   ZVertexAlpaka Producer::makeAsync(TkSoA const* tksoa, float ptMin, Queue& queue) const {
     // std::cout << "producing Vertices on GPU" << std::endl;
@@ -110,12 +110,13 @@ namespace gpuVertexFinder {
     auto ws_dBuf{cms::alpakatools::allocDeviceBuf<WorkSpace>(1u)};
 auto ws_d = alpaka::getPtrNative(ws_dBuf);
 
-/*
- const WorkDiv1 initWorkDiv = cms::alpakatools::make_workdiv(Vec1::all(1u), Vec1::all(1u));
- alpaka::enqueue(queue,
-		 alpaka::createTaskKernel<Acc1>(initWorkDiv,
-						init(),
-						soa, ws_d));
+auto nvFinalVerticesView = cms::alpakatools::createDeviceView<uint32_t>(&soa->nvFinal, 1u);
+alpaka::memset(queue, nvFinalVerticesView, 0, 1u);
+auto ntrksWorkspaceView = cms::alpakatools::createDeviceView<uint32_t>(&ws_d->ntrks, 1u);
+alpaka::memset(queue, ntrksWorkspaceView, 0, 1u);
+auto nvIntermediateWorkspaceView = cms::alpakatools::createDeviceView<uint32_t>(&ws_d->nvIntermediate, 1u);
+alpaka::memset(queue, nvIntermediateWorkspaceView, 0, 1u);
+
     const uint32_t blockSize = 128;
     const uint32_t numberOfBlocks = (TkSoA::stride() + blockSize - 1) / blockSize; // TO DO: NB: TkSoA::stride() on device?
     const WorkDiv1 loadTracksWorkDiv = cms::alpakatools::make_workdiv(Vec1::all(numberOfBlocks), Vec1::all(blockSize));
@@ -193,7 +194,7 @@ auto ws_d = alpaka::getPtrNative(ws_dBuf);
 						     sortByPt2Kernel(),
 						     soa, ws_d));
     }
-*/
+
       alpaka::wait(queue);
       return vertices;
   }
