@@ -1,5 +1,5 @@
 #include "AlpakaCore/alpakaCommon.h"
-#include "DataFormats/ZVertexAlpaka.h"
+#include "AlpakaDataFormats/ZVertexAlpaka.h"
 #include "Framework/EventSetup.h"
 #include "Framework/Event.h"
 #include "Framework/PluginFactory.h"

@@ -4,7 +4,7 @@
 #include "AlpakaDataFormats/SiPixelClustersAlpaka.h"
 #include "AlpakaDataFormats/SiPixelDigisAlpaka.h"
 #include "AlpakaDataFormats/TrackingRecHit2DAlpaka.h"
-#include "DataFormats/ZVertexAlpaka.h"
+#include "AlpakaDataFormats/ZVertexAlpaka.h"
 #include "Framework/EventSetup.h"
 #include "Framework/Event.h"
 #include "Framework/PluginFactory.h"
