@@ -4,7 +4,7 @@
 #include "AlpakaDataFormats/SiPixelClustersAlpaka.h"
 #include "AlpakaDataFormats/SiPixelDigisAlpaka.h"
 #include "AlpakaDataFormats/TrackingRecHit2DAlpaka.h"
-//#include "DataFormats/ZVertexSoA.h"
+#include "DataFormats/ZVertexAlpaka.h"
 #include "Framework/EventSetup.h"
 #include "Framework/Event.h"
 #include "Framework/PluginFactory.h"
@@ -34,7 +34,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     edm::EDGetTokenT<SiPixelClustersAlpaka> clusterToken_;
     edm::EDGetTokenT<TrackingRecHit2DAlpaka> hitToken_;
     edm::EDGetTokenT<PixelTrackHost> trackToken_;
-    //edm::EDGetTokenT<ZVertexHeterogeneous> vertexToken_;
+    edm::EDGetTokenT<ZVertexHost> vertexToken_;
 
     static std::map<std::string, SimpleAtomicHisto> histos;
   };
@@ -78,8 +78,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       : digiToken_(reg.consumes<SiPixelDigisAlpaka>()),
         clusterToken_(reg.consumes<SiPixelClustersAlpaka>()),
         hitToken_(reg.consumes<TrackingRecHit2DAlpaka>()),
-        trackToken_(reg.consumes<PixelTrackHost>())  //,
-                                                     //vertexToken_(reg.consumes<ZVertexHeterogeneous>())
+        trackToken_(reg.consumes<PixelTrackHost>()),
+	vertexToken_(reg.consumes<ZVertexHost>())
   {}
 
 #ifdef TODO
@@ -223,18 +223,18 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       histos["track_n"].fill(nTracks);
     }
 
-    /*
-  {
-    auto const& vertices = iEvent.get(vertexToken_);
+    {
+      auto const& verticesBuf = iEvent.get(vertexToken_);
+      auto const vertices = alpaka::getPtrNative(verticesBuf);
 
-    histos["vertex_n"].fill(vertices->nvFinal);
-    for (uint32_t i = 0; i < vertices->nvFinal; ++i) {
-      histos["vertex_z"].fill(vertices->zv[i]);
-      histos["vertex_chi2"].fill(vertices->chi2[i]);
-      histos["vertex_ndof"].fill(vertices->ndof[i]);
-      histos["vertex_pt2"].fill(vertices->ptv2[i]);
+      histos["vertex_n"].fill(vertices->nvFinal);
+      for (uint32_t i = 0; i < vertices->nvFinal; ++i) {
+	histos["vertex_z"].fill(vertices->zv[i]);
+	histos["vertex_chi2"].fill(vertices->chi2[i]);
+	histos["vertex_ndof"].fill(vertices->ndof[i]);
+	histos["vertex_pt2"].fill(vertices->ptv2[i]);
+      }
     }
-    }*/
   }
 
   void HistoValidator::endJob() {

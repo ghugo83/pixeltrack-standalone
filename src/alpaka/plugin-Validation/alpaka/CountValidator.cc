@@ -2,7 +2,7 @@
 #include "AlpakaDataFormats/PixelTrackAlpaka.h"
 #include "AlpakaDataFormats/SiPixelClustersAlpaka.h"
 #include "AlpakaDataFormats/SiPixelDigisAlpaka.h"
-//#include "DataFormats/ZVertexSoA.h"
+#include "DataFormats/ZVertexAlpaka.h"
 #include "DataFormats/DigiClusterCount.h"
 #include "DataFormats/TrackCount.h"
 #include "DataFormats/VertexCount.h"
@@ -28,12 +28,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     edm::EDGetTokenT<DigiClusterCount> digiClusterCountToken_;
     edm::EDGetTokenT<TrackCount> trackCountToken_;
-    //edm::EDGetTokenT<VertexCount> vertexCountToken_;
+    edm::EDGetTokenT<VertexCount> vertexCountToken_;
 
     edm::EDGetTokenT<SiPixelDigisAlpaka> digiToken_;
     edm::EDGetTokenT<SiPixelClustersAlpaka> clusterToken_;
     edm::EDGetTokenT<PixelTrackHost> trackToken_;
-    //edm::EDGetTokenT<ZVertexHeterogeneous> vertexToken_;
+    edm::EDGetTokenT<ZVertexHost> vertexToken_;
 
     static std::atomic<int> allEvents;
     static std::atomic<int> goodEvents;
@@ -52,7 +52,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   CountValidator::CountValidator(edm::ProductRegistry& reg)
       : digiClusterCountToken_(reg.consumes<DigiClusterCount>()),
         trackCountToken_(reg.consumes<TrackCount>()),
-        //vertexCountToken_(reg.consumes<VertexCount>()),
+        vertexCountToken_(reg.consumes<VertexCount>()),
         digiToken_(reg.consumes<SiPixelDigisAlpaka>()),
         clusterToken_(reg.consumes<SiPixelClustersAlpaka>()),
         trackToken_(reg.consumes<PixelTrackHost>())  //,
@@ -61,7 +61,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   void CountValidator::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     constexpr float trackTolerance = 0.012f;  // in 200 runs of 1k events all events are withing this tolerance
-    //constexpr int vertexTolerance = 1;
+    constexpr int vertexTolerance = 1;
     std::stringstream ss;
     bool ok = true;
 
@@ -110,21 +110,21 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       }
     }
 
-    /*
-  {
-    auto const& count = iEvent.get(vertexCountToken_);
-    auto const& vertices = iEvent.get(vertexToken_);
+    {
+      auto const& count = iEvent.get(vertexCountToken_);
+      auto const& verticesBuf = iEvent.get(vertexToken_);
+      auto const vertices = alpaka::getPtrNative(verticesBuf);
 
-    auto diff = std::abs(int(vertices->nvFinal) - int(count.nVertices()));
-    if (diff != 0) {
-      sumVertexDifference += diff;
+      auto diff = std::abs(int(vertices->nvFinal) - int(count.nVertices()));
+      if (diff != 0) {
+	sumVertexDifference += diff;
+      }
+      if (diff > vertexTolerance) {
+	ss << "\n N(vertices) is " << vertices->nvFinal << " expected " << count.nVertices() << ", difference " << diff
+	   << " is outside tolerance " << vertexTolerance;
+	ok = false;
+      }
     }
-    if (diff > vertexTolerance) {
-      ss << "\n N(vertices) is " << vertices->nvFinal << " expected " << count.nVertices() << ", difference " << diff
-         << " is outside tolerance " << vertexTolerance;
-      ok = false;
-    }
-    }*/
 
     ++allEvents;
     if (ok) {
