@@ -217,25 +217,29 @@ public:
   // params
   Params const& m_params;
 
-  AlpakaDeviceBuf<Counters> counters_;
+  AlpakaDeviceBuf<Counters> counters_; // NB: Counters: In legacy, sum of the stats of all events.
+  // Here instead, these stats are per event.
+  // Does not matter much, as the stats are desactivated by default anyway, and are for debug only 
+  // (stats are not stored eventually, no interference with any result). 
+  // For debug, better to be able to see info per event that just a sum.
 
   // workspace
   AlpakaDeviceBuf<HitToTuple> device_hitToTuple_;
   AlpakaDeviceBuf<TupleMultiplicity> device_tupleMultiplicity_;
 
-  AlpakaDeviceBuf<GPUCACell> device_theCells_; // NB: In legacy, was allocated on top of buildDoublets
-  AlpakaDeviceBuf<GPUCACell::OuterHitOfCell> device_isOuterHitOfCell_; // NB: In legacy, was allocated on top of buildDoublets
+  AlpakaDeviceBuf<GPUCACell> device_theCells_; // NB: In legacy, was allocated inside buildDoublets.
+  AlpakaDeviceBuf<GPUCACell::OuterHitOfCell> device_isOuterHitOfCell_; // NB: In legacy, was allocated inside buildDoublets.
 
   AlpakaDeviceBuf<CAConstants::CellNeighborsVector> device_theCellNeighbors_;
   AlpakaDeviceBuf<CAConstants::CellTracksVector> device_theCellTracks_;
 
-  // AlpakaDeviceBuf<unsigned char> cellStorage_; // NB: In legacy, was allocated on top of buildDoublets
-  // NB: Here, data from cellstorage_ directly owned by the following:
+  // AlpakaDeviceBuf<unsigned char> cellStorage_; // NB: In legacy, was allocated inside buildDoublets.
+  // NB: Here, data from cellstorage_ (legacy) directly owned by the following:
   AlpakaDeviceBuf<CAConstants::CellNeighbors> device_theCellNeighborsContainer_; // Was non-owning in legacy!
   AlpakaDeviceBuf<CAConstants::CellTracks> device_theCellTracksContainer_; // Was non-owning in legacy!
 
   // AlpakaDeviceBuf<cms::alpakatools::AtomicPairCounter::c_type> device_storage_; // NB: In legacy
-  // NB: Here, data from device_storage_ directly owned by the following:
+  // NB: Here, data from device_storage_ (legacy) directly owned by the following:
   AlpakaDeviceBuf<cms::alpakatools::AtomicPairCounter> device_hitTuple_apc_; // Was non-owning in legacy!
   AlpakaDeviceBuf<cms::alpakatools::AtomicPairCounter> device_hitToTuple_apc_; // Was non-owning in legacy!
   AlpakaDeviceBuf<uint32_t> device_nCells_; // Was non-owning in legacy!
