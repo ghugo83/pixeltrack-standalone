@@ -69,16 +69,15 @@ namespace pixelTrack {
 
 }  // namespace pixelTrack
 
-
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
-//using PixelTrackHeterogeneous = HeterogeneousSoA<pixelTrack::TrackSoA>;
-using PixelTrackAlpaka = AlpakaDeviceBuf<pixelTrack::TrackSoA>;
-using PixelTrackHost = AlpakaHostBuf<pixelTrack::TrackSoA>;
+  //using PixelTrackHeterogeneous = HeterogeneousSoA<pixelTrack::TrackSoA>;
+  using PixelTrackAlpaka = AlpakaDeviceBuf<pixelTrack::TrackSoA>;
+  using PixelTrackHost = AlpakaHostBuf<pixelTrack::TrackSoA>;
 
-// TO DO:ANOTHER OPTION IS TO CREATE A HeterogeneousSoA class, 
-// with a AlpakaDeviceBuf<pixelTrack::TrackSoA> as a data member
-// and a toHostAsync function.
+  // TO DO:ANOTHER OPTION IS TO CREATE A HeterogeneousSoA class,
+  // with a AlpakaDeviceBuf<pixelTrack::TrackSoA> as a data member
+  // and a toHostAsync function.
 
-}
+}  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
 #endif  // CUDADataFormatsTrackTrackSoA_H

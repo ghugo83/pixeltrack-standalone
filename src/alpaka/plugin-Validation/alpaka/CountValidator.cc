@@ -55,8 +55,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         //vertexCountToken_(reg.consumes<VertexCount>()),
         digiToken_(reg.consumes<SiPixelDigisAlpaka>()),
         clusterToken_(reg.consumes<SiPixelClustersAlpaka>()),
-	trackToken_(reg.consumes<PixelTrackHost>())//,
-	//vertexToken_(reg.consumes<ZVertexHeterogeneous>())
+        trackToken_(reg.consumes<PixelTrackHost>())  //,
+                                                     //vertexToken_(reg.consumes<ZVertexHeterogeneous>())
   {}
 
   void CountValidator::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
@@ -86,32 +86,31 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       }
     }
 
-    
-  {
-    auto const& count = iEvent.get(trackCountToken_);
-    auto const& tracksBuf = iEvent.get(trackToken_);
-    auto const tracks = alpaka::getPtrNative(tracksBuf);
+    {
+      auto const& count = iEvent.get(trackCountToken_);
+      auto const& tracksBuf = iEvent.get(trackToken_);
+      auto const tracks = alpaka::getPtrNative(tracksBuf);
 
-    int nTracks = 0;
-    for (int i = 0; i < tracks->stride(); ++i) {
-      if (tracks->nHits(i) > 0) {
-        ++nTracks;
+      int nTracks = 0;
+      for (int i = 0; i < tracks->stride(); ++i) {
+        if (tracks->nHits(i) > 0) {
+          ++nTracks;
+        }
+      }
+
+      auto rel = std::abs(float(nTracks - int(count.nTracks())) / count.nTracks());
+      if (static_cast<unsigned int>(nTracks) != count.nTracks()) {
+        std::lock_guard<std::mutex> guard(sumTrackDifferenceMutex);
+        sumTrackDifference += rel;
+      }
+      if (rel >= trackTolerance) {
+        ss << "\n N(tracks) is " << nTracks << " expected " << count.nTracks() << ", relative difference " << rel
+           << " is outside tolerance " << trackTolerance;
+        ok = false;
       }
     }
 
-    auto rel = std::abs(float(nTracks - int(count.nTracks())) / count.nTracks());
-    if (static_cast<unsigned int>(nTracks) != count.nTracks()) {
-      std::lock_guard<std::mutex> guard(sumTrackDifferenceMutex);
-      sumTrackDifference += rel;
-    }
-    if (rel >= trackTolerance) {
-      ss << "\n N(tracks) is " << nTracks << " expected " << count.nTracks() << ", relative difference " << rel
-         << " is outside tolerance " << trackTolerance;
-      ok = false;
-    }
-  }
-
-  /*
+    /*
   {
     auto const& count = iEvent.get(vertexCountToken_);
     auto const& vertices = iEvent.get(vertexToken_);

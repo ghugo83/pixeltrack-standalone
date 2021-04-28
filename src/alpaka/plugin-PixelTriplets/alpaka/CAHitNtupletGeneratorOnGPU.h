@@ -18,41 +18,41 @@ namespace edm {
 }  // namespace edm
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
-class CAHitNtupletGeneratorOnGPU {
-public:
-  using HitsOnGPU = TrackingRecHit2DSOAView;
-  using HitsOnCPU = TrackingRecHit2DAlpaka;
-  using hindex_type = TrackingRecHit2DSOAView::hindex_type;
+  class CAHitNtupletGeneratorOnGPU {
+  public:
+    using HitsOnGPU = TrackingRecHit2DSOAView;
+    using HitsOnCPU = TrackingRecHit2DAlpaka;
+    using hindex_type = TrackingRecHit2DSOAView::hindex_type;
 
-  using Quality = pixelTrack::Quality;
-  using OutputSoA = pixelTrack::TrackSoA;
-  using HitContainer = pixelTrack::HitContainer;
-  using Tuple = HitContainer;
+    using Quality = pixelTrack::Quality;
+    using OutputSoA = pixelTrack::TrackSoA;
+    using HitContainer = pixelTrack::HitContainer;
+    using Tuple = HitContainer;
 
-  using QualityCuts = cAHitNtupletGenerator::QualityCuts;
-  using Params = cAHitNtupletGenerator::Params;
-  using Counters = cAHitNtupletGenerator::Counters;
+    using QualityCuts = cAHitNtupletGenerator::QualityCuts;
+    using Params = cAHitNtupletGenerator::Params;
+    using Counters = cAHitNtupletGenerator::Counters;
 
-public:
-  CAHitNtupletGeneratorOnGPU(edm::ProductRegistry& reg);
+  public:
+    CAHitNtupletGeneratorOnGPU(edm::ProductRegistry& reg);
 
-  ~CAHitNtupletGeneratorOnGPU();
+    ~CAHitNtupletGeneratorOnGPU();
 
-  PixelTrackAlpaka makeTuplesAsync(TrackingRecHit2DAlpaka const& hits_d, float bfield, Queue& queue) const;
+    PixelTrackAlpaka makeTuplesAsync(TrackingRecHit2DAlpaka const& hits_d, float bfield, Queue& queue) const;
 
-private:
+  private:
 #ifdef TODO
-  void buildDoublets(HitsOnCPU const& hh, cudaStream_t stream) const;
+    void buildDoublets(HitsOnCPU const& hh, cudaStream_t stream) const;
 
-  void hitNtuplets(HitsOnCPU const& hh, const edm::EventSetup& es, bool useRiemannFit, cudaStream_t cudaStream);
+    void hitNtuplets(HitsOnCPU const& hh, const edm::EventSetup& es, bool useRiemannFit, cudaStream_t cudaStream);
 
-  void launchKernels(HitsOnCPU const& hh, bool useRiemannFit, cudaStream_t cudaStream) const;
+    void launchKernels(HitsOnCPU const& hh, bool useRiemannFit, cudaStream_t cudaStream) const;
 #endif
 
-  Params m_params;
+    Params m_params;
 
-  //AlpakaDeviceBuf<Counters> m_counters;
-};
-}
+    //AlpakaDeviceBuf<Counters> m_counters;
+  };
+}  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
 #endif  // RecoPixelVertexing_PixelTriplets_plugins_CAHitNtupletGeneratorOnGPU_h

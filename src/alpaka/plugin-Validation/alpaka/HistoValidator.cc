@@ -77,9 +77,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   HistoValidator::HistoValidator(edm::ProductRegistry& reg)
       : digiToken_(reg.consumes<SiPixelDigisAlpaka>()),
         clusterToken_(reg.consumes<SiPixelClustersAlpaka>()),
-      hitToken_(reg.consumes<TrackingRecHit2DAlpaka>()),
-      trackToken_(reg.consumes<PixelTrackHost>())//,
-	//vertexToken_(reg.consumes<ZVertexHeterogeneous>())
+        hitToken_(reg.consumes<TrackingRecHit2DAlpaka>()),
+        trackToken_(reg.consumes<PixelTrackHost>())  //,
+                                                     //vertexToken_(reg.consumes<ZVertexHeterogeneous>())
   {}
 
 #ifdef TODO
@@ -124,7 +124,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     Queue queue(device);
     auto const h_adcBuf = digis.adcToHostAsync(queue);
     auto const h_adc = alpaka::getPtrNative(h_adcBuf);
-    
+
     auto const d_clusInModuleView =
         cms::alpakatools::createDeviceView<uint32_t>(clusters.clusInModule(), gpuClustering::MaxNumModules);
     auto h_clusInModuleBuf{cms::alpakatools::allocHostBuf<uint32_t>(gpuClustering::MaxNumModules)};
@@ -198,32 +198,32 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       histos["hit_sizex"].fill(h_sizex[i]);
       histos["hit_sizey"].fill(h_sizey[i]);
     }
-    
+
     {
       auto const& tracksBuf = iEvent.get(trackToken_);
       auto const tracks = alpaka::getPtrNative(tracksBuf);
 
       int nTracks = 0;
       for (int i = 0; i < tracks->stride(); ++i) {
-	if (tracks->nHits(i) > 0 and tracks->quality(i) >= trackQuality::loose) {
-	  ++nTracks;
-	  histos["track_nhits"].fill(tracks->nHits(i));
-	  histos["track_chi2"].fill(tracks->chi2(i));
-	  histos["track_pt"].fill(tracks->pt(i));
-	  histos["track_eta"].fill(tracks->eta(i));
-	  histos["track_phi"].fill(tracks->phi(i));
-	  histos["track_tip"].fill(tracks->tip(i));
-	  histos["track_tip_zoom"].fill(tracks->tip(i));
-	  histos["track_zip"].fill(tracks->zip(i));
-	  histos["track_zip_zoom"].fill(tracks->zip(i));
-	  histos["track_quality"].fill(tracks->quality(i));
-	}
+        if (tracks->nHits(i) > 0 and tracks->quality(i) >= trackQuality::loose) {
+          ++nTracks;
+          histos["track_nhits"].fill(tracks->nHits(i));
+          histos["track_chi2"].fill(tracks->chi2(i));
+          histos["track_pt"].fill(tracks->pt(i));
+          histos["track_eta"].fill(tracks->eta(i));
+          histos["track_phi"].fill(tracks->phi(i));
+          histos["track_tip"].fill(tracks->tip(i));
+          histos["track_tip_zoom"].fill(tracks->tip(i));
+          histos["track_zip"].fill(tracks->zip(i));
+          histos["track_zip_zoom"].fill(tracks->zip(i));
+          histos["track_quality"].fill(tracks->quality(i));
+        }
       }
 
       histos["track_n"].fill(nTracks);
     }
 
-  /*
+    /*
   {
     auto const& vertices = iEvent.get(vertexToken_);
 
