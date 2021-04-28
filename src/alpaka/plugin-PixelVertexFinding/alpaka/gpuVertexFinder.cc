@@ -5,7 +5,7 @@
 #include "gpuClusterTracksDBSCAN.h"
 #include "gpuClusterTracksIterative.h"
 #include "gpuFitVertices.h"
-//#include "gpuSortByPt2.h"
+#include "gpuSortByPt2.h"
 #include "gpuSplitVertices.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
@@ -70,7 +70,7 @@ namespace gpuVertexFinder {
       alpaka::syncBlockThreads(acc);
       fitVertices(acc, pdata, pws, 5000.);
       alpaka::syncBlockThreads(acc);
-      sortByPt2(pdata, pws);
+      sortByPt2(acc, pdata, pws);
     }
   };
 #else
@@ -96,7 +96,7 @@ namespace gpuVertexFinder {
 				  gpuVertexFinder::ZVertices* pdata, gpuVertexFinder::WorkSpace* pws) const {
       fitVertices(acc, pdata, pws, 5000.);
       alpaka::syncBlockThreads(acc);
-      sortByPt2(pdata, pws);
+      sortByPt2(acc, pdata, pws);
     }
   };
   #endif*/

@@ -71,8 +71,11 @@ namespace gpuVertexFinder {
       nn[i] = 0;
     });
     alpaka::syncBlockThreads(acc);
-    if (threadIdxLocal < 32)
-      hws[threadIdxLocal] = 0;  // used by prefix scan...
+
+    cms::alpakatools::for_each_element_in_thread_1D_index_in_block(acc, 32, [&](uint32_t i) {
+	hws[i] = 0;  // used by prefix scan...
+      });
+
     alpaka::syncBlockThreads(acc);
     hist.finalize(acc, hws);
     alpaka::syncBlockThreads(acc);
