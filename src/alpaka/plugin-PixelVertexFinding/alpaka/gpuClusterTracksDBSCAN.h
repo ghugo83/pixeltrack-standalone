@@ -206,7 +206,7 @@ cms::alpakatools::for_each_element_1D_block_stride(acc, nt, [&](uint32_t i) {
     cms::alpakatools::for_each_element_1D_block_stride(acc, nt, [&](uint32_t i) {
       if (iv[i] == int(i)) {
         if (nn[i] >= minT) {
-          auto old = atomicInc(&foundClusters, 0xffffffff);
+          auto old = alpaka::atomicOp<alpaka::AtomicInc>(acc, &foundClusters, 0xffffffff);
           iv[i] = -(old + 1);
         } else {  // noise
           iv[i] = -9998;
