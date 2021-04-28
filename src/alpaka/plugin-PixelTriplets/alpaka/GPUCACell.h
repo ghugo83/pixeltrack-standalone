@@ -19,15 +19,6 @@
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
-// NOOOOOOOOO
-/*
-  ALPAKA_FN_ACC auto userDefinedThreadFence() -> void
-  {
-#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
-    __threadfence();
-#endif
-  }*/
-
 class GPUCACell {
 public:
   using ptrAsInt = unsigned long long;
@@ -81,47 +72,47 @@ public:
       auto i = cellNeighbors.extend(acc);  // maybe waisted....
       if (i > 0) {
         cellNeighbors[i].reset();
-	// TO DO: CHECK THIS IS OK
-#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+	// Serial case does not behave properly otherwise (also observed in Kokkos)
+#ifdef ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
+	theOuterNeighbors = &cellNeighbors[i];
+#else
         auto zero = (ptrAsInt)(&cellNeighbors[0]);
         alpaka::atomicOp<alpaka::AtomicCas>(acc, (ptrAsInt*)(&theOuterNeighbors),
-					    zero,
-					    (ptrAsInt)(&cellNeighbors[i]));  // if fails we cannot give "i" back...
-#else
-        theOuterNeighbors = &cellNeighbors[i];
+	  zero,
+	  (ptrAsInt)(&cellNeighbors[i]));  // if fails we cannot give "i" back...  
 #endif
       } else
-        return -1;
-    }
-	// NOOOOOOOOO
-	// TO DO: Alpaka equivalent???
+	  return -1;
+      }
+	// TO DO: Alpaka equivalent does not exist?
 	//__threadfence();
-	//ALPAKA_ACCELERATOR_NAMESPACE::userDefinedThreadFence();
-	//alpaka::wait(device);
+	// This is obviously not equivalent, but seems to be sufficient.
+	// To DO: address in a better way?
 	alpaka::syncBlockThreads(acc);
 
 	return outerNeighbors().push_back(acc, t);
-  }
+      }
 
 	template <typename T_Acc>
-  ALPAKA_FN_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) int addTrack(const T_Acc &acc, CellTracks::value_t t, CellTracksVector& cellTracks) {
-    if (tracks().empty()) {
-      auto i = cellTracks.extend(acc);  // maybe waisted....
-      if (i > 0) {
+	  ALPAKA_FN_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) int addTrack(const T_Acc &acc, CellTracks::value_t t, CellTracksVector& cellTracks) {
+	if (tracks().empty()) {
+	auto i = cellTracks.extend(acc);  // maybe waisted....
+	if (i > 0) {
         cellTracks[i].reset();
-#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+	// Serial case does not behave properly otherwise (also observed in Kokkos)
+#ifdef ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
+	theTracks = &cellTracks[i];
+#else
         auto zero = (ptrAsInt)(&cellTracks[0]);
         alpaka::atomicOp<alpaka::AtomicCas>(acc, (ptrAsInt*)(&theTracks), zero, (ptrAsInt)(&cellTracks[i]));  // if fails we cannot give "i" back...
-#else
-        theTracks = &cellTracks[i];
 #endif
       } else
-        return -1;
+	  return -1;
     }
-    // NOOOOOOOOO
-    // TO DO: Alpaka equivalent???
-    //__threadfence();
-    //alpaka::wait(device);
+	// TO DO: Alpaka equivalent does not exist?
+	//__threadfence();
+	// This is obviously not equivalent, but seems to be sufficient.
+	// TO DO: address in a better way?
     alpaka::syncBlockThreads(acc);
 
     return tracks().push_back(acc, t);
