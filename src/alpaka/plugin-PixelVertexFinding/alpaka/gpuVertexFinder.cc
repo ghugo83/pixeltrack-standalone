@@ -4,8 +4,8 @@
 #include "gpuClusterTracksByDensity.h"
 #include "gpuClusterTracksDBSCAN.h"
 #include "gpuClusterTracksIterative.h"
-/*#include "gpuFitVertices.h"
-#include "gpuSortByPt2.h"
+#include "gpuFitVertices.h"
+/*#include "gpuSortByPt2.h"
 #include "gpuSplitVertices.h"*/
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
@@ -64,11 +64,11 @@ namespace gpuVertexFinder {
 				  ) const {
       clusterTracksByDensity(acc, pdata, pws, minT, eps, errmax, chi2max);
       alpaka::syncBlockThreads(acc);
-      fitVertices(pdata, pws, 50.);
+      fitVertices(acc, pdata, pws, 50.);
       alpaka::syncBlockThreads(acc);
       splitVertices(pdata, pws, 9.f);
       alpaka::syncBlockThreads(acc);
-      fitVertices(pdata, pws, 5000.);
+      fitVertices(acc, pdata, pws, 5000.);
       alpaka::syncBlockThreads(acc);
       sortByPt2(pdata, pws);
     }
@@ -86,7 +86,7 @@ namespace gpuVertexFinder {
 				  ) const {
       clusterTracksByDensity(acc, pdata, pws, minT, eps, errmax, chi2max);
       alpaka::syncBlockThreads(acc);
-      fitVertices(pdata, pws, 50.);
+      fitVertices(acc, pdata, pws, 50.);
     }
   };
 
@@ -94,7 +94,7 @@ namespace gpuVertexFinder {
     template <typename T_Acc>
     ALPAKA_FN_ACC void operator()(const T_Acc &acc,
 				  gpuVertexFinder::ZVertices* pdata, gpuVertexFinder::WorkSpace* pws) const {
-      fitVertices(pdata, pws, 5000.);
+      fitVertices(acc, pdata, pws, 5000.);
       alpaka::syncBlockThreads(acc);
       sortByPt2(pdata, pws);
     }
