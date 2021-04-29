@@ -33,6 +33,9 @@ uint32_t& nvIntermediate = ws.nvIntermediate;
 int32_t* __restrict__ nn = data.ndof;
 int32_t* __restrict__ iv = ws.iv;
 
+assert(pdata);
+assert(zt);
+
 assert(nvFinal <= nvIntermediate);
 nvFinal = nvIntermediate;
 auto foundClusters = nvFinal;

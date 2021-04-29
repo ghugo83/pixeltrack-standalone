@@ -16,7 +16,8 @@ namespace gpuVertexFinder {
     template <typename T_Acc>
     ALPAKA_FN_ACC void operator()(const T_Acc &acc,
                                   TkSoA const* ptracks, ZVertexSoA* soa, WorkSpace* pws, float ptMin) const {
-     
+assert(ptracks);
+assert(soa);
       auto const& tracks = *ptracks;
       auto const& fit = tracks.stateAtBS;
       auto const* quality = tracks.qualityData();
@@ -103,9 +104,11 @@ namespace gpuVertexFinder {
 
   ZVertexAlpaka Producer::makeAsync(TkSoA const* tksoa, float ptMin, Queue& queue) const {
     // std::cout << "producing Vertices on GPU" << std::endl;
+    assert(tksoa);
 
     ZVertexAlpaka vertices{cms::alpakatools::allocDeviceBuf<ZVertexSoA>(1u)};
     auto* soa = alpaka::getPtrNative(vertices);
+    assert(soa);
 
     auto ws_dBuf{cms::alpakatools::allocDeviceBuf<WorkSpace>(1u)};
 auto ws_d = alpaka::getPtrNative(ws_dBuf);

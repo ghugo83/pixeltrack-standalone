@@ -44,6 +44,9 @@ namespace gpuVertexFinder {
     int32_t* __restrict__ nn = data.ndof;
     int32_t* __restrict__ iv = ws.iv;
 
+    assert(pdata);
+    assert(zt);
+
     using Hist = cms::alpakatools::HistoContainer<uint8_t, 256, 16000, 8, uint16_t>;
     auto&& hist = alpaka::declareSharedVar<Hist, __COUNTER__>(acc);
     auto&& hws = alpaka::declareSharedVar<Hist::Counter[32], __COUNTER__>(acc);
