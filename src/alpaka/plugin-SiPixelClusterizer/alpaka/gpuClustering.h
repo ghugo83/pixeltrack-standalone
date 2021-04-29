@@ -80,9 +80,9 @@ namespace gpuClustering {
 
       // Get thread / CPU element indices in block.
       const auto& [firstElementIdxNoStride, endElementIdxNoStride] =
-          cms::alpakatools::element_index_range_in_block(acc, Vec1::all(firstPixel));
-      uint32_t firstElementIdx = firstElementIdxNoStride[0u];
-      uint32_t endElementIdx = endElementIdxNoStride[0u];
+          cms::alpakatools::element_index_range_in_block(acc, firstPixel);
+      uint32_t firstElementIdx = firstElementIdxNoStride;
+      uint32_t endElementIdx = endElementIdxNoStride;
 
       // skip threads not associated to an existing pixel
       for (uint32_t i = firstElementIdx; i < numElements; ++i) {
