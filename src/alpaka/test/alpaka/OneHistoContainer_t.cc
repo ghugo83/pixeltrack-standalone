@@ -20,8 +20,8 @@ struct mykernel {
 
     using Hist = cms::alpakatools::HistoContainer<T, NBINS, 12000, S, uint16_t>;
 
-    auto&& hist = alpaka::declareSharedVar<Hist, __COUNTER__>(acc);
-    auto&& ws = alpaka::declareSharedVar<typename Hist::Counter[32], __COUNTER__>(acc);
+    auto& hist = alpaka::declareSharedVar<Hist, __COUNTER__>(acc);
+    auto& ws = alpaka::declareSharedVar<typename Hist::Counter[32], __COUNTER__>(acc);
 
     // set off zero
     cms::alpakatools::for_each_element_1D_block_stride(acc, Hist::totbins(), [&](uint32_t j) { hist.off[j] = 0; });

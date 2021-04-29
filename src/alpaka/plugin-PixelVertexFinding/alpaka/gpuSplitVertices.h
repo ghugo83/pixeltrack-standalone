@@ -37,12 +37,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       assert(zt);
 
       constexpr uint32_t MAXTK = 512;
-      auto&& it = alpaka::declareSharedVar<uint32_t[MAXTK], __COUNTER__>(acc);   // track index
-      auto&& zz = alpaka::declareSharedVar<float[MAXTK], __COUNTER__>(acc);      // z pos
-      auto&& newV = alpaka::declareSharedVar<uint8_t[MAXTK], __COUNTER__>(acc);  // 0 or 1
-      auto&& ww = alpaka::declareSharedVar<float[MAXTK], __COUNTER__>(acc);      // z weight
+      auto& it = alpaka::declareSharedVar<uint32_t[MAXTK], __COUNTER__>(acc);   // track index
+      auto& zz = alpaka::declareSharedVar<float[MAXTK], __COUNTER__>(acc);      // z pos
+      auto& newV = alpaka::declareSharedVar<uint8_t[MAXTK], __COUNTER__>(acc);  // 0 or 1
+      auto& ww = alpaka::declareSharedVar<float[MAXTK], __COUNTER__>(acc);      // z weight
 
-      auto&& nq = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);  // number of track for this vertex
+      auto& nq = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);  // number of track for this vertex
 
       const uint32_t blockIdx(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
       const uint32_t gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
@@ -74,8 +74,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         });
 
         // the new vertices
-        auto&& znew = alpaka::declareSharedVar<float[2], __COUNTER__>(acc);
-        auto&& wnew = alpaka::declareSharedVar<float[2], __COUNTER__>(acc);
+        auto& znew = alpaka::declareSharedVar<float[2], __COUNTER__>(acc);
+        auto& wnew = alpaka::declareSharedVar<float[2], __COUNTER__>(acc);
         alpaka::syncBlockThreads(acc);
 
         assert(int(nq) == nn[kv] + 1);
@@ -133,7 +133,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           continue;
 
         // get a new global vertex
-        auto&& igv = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);
+        auto& igv = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);
         if (0 == threadIdxLocal)
           igv = alpaka::atomicOp<alpaka::AtomicAdd>(acc, &ws.nvIntermediate, 1u);
         alpaka::syncBlockThreads(acc);

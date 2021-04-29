@@ -52,8 +52,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       assert(zt);
 
       using Hist = cms::alpakatools::HistoContainer<uint8_t, 256, 16000, 8, uint16_t>;
-      auto&& hist = alpaka::declareSharedVar<Hist, __COUNTER__>(acc);
-      auto&& hws = alpaka::declareSharedVar<Hist::Counter[32], __COUNTER__>(acc);
+      auto& hist = alpaka::declareSharedVar<Hist, __COUNTER__>(acc);
+      auto& hws = alpaka::declareSharedVar<Hist::Counter[32], __COUNTER__>(acc);
 
       cms::alpakatools::for_each_element_1D_block_stride(acc, Hist::totbins(), [&](uint32_t j) { hist.off[j] = 0; });
       alpaka::syncBlockThreads(acc);
@@ -184,7 +184,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       alpaka::syncBlockThreads(acc);
 #endif
 
-      auto&& foundClusters = alpaka::declareSharedVar<unsigned int, __COUNTER__>(acc);
+      auto& foundClusters = alpaka::declareSharedVar<unsigned int, __COUNTER__>(acc);
       foundClusters = 0;
       alpaka::syncBlockThreads(acc);
 

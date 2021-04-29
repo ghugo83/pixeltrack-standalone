@@ -49,7 +49,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       });
 
       // only for test
-      auto&& noise = alpaka::declareSharedVar<int, __COUNTER__>(acc);
+      auto& noise = alpaka::declareSharedVar<int, __COUNTER__>(acc);
       const uint32_t threadIdxLocal(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[0u]);
       if (verbose && 0 == threadIdxLocal)
         noise = 0;

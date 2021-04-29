@@ -65,7 +65,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         using ClusParams = pixelCPEforGPU::ClusParams;
 
         // as usual one block per module
-        auto&& clusParams = alpaka::declareSharedVar<ClusParams, __COUNTER__>(acc);
+        auto& clusParams = alpaka::declareSharedVar<ClusParams, __COUNTER__>(acc);
 
         auto me = clusters.moduleId(blockIdx);
         int nclus = clusters.clusInModule(me);

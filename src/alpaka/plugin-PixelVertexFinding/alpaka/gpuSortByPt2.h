@@ -53,7 +53,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         return;
       }
 #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
-      auto&& sws = alpaka::declareSharedVar<uint16_t[1024], __COUNTER__>(acc);
+      auto& sws = alpaka::declareSharedVar<uint16_t[1024], __COUNTER__>(acc);
       // sort using only 16 bits
       cms::alpakatools::radixSort<Acc1, float, 2>(acc, ptv2, sortInd, sws, nvFinal);
 #else

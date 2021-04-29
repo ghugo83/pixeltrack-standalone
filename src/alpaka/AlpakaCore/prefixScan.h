@@ -141,7 +141,7 @@ namespace cms {
         uint32_t const threadDimension(alpaka::getWorkDiv<alpaka::Thread, alpaka::Elems>(acc)[0u]);
         uint32_t const blockIdx(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
 
-        auto&& ws = alpaka::declareSharedVar<T[32], __COUNTER__>(acc);
+        auto& ws = alpaka::declareSharedVar<T[32], __COUNTER__>(acc);
         // first each block does a scan of size 1024; (better be enough blocks....)
 #ifndef NDEBUG
 	uint32_t const gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
@@ -180,7 +180,7 @@ namespace cms {
 
         alpaka::syncBlockThreads(acc);
 
-        auto&& ws = alpaka::declareSharedVar<T[32], __COUNTER__>(acc);
+        auto& ws = alpaka::declareSharedVar<T[32], __COUNTER__>(acc);
         blockPrefixScan(acc, psum, psum, numBlocks, ws);
 
         for (int elemId = 0; elemId < static_cast<int>(threadDimension); ++elemId) {
