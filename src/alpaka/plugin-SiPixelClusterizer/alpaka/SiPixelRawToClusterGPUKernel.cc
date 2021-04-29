@@ -485,10 +485,12 @@ namespace pixelgpudetails {
                                   uint32_t *__restrict__ moduleStart) const {
       assert(gpuClustering::MaxNumModules < 2048);  // easy to extend at least till 32*1024
 
+#ifndef NDEBUG
       const uint32_t blockIdxLocal(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
       assert(0 == blockIdxLocal);
       const uint32_t gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
       assert(1 == gridDimension);
+#endif
 
       // limit to MaxHitsInModule;
       cms::alpakatools::for_each_element_1D_block_stride(acc, gpuClustering::MaxNumModules, [&](uint32_t i) {

@@ -62,6 +62,7 @@ struct mykernel {
     assert(N == hist.size());
 
     // bin
+#ifndef NDEBUG
     cms::alpakatools::for_each_element_1D_block_stride(acc, hist.size() - 1, [&](uint32_t j) {
       auto p = hist.begin() + j;
       assert((*p) < N);
@@ -69,20 +70,25 @@ struct mykernel {
       auto k2 = Hist::bin(v[*(p + 1)]);
       assert(k2 >= k1);
     });
+#endif
 
     // forEachInWindow
     cms::alpakatools::for_each_element_1D_block_stride(acc, hist.size(), [&](uint32_t i) {
       auto p = hist.begin() + i;
       auto j = *p;
+#ifndef NDEBUG
       auto b0 = Hist::bin(v[j]);
+#endif
       int tot = 0;
       auto ftest = [&](unsigned int k) {
         assert(k < N);
         ++tot;
       };
       cms::alpakatools::forEachInWindow(hist, v[j], v[j], ftest);
+#ifndef NDEBUG
       int rtot = hist.size(b0);
       assert(tot == rtot);
+#endif
       tot = 0;
       auto vm = int(v[j]) - DELTA;
       auto vp = int(v[j]) + DELTA;
@@ -93,10 +99,12 @@ struct mykernel {
       vp = std::max(vp, 0);
       assert(vp >= vm);
       cms::alpakatools::forEachInWindow(hist, vm, vp, ftest);
+#ifndef NDEBUG
       int bp = Hist::bin(vp);
       int bm = Hist::bin(vm);
       rtot = hist.end(bp) - hist.begin(bm);
       assert(tot == rtot);
+#endif
     });
   }
 };

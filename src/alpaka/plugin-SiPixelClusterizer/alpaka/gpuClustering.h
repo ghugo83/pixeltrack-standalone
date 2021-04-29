@@ -169,8 +169,11 @@ namespace gpuClustering {
       // NB: can be tuned.
       constexpr uint32_t threadDimension = 256;
 #endif
+
+#ifndef NDEBUG
       const uint32_t runTimeThreadDimension(alpaka::getWorkDiv<alpaka::Thread, alpaka::Elems>(acc)[0u]);
       assert(runTimeThreadDimension <= threadDimension);
+#endif
 
       // nearest neighbour
       // allocate space for duplicate pixels: a pixel can appear more than once with different charge in the same event
@@ -280,8 +283,10 @@ namespace gpuClustering {
         if (threadIdxLocal == 0)
           n0 = nloops;
         alpaka::syncBlockThreads(acc);
+#ifndef NDEBUG
         auto ok = n0 == nloops;
         assert(alpaka::syncBlockThreadsPredicate<alpaka::BlockAnd>(acc, ok));
+#endif
         if (thisModuleId % 100 == 1)
           if (threadIdxLocal == 0)
             printf("# loops %d\n", nloops);
