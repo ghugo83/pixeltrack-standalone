@@ -44,7 +44,7 @@ namespace cms {
      */
     template <typename TAcc>
     ALPAKA_FN_ACC std::pair<Idx, Idx> element_index_range_in_block(const TAcc& acc,
-                                                                     const Idx& elementIdxShift,
+                                                                     const Idx elementIdxShift,
                                                                      const Idx dimIndex = 0u) {
 
       // Take into account the thread index in block.
@@ -69,7 +69,7 @@ namespace cms {
     template <typename TAcc>
     ALPAKA_FN_ACC std::pair<Idx, Idx> element_index_range_in_block_truncated(const TAcc& acc,
                                                                                const Idx maxNumberOfElements,
-                                                                               const Idx& elementIdxShift,
+                                                                               const Idx elementIdxShift,
                                                                                const Idx dimIndex = 0u) {
       // Check dimension
       //static_assert(alpaka::Dim<TAcc>::value == Dim1::value,
@@ -90,7 +90,7 @@ namespace cms {
      */
     template <typename TAcc>
     ALPAKA_FN_ACC std::pair<Idx, Idx> element_index_range_in_grid(const TAcc& acc,
-                                                                    Idx& elementIdxShift,
+                                                                    Idx elementIdxShift,
                                                                     const Idx dimIndex = 0u) {
       // Take into account the block index in grid.
       const Idx blockIdxInGrid(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[dimIndex]);
@@ -110,7 +110,7 @@ namespace cms {
     template <typename TAcc>
     ALPAKA_FN_ACC std::pair<Idx, Idx> element_index_range_in_grid_truncated(const TAcc& acc,
                                                                               const Idx maxNumberOfElements,
-                                                                              Idx& elementIdxShift,
+                                                                              Idx elementIdxShift,
                                                                               const Idx dimIndex = 0u) {
       // Check dimension
       //static_assert(dimIndex <= alpaka::Dim<TAcc>::value,
@@ -266,11 +266,9 @@ namespace cms {
                                                        const Idx elementIdxShift,
                                                        const Func func,
                                                        const Idx dimIndex = 0) {
-      Idx elementIdxShiftCopy = elementIdxShift;
-
       // Get thread / element indices in block.
       const auto& [firstElementIdxNoStride, endElementIdxNoStride] =
-          cms::alpakatools::element_index_range_in_grid(acc, elementIdxShiftCopy, dimIndex);
+          cms::alpakatools::element_index_range_in_grid(acc, elementIdxShift, dimIndex);
 
       // Stride = grid size.
       const Idx gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Elems>(acc)[dimIndex]);

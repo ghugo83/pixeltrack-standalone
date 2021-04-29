@@ -42,15 +42,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         const uint32_t dimIndexY = 0u;
         const uint32_t dimIndexX = 1u;
         const uint32_t blockDimensionX(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[dimIndexX]);
-        Idx elementsShiftX(0u);
         const auto& [firstElementIdxNoStrideX, endElementIdxNoStrideX] =
-            cms::alpakatools::element_index_range_in_block(acc, elementsShiftX, dimIndexX);
+            cms::alpakatools::element_index_range_in_block(acc, 0u, dimIndexX);
 
         // Outermost loop on Y
         const uint32_t gridDimensionY(alpaka::getWorkDiv<alpaka::Grid, alpaka::Elems>(acc)[dimIndexY]);
-        Idx elementsShiftY(0u);
         const auto& [firstElementIdxNoStrideY, endElementIdxNoStrideY] =
-            cms::alpakatools::element_index_range_in_grid(acc, elementsShiftY, dimIndexY);
+            cms::alpakatools::element_index_range_in_grid(acc, 0u, dimIndexY);
         uint32_t firstElementIdxY = firstElementIdxNoStrideY;
         uint32_t endElementIdxY = endElementIdxNoStrideY;
         for (uint32_t idy = firstElementIdxY, nt = nHits; idy < nt; ++idy) {
