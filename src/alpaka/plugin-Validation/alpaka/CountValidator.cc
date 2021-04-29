@@ -55,8 +55,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         vertexCountToken_(reg.consumes<VertexCount>()),
         digiToken_(reg.consumes<SiPixelDigisAlpaka>()),
         clusterToken_(reg.consumes<SiPixelClustersAlpaka>()),
-        trackToken_(reg.consumes<PixelTrackHost>())  //,
-                                                     //vertexToken_(reg.consumes<ZVertexHeterogeneous>())
+        trackToken_(reg.consumes<PixelTrackHost>()),
+	vertexToken_(reg.consumes<ZVertexHost>())
   {}
 
   void CountValidator::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
