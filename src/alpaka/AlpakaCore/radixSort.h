@@ -243,14 +243,13 @@ namespace cms {
       radixSortImpl<T_Acc, I, NS>(acc, (I const*)(a), ind, ind2, size, reorderFloat<T_Acc, I>);
     }
 
-    /* TO DO, but not needed
+    /* Not needed
 template <typename T, int NS = sizeof(T)>
 ALPAKA_FN_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) void radixSortMulti(T const* v,
                                                uint16_t* index,
                                                uint32_t const* offsets,
                                                uint16_t* workspace) {
 
-  // NOOOOOO
   extern __shared__ uint16_t ws[];
 
   auto a = v + offsets[blockIdx.x];
