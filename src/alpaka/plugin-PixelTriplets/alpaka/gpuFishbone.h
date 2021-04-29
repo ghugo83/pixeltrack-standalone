@@ -42,17 +42,17 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         const uint32_t dimIndexY = 0u;
         const uint32_t dimIndexX = 1u;
         const uint32_t blockDimensionX(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[dimIndexX]);
-        Vec1 elementsShiftX(Vec1::all(0u));
+        Idx elementsShiftX(0u);
         const auto& [firstElementIdxNoStrideX, endElementIdxNoStrideX] =
             cms::alpakatools::element_index_range_in_block(acc, elementsShiftX, dimIndexX);
 
         // Outermost loop on Y
         const uint32_t gridDimensionY(alpaka::getWorkDiv<alpaka::Grid, alpaka::Elems>(acc)[dimIndexY]);
-        Vec1 elementsShiftY(Vec1::all(0u));
+        Idx elementsShiftY(0u);
         const auto& [firstElementIdxNoStrideY, endElementIdxNoStrideY] =
             cms::alpakatools::element_index_range_in_grid(acc, elementsShiftY, dimIndexY);
-        uint32_t firstElementIdxY = firstElementIdxNoStrideY[0u];
-        uint32_t endElementIdxY = endElementIdxNoStrideY[0u];
+        uint32_t firstElementIdxY = firstElementIdxNoStrideY;
+        uint32_t endElementIdxY = endElementIdxNoStrideY;
         for (uint32_t idy = firstElementIdxY, nt = nHits; idy < nt; ++idy) {
           if (!cms::alpakatools::get_next_element_1D_index_stride(
                   idy, firstElementIdxY, endElementIdxY, gridDimensionY, nt))
@@ -87,8 +87,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           if (sg < 2)
             continue;
           // Here we parallelize in X
-          uint32_t firstElementIdxX = firstElementIdxNoStrideX[0u];
-          uint32_t endElementIdxX = endElementIdxNoStrideX[0u];
+          uint32_t firstElementIdxX = firstElementIdxNoStrideX;
+          uint32_t endElementIdxX = endElementIdxNoStrideX;
           for (uint32_t ic = firstElementIdxX; ic < sg - 1; ++ic) {
             if (!cms::alpakatools::get_next_element_1D_index_stride(
                     ic, firstElementIdxX, endElementIdxX, blockDimensionX, sg - 1))

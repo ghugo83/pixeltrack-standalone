@@ -118,9 +118,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
           const uint32_t blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[0u]);
           const auto& [firstElementIdxNoStride, endElementIdxNoStride] =
-              cms::alpakatools::element_index_range_in_block(acc, Vec1::all(first));
-          uint32_t rowsColsFirstElementIdx = firstElementIdxNoStride[0u];
-          uint32_t rowsColsEndElementIdx = endElementIdxNoStride[0u];
+              cms::alpakatools::element_index_range_in_block(acc, first);
+          uint32_t rowsColsFirstElementIdx = firstElementIdxNoStride;
+          uint32_t rowsColsEndElementIdx = endElementIdxNoStride;
           for (uint32_t i = rowsColsFirstElementIdx; i < numElements; ++i) {
             if (!cms::alpakatools::get_next_element_1D_index_stride(
                     i, rowsColsFirstElementIdx, rowsColsEndElementIdx, blockDimension, numElements))
@@ -149,8 +149,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           // pixmx is not available in the binary dumps
           //auto pixmx = cpeParams->detParams(me).pixmx;
           auto pixmx = std::numeric_limits<uint16_t>::max();
-          uint32_t chargeFirstElementIdx = firstElementIdxNoStride[0u];
-          uint32_t chargeEndElementIdx = endElementIdxNoStride[0u];
+          uint32_t chargeFirstElementIdx = firstElementIdxNoStride;
+          uint32_t chargeEndElementIdx = endElementIdxNoStride;
           for (uint32_t i = chargeFirstElementIdx; i < numElements; ++i) {
             if (!cms::alpakatools::get_next_element_1D_index_stride(
                     i, chargeFirstElementIdx, chargeEndElementIdx, blockDimension, numElements))

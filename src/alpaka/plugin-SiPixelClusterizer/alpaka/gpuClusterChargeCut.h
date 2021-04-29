@@ -47,11 +47,11 @@ namespace gpuClustering {
 
       // Get thread / CPU element indices in block.
       const auto& [firstElementIdxNoStride, endElementIdxNoStride] =
-          cms::alpakatools::element_index_range_in_block(acc, Vec1::all(firstPixel));
+          cms::alpakatools::element_index_range_in_block(acc, firstPixel);
 
       if (nclus > MaxNumClustersPerModules) {
-        uint32_t firstElementIdx = firstElementIdxNoStride[0u];
-        uint32_t endElementIdx = endElementIdxNoStride[0u];
+        uint32_t firstElementIdx = firstElementIdxNoStride;
+        uint32_t endElementIdx = endElementIdxNoStride;
         // remove excess  FIXME find a way to cut charge first....
         for (uint32_t i = firstElementIdx; i < numElements; ++i) {
           if (!cms::alpakatools::get_next_element_1D_index_stride(
@@ -83,8 +83,8 @@ namespace gpuClustering {
       cms::alpakatools::for_each_element_1D_block_stride(acc, nclus, [&](uint32_t i) { charge[i] = 0; });
       alpaka::syncBlockThreads(acc);
 
-      uint32_t firstElementIdx = firstElementIdxNoStride[0u];
-      uint32_t endElementIdx = endElementIdxNoStride[0u];
+      uint32_t firstElementIdx = firstElementIdxNoStride;
+      uint32_t endElementIdx = endElementIdxNoStride;
       for (uint32_t i = firstElementIdx; i < numElements; ++i) {
         if (!cms::alpakatools::get_next_element_1D_index_stride(
                 i, firstElementIdx, endElementIdx, blockDimension, numElements))
@@ -122,8 +122,8 @@ namespace gpuClustering {
       alpaka::syncBlockThreads(acc);
 
       // reassign id
-      firstElementIdx = firstElementIdxNoStride[0u];
-      endElementIdx = endElementIdxNoStride[0u];
+      firstElementIdx = firstElementIdxNoStride;
+      endElementIdx = endElementIdxNoStride;
       for (uint32_t i = firstElementIdx; i < numElements; ++i) {
         if (!cms::alpakatools::get_next_element_1D_index_stride(
                 i, firstElementIdx, endElementIdx, blockDimension, numElements))
