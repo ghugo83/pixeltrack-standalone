@@ -35,6 +35,14 @@ template <typename T_Acc>
   assert(pdata);
   assert(zt);
 
+  constexpr uint32_t MAXTK = 512;
+  auto&& it = alpaka::declareSharedVar<uint32_t[MAXTK], __COUNTER__>(acc);   // track index
+  auto&& zz = alpaka::declareSharedVar<float[MAXTK], __COUNTER__>(acc);      // z pos 
+  auto&& newV = alpaka::declareSharedVar<uint8_t[MAXTK], __COUNTER__>(acc);  // 0 or 1
+  auto&& ww = alpaka::declareSharedVar<float[MAXTK], __COUNTER__>(acc);      // z weight
+
+  auto&& nq = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);  // number of track for this vertex 
+
 
   const uint32_t blockIdx(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
   const uint32_t gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
@@ -46,22 +54,13 @@ template <typename T_Acc>
     if (chi2[kv] < maxChi2 * float(nn[kv]))
       continue;
 
-    constexpr uint32_t MAXTK = 512;
-
     assert((uint32_t)nn[kv] < MAXTK);
 
     if ((uint32_t)nn[kv] >= MAXTK)
       continue;  
     // too bad FIXME	    
-
-    auto&& it = alpaka::declareSharedVar<uint32_t[MAXTK], __COUNTER__>(acc);   // track index
-    auto&& zz = alpaka::declareSharedVar<float[MAXTK], __COUNTER__>(acc);      // z pos 
-    auto&& newV = alpaka::declareSharedVar<uint8_t[MAXTK], __COUNTER__>(acc);  // 0 or 1
-    auto&& ww = alpaka::declareSharedVar<float[MAXTK], __COUNTER__>(acc);      // z weight
-
-    auto&& nq = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);  // number of track for this vertex 
+    
     nq = 0u;
-
     alpaka::syncBlockThreads(acc);
 
     // copy to local
