@@ -69,8 +69,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       // e.g. see  https://nvlabs.github.io/cub/classcub_1_1_warp_scan.html
       const int nPairsMax = CAConstants::maxNumberOfLayerPairs();  // add constexpr?
       assert(nPairs <= nPairsMax);
-      auto&& innerLayerCumulativeSize = alpaka::declareSharedVar<uint32_t[nPairsMax], __COUNTER__>(acc);
-      auto&& ntot = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);
+      auto& innerLayerCumulativeSize = alpaka::declareSharedVar<uint32_t[nPairsMax], __COUNTER__>(acc);
+      auto& ntot = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);
 
       const uint32_t dimIndexY = 0u;
       const uint32_t dimIndexX = 1u;

@@ -18,7 +18,7 @@ namespace cms {
         const T_Acc& acc, T const* a, uint16_t* ind, uint16_t* ind2, uint32_t size) {
       //move negative first...
 
-      auto&& firstNeg = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);
+      auto& firstNeg = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);
       firstNeg = a[ind[0]] < 0 ? 0 : size;
       alpaka::syncBlockThreads(acc);
 
@@ -46,7 +46,7 @@ namespace cms {
         const T_Acc& acc, T const* a, uint16_t* ind, uint16_t* ind2, uint32_t size) {
       //move negative first...
 
-      auto&& firstNeg = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);
+      auto& firstNeg = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);
       firstNeg = a[ind[0]] < 0 ? 0 : size;
       alpaka::syncBlockThreads(acc);
 
@@ -78,12 +78,12 @@ namespace cms {
       constexpr int sb = 1 << d;
       constexpr int ps = int(sizeof(T)) - NS;
 
-      auto&& c = alpaka::declareSharedVar<int32_t[sb], __COUNTER__>(acc);
-      auto&& ct = alpaka::declareSharedVar<int32_t[sb], __COUNTER__>(acc);
-      auto&& cu = alpaka::declareSharedVar<int32_t[sb], __COUNTER__>(acc);
+      auto& c = alpaka::declareSharedVar<int32_t[sb], __COUNTER__>(acc);
+      auto& ct = alpaka::declareSharedVar<int32_t[sb], __COUNTER__>(acc);
+      auto& cu = alpaka::declareSharedVar<int32_t[sb], __COUNTER__>(acc);
 
-      auto&& ibs = alpaka::declareSharedVar<int, __COUNTER__>(acc);
-      auto&& p = alpaka::declareSharedVar<int, __COUNTER__>(acc);
+      auto& ibs = alpaka::declareSharedVar<int, __COUNTER__>(acc);
+      auto& p = alpaka::declareSharedVar<int, __COUNTER__>(acc);
 
       assert(size > 0);
 

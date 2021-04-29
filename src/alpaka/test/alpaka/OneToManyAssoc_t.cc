@@ -24,7 +24,7 @@ struct countMultiLocal {
                                 Multiplicity* __restrict__ assoc,
                                 uint32_t n) const {
     cms::alpakatools::for_each_element_1D_grid_stride(acc, n, [&](uint32_t i) {
-      auto&& local = alpaka::declareSharedVar<Multiplicity::CountersOnly, __COUNTER__>(acc);
+      auto& local = alpaka::declareSharedVar<Multiplicity::CountersOnly, __COUNTER__>(acc);
       const uint32_t threadIdxLocal(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[0u]);
       const bool oncePerSharedMemoryAccess = (threadIdxLocal == 0);
       if (oncePerSharedMemoryAccess) {
