@@ -71,7 +71,7 @@ namespace gpuClustering {
 #endif
 
       // find the index of the first pixel not belonging to this module (or invalid)
-      auto&& msize = alpaka::declareSharedVar<unsigned int, __COUNTER__>(acc);
+      auto& msize = alpaka::declareSharedVar<unsigned int, __COUNTER__>(acc);
       msize = numElements;
       alpaka::syncBlockThreads(acc);
 
@@ -101,8 +101,8 @@ namespace gpuClustering {
       constexpr uint32_t maxPixInModule = 4000;
       constexpr auto nbins = phase1PixelTopology::numColsInModule + 2;  //2+2;
       using Hist = cms::alpakatools::HistoContainer<uint16_t, nbins, maxPixInModule, 9, uint16_t>;
-      auto&& hist = alpaka::declareSharedVar<Hist, __COUNTER__>(acc);
-      auto&& ws = alpaka::declareSharedVar<Hist::Counter[32], __COUNTER__>(acc);
+      auto& hist = alpaka::declareSharedVar<Hist, __COUNTER__>(acc);
+      auto& ws = alpaka::declareSharedVar<Hist::Counter[32], __COUNTER__>(acc);
 
       cms::alpakatools::for_each_element_1D_block_stride(acc, Hist::totbins(), [&](uint32_t j) { hist.off[j] = 0; });
       alpaka::syncBlockThreads(acc);
@@ -121,7 +121,7 @@ namespace gpuClustering {
       assert(msize - firstPixel <= maxPixInModule);
 
 #ifdef GPU_DEBUG
-      auto&& totGood = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);
+      auto& totGood = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);
       totGood = 0;
       alpaka::syncBlockThreads(acc);
 #endif
@@ -190,8 +190,8 @@ namespace gpuClustering {
 
 #ifdef GPU_DEBUG
       // look for anomalous high occupancy
-      auto&& n40 = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);
-      auto&& n60 = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);
+      auto& n40 = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);
+      auto& n60 = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);
       n40 = n60 = 0;
       alpaka::syncBlockThreads(acc);
       cms::alpakatools::for_each_element_1D_block_stride(acc, Hist::nbins(), [&](uint32_t j) {
@@ -279,7 +279,7 @@ namespace gpuClustering {
 
 #ifdef GPU_DEBUG
       {
-        auto&& n0 = alpaka::declareSharedVar<int, __COUNTER__>(acc);
+        auto& n0 = alpaka::declareSharedVar<int, __COUNTER__>(acc);
         if (threadIdxLocal == 0)
           n0 = nloops;
         alpaka::syncBlockThreads(acc);
@@ -293,7 +293,7 @@ namespace gpuClustering {
       }
 #endif
 
-      auto&& foundClusters = alpaka::declareSharedVar<unsigned int, __COUNTER__>(acc);
+      auto& foundClusters = alpaka::declareSharedVar<unsigned int, __COUNTER__>(acc);
       foundClusters = 0;
       alpaka::syncBlockThreads(acc);
 

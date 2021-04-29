@@ -22,9 +22,9 @@ template <typename T>
 struct testPrefixScan {
   template <typename T_Acc>
   ALPAKA_FN_ACC void operator()(const T_Acc& acc, unsigned int size) const {
-    auto&& ws = alpaka::declareSharedVar<T[32], __COUNTER__>(acc);
-    auto&& c = alpaka::declareSharedVar<T[1024], __COUNTER__>(acc);
-    auto&& co = alpaka::declareSharedVar<T[1024], __COUNTER__>(acc);
+    auto& ws = alpaka::declareSharedVar<T[32], __COUNTER__>(acc);
+    auto& c = alpaka::declareSharedVar<T[1024], __COUNTER__>(acc);
+    auto& co = alpaka::declareSharedVar<T[1024], __COUNTER__>(acc);
 
     cms::alpakatools::for_each_element_1D_block_stride(acc, size, [&](uint32_t i) { c[i] = 1; });
 
@@ -52,8 +52,8 @@ struct testWarpPrefixScan {
   template <typename T_Acc>
   ALPAKA_FN_ACC void operator()(const T_Acc& acc, uint32_t size) const {
     assert(size <= 32);
-    auto&& c = alpaka::declareSharedVar<T[1024], __COUNTER__>(acc);
-    auto&& co = alpaka::declareSharedVar<T[1024], __COUNTER__>(acc);
+    auto& c = alpaka::declareSharedVar<T[1024], __COUNTER__>(acc);
+    auto& co = alpaka::declareSharedVar<T[1024], __COUNTER__>(acc);
 
     uint32_t const blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Threads>(acc)[0u]);
     uint32_t const blockThreadIdx(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[0u]);
