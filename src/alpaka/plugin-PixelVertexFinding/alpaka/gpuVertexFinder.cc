@@ -121,7 +121,7 @@ auto nvIntermediateWorkspaceView = cms::alpakatools::createDeviceView<uint32_t>(
 alpaka::memset(queue, nvIntermediateWorkspaceView, 0, 1u);
 
     const uint32_t blockSize = 128;
-    const uint32_t numberOfBlocks = (TkSoA::stride() + blockSize - 1) / blockSize; // TO DO: NB: TkSoA::stride() on device?
+    const uint32_t numberOfBlocks = (TkSoA::stride() + blockSize - 1) / blockSize;
     const WorkDiv1 loadTracksWorkDiv = cms::alpakatools::make_workdiv(Vec1::all(numberOfBlocks), Vec1::all(blockSize));
     alpaka::enqueue(queue,
 		 alpaka::createTaskKernel<Acc1>(loadTracksWorkDiv, 
