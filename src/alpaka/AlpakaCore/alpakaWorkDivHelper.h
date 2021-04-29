@@ -79,7 +79,7 @@ namespace cms {
       // Check dimension
       //static_assert(alpaka::Dim<TAcc>::value == Dim1::value,
       //              "Accelerator and maxNumberOfElements need to have same dimension.");
-      auto&& [firstElementIdxLocalVec, endElementIdxLocalVec] =
+      auto [firstElementIdxLocalVec, endElementIdxLocalVec] =
           element_index_range_in_block(acc, elementIdxShift, dimIndex);
 
       // Truncate
@@ -120,7 +120,7 @@ namespace cms {
       // Check dimension
       //static_assert(dimIndex <= alpaka::Dim<TAcc>::value,
       //"Accelerator and maxNumberOfElements need to have same dimension.");
-      auto&& [firstElementIdxGlobalVec, endElementIdxGlobalVec] =
+      auto [firstElementIdxGlobalVec, endElementIdxGlobalVec] =
           element_index_range_in_grid(acc, elementIdxShift, dimIndex);
 
       // Truncate
