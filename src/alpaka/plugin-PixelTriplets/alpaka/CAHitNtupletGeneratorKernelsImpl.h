@@ -516,7 +516,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           acc, tuples->totbins(), [&](uint32_t idx) { hitDetIndices->off[idx] = tuples->off[idx]; });
       // fill hit indices
       auto const &hh = *hhp;
+#ifndef NDEBUG
       auto nhits = hh.nHits();
+#endif
       cms::alpakatools::for_each_element_1D_grid_stride(acc, tuples->size(), [&](uint32_t idx) {
         assert(tuples->bins[idx] < nhits);
         hitDetIndices->bins[idx] = hh.detectorIndex(tuples->bins[idx]);

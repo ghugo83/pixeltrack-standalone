@@ -80,11 +80,15 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         if (0 == threadIdx) {
           cellNeighbors->construct(CAConstants::maxNumOfActiveDoublets(), cellNeighborsContainer);
           cellTracks->construct(CAConstants::maxNumOfActiveDoublets(), cellTracksContainer);
+#ifndef NDEBUG
           auto i = cellNeighbors->extend(acc);
           assert(0 == i);
+#endif
           (*cellNeighbors)[0].reset();
+#ifndef NDEBUG
           i = cellTracks->extend(acc);
           assert(0 == i);
+#endif
           (*cellTracks)[0].reset();
         }
       }  // initDoublets kernel operator()

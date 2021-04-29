@@ -48,7 +48,9 @@ struct verify {
       assert(ind[n] == dc->get().n);
       auto ib = ind[i];
       auto ie = ind[i + 1];
+#ifndef NDEBUG
       auto k = cont[ib++];
+#endif
       assert(k < n);
       for (; ib < ie; ++ib)
         assert(cont[ib] == k);
