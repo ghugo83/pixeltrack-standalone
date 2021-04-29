@@ -31,18 +31,18 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   };
 
   PixelVertexProducerAlpaka::PixelVertexProducerAlpaka(edm::ProductRegistry& reg)
-    : tokenTrack_(reg.consumes<PixelTrackAlpaka>()),
-      tokenVertex_(reg.produces<ZVertexAlpaka>()),
-      m_gpuAlgo(true,   // oneKernel
-                true,   // useDensity
-                false,  // useDBSCAN
-                false,  // useIterative
-                2,      // minT
-                0.07,   // eps
-                0.01,   // errmax
-                9       // chi2max
-                ),
-      m_ptMin(0.5)  // 0.5 GeV
+      : tokenTrack_(reg.consumes<PixelTrackAlpaka>()),
+        tokenVertex_(reg.produces<ZVertexAlpaka>()),
+        m_gpuAlgo(true,   // oneKernel
+                  true,   // useDensity
+                  false,  // useDBSCAN
+                  false,  // useIterative
+                  2,      // minT
+                  0.07,   // eps
+                  0.01,   // errmax
+                  9       // chi2max
+                  ),
+        m_ptMin(0.5)  // 0.5 GeV
   {}
 
   void PixelVertexProducerAlpaka::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
@@ -53,6 +53,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     iEvent.emplace(tokenVertex_, m_gpuAlgo.makeAsync(tracks, m_ptMin, queue));
   }
 
-}
+}  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
 DEFINE_FWK_ALPAKA_MODULE(PixelVertexProducerAlpaka);

@@ -79,8 +79,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         clusterToken_(reg.consumes<SiPixelClustersAlpaka>()),
         hitToken_(reg.consumes<TrackingRecHit2DAlpaka>()),
         trackToken_(reg.consumes<PixelTrackHost>()),
-	vertexToken_(reg.consumes<ZVertexHost>())
-  {}
+        vertexToken_(reg.consumes<ZVertexHost>()) {}
 
 #ifdef TODO
   void HistoValidator::acquire(const edm::Event& iEvent,
@@ -229,10 +228,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       histos["vertex_n"].fill(vertices->nvFinal);
       for (uint32_t i = 0; i < vertices->nvFinal; ++i) {
-	histos["vertex_z"].fill(vertices->zv[i]);
-	histos["vertex_chi2"].fill(vertices->chi2[i]);
-	histos["vertex_ndof"].fill(vertices->ndof[i]);
-	histos["vertex_pt2"].fill(vertices->ptv2[i]);
+        histos["vertex_z"].fill(vertices->zv[i]);
+        histos["vertex_chi2"].fill(vertices->chi2[i]);
+        histos["vertex_ndof"].fill(vertices->ndof[i]);
+        histos["vertex_pt2"].fill(vertices->ptv2[i]);
       }
     }
   }

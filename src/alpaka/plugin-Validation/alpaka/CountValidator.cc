@@ -117,12 +117,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       auto diff = std::abs(int(vertices->nvFinal) - int(count.nVertices()));
       if (diff != 0) {
-	sumVertexDifference += diff;
+        sumVertexDifference += diff;
       }
       if (diff > vertexTolerance) {
-	ss << "\n N(vertices) is " << vertices->nvFinal << " expected " << count.nVertices() << ", difference " << diff
-	   << " is outside tolerance " << vertexTolerance;
-	ok = false;
+        ss << "\n N(vertices) is " << vertices->nvFinal << " expected " << count.nVertices() << ", difference " << diff
+           << " is outside tolerance " << vertexTolerance;
+        ok = false;
       }
     }
 

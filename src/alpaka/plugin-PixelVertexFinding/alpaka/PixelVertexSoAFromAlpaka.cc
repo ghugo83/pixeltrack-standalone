@@ -8,46 +8,48 @@
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
-class PixelVertexSoAFromAlpaka : public edm::EDProducer {
-public:
-explicit PixelVertexSoAFromAlpaka(edm::ProductRegistry& reg);
-~PixelVertexSoAFromAlpaka() override = default;
+  class PixelVertexSoAFromAlpaka : public edm::EDProducer {
+  public:
+    explicit PixelVertexSoAFromAlpaka(edm::ProductRegistry& reg);
+    ~PixelVertexSoAFromAlpaka() override = default;
 
-private:
+  private:
 #ifdef TODO
-void acquire(edm::Event const& iEvent,
-    edm::EventSetup const& iSetup,
-    edm::WaitingTaskWithArenaHolder waitingTaskHolder) override;
+    void acquire(edm::Event const& iEvent,
+                 edm::EventSetup const& iSetup,
+                 edm::WaitingTaskWithArenaHolder waitingTaskHolder) override;
 #endif
-  void produce(edm::Event& iEvent, edm::EventSetup const& iSetup) override;
+    void produce(edm::Event& iEvent, edm::EventSetup const& iSetup) override;
 
-  edm::EDGetTokenT<ZVertexAlpaka> tokenAlpaka_;
+    edm::EDGetTokenT<ZVertexAlpaka> tokenAlpaka_;
 #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
-  edm::EDPutTokenT<ZVertexHost> tokenSOA_;
+    edm::EDPutTokenT<ZVertexHost> tokenSOA_;
 #endif
 
 #ifdef TODO
-  cms::cuda::host::unique_ptr<ZVertexSoA> m_soa;
+    cms::cuda::host::unique_ptr<ZVertexSoA> m_soa;
 #endif
-};
+  };
 
   PixelVertexSoAFromAlpaka::PixelVertexSoAFromAlpaka(edm::ProductRegistry& reg)
-    : tokenAlpaka_(reg.consumes<ZVertexAlpaka>())
+      : tokenAlpaka_(reg.consumes<ZVertexAlpaka>())
 #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
-    , tokenSOA_(reg.produces<ZVertexHost>()) 
+        ,
+        tokenSOA_(reg.produces<ZVertexHost>())
 #endif
-  {}
+  {
+  }
 
 #ifdef TODO
   void PixelVertexSoAFromAlpaka::acquire(edm::Event const& iEvent,
-    edm::EventSetup const& iSetup,
-    edm::WaitingTaskWithArenaHolder waitingTaskHolder) {
-  auto const& inputDataWrapped = iEvent.get(tokenAlpaka_);
-  cms::cuda::ScopedContextAcquire ctx{inputDataWrapped, std::move(waitingTaskHolder)};
-  auto const& inputData = ctx.get(inputDataWrapped);
+                                         edm::EventSetup const& iSetup,
+                                         edm::WaitingTaskWithArenaHolder waitingTaskHolder) {
+    auto const& inputDataWrapped = iEvent.get(tokenAlpaka_);
+    cms::cuda::ScopedContextAcquire ctx{inputDataWrapped, std::move(waitingTaskHolder)};
+    auto const& inputData = ctx.get(inputDataWrapped);
 
-  m_soa = inputData.toHostAsync(ctx.stream());
-}
+    m_soa = inputData.toHostAsync(ctx.stream());
+  }
 #endif
 
   void PixelVertexSoAFromAlpaka::produce(edm::Event& iEvent, edm::EventSetup const& iSetup) {
@@ -60,9 +62,9 @@ void acquire(edm::Event const& iEvent,
 
     // No copies....
     iEvent.emplace(tokenSOA_, std::move(outputData));
-#endif 
+#endif
   }
 
-  }
+}  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
 DEFINE_FWK_ALPAKA_MODULE(PixelVertexSoAFromAlpaka);
