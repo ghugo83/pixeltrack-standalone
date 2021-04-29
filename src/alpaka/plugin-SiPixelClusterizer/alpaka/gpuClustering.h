@@ -11,9 +11,10 @@
 
 namespace gpuClustering {
 
-#ifdef GPU_DEBUG
-  // move to ALPAKA_ACCELERATOR_NAMESPACE ?
-  ALPAKA_STATIC_ACC_MEM_GLOBAL uint32_t gMaxHit = 0;
+#ifdef GPU_DEBUG 
+  namespace ALPAKA_ACCELERATOR_NAMESPACE {
+    ALPAKA_STATIC_ACC_MEM_GLOBAL uint32_t gMaxHit = 0;
+  }
 #endif
 
   struct countModules {
@@ -328,8 +329,8 @@ namespace gpuClustering {
         nClustersInModule[thisModuleId] = foundClusters;
         moduleId[blockIdx] = thisModuleId;
 #ifdef GPU_DEBUG
-        if (foundClusters > gMaxHit) {
-          gMaxHit = foundClusters;
+        if (foundClusters > ALPAKA_ACCELERATOR_NAMESPACE::gMaxHit) {
+          ALPAKA_ACCELERATOR_NAMESPACE::gMaxHit = foundClusters;
           if (foundClusters > 8)
             printf("max hit %d in %d\n", foundClusters, thisModuleId);
         }
@@ -343,5 +344,6 @@ namespace gpuClustering {
   };
 
 }  // namespace gpuClustering
+
 
 #endif  // RecoLocalTracker_SiPixelClusterizer_plugins_gpuClustering_h
