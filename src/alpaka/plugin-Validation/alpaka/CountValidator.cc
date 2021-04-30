@@ -56,8 +56,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         digiToken_(reg.consumes<SiPixelDigisAlpaka>()),
         clusterToken_(reg.consumes<SiPixelClustersAlpaka>()),
         trackToken_(reg.consumes<PixelTrackHost>()),
-	vertexToken_(reg.consumes<ZVertexHost>())
-  {}
+        vertexToken_(reg.consumes<ZVertexHost>()) {}
 
   void CountValidator::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     constexpr float trackTolerance = 0.012f;  // in 200 runs of 1k events all events are withing this tolerance
