@@ -292,9 +292,14 @@ namespace cms {
     }
 
     /*
-     * Case where the input index has reached the end of threadDimension: strides the input index.
+     * Case where the input index i has reached the end of threadDimension: strides the input index.
      * Otherwise: do nothing.
-     * NB: Modifies i, firstElementIdx and endElementIdx.
+     * NB 1: This helper function is used as a trick to only have one loop (like in legacy), instead of 2 loops
+     * (like in all the other Alpaka helpers, 'for_each_element_in_block_strided' for example, 
+     * because of the additional loop over elements in Alpaka model). 
+     * This allows to keep the 'continue' and 'break' statements as-is from legacy code, 
+     * and hence avoids a lot of legacy code reshuffling.
+     * NB 2: Modifies i, firstElementIdx and endElementIdx.
      */
     ALPAKA_FN_ACC ALPAKA_FN_INLINE bool next_valid_element_index_strided(
         Idx& i, Idx& firstElementIdx, Idx& endElementIdx, const Idx stride, const Idx maxNumberOfElements) {
