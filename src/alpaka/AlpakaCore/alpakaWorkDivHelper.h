@@ -147,7 +147,7 @@ namespace cms {
      * Indexes are local to the BLOCK.
      */
     template <typename TAcc, typename Func>
-    ALPAKA_FN_ACC void for_each_element_in_thread_1D_index_in_block(const TAcc& acc,
+    ALPAKA_FN_ACC void for_each_element_in_block(const TAcc& acc,
                                                                     const Idx maxNumberOfElements,
                                                                     const Idx elementIdxShift,
                                                                     const Func func,
@@ -164,12 +164,12 @@ namespace cms {
      * Overload for elementIdxShift = 0
      */
     template <typename TAcc, typename Func>
-    ALPAKA_FN_ACC void for_each_element_in_thread_1D_index_in_block(const TAcc& acc,
+    ALPAKA_FN_ACC void for_each_element_in_block(const TAcc& acc,
                                                                     const Idx maxNumberOfElements,
                                                                     const Func func,
                                                                     const Idx dimIndex = 0) {
       const Idx elementIdxShift = 0;
-      cms::alpakatools::for_each_element_in_thread_1D_index_in_block(
+      cms::alpakatools::for_each_element_in_block(
           acc, maxNumberOfElements, elementIdxShift, func, dimIndex);
     }
 
@@ -179,7 +179,7 @@ namespace cms {
      * Indexes are expressed in GRID 'frame-of-reference'.
      */
     template <typename TAcc, typename Func>
-    ALPAKA_FN_ACC void for_each_element_in_thread_1D_index_in_grid(const TAcc& acc,
+    ALPAKA_FN_ACC void for_each_element_in_grid(const TAcc& acc,
                                                                    const Idx maxNumberOfElements,
                                                                    Idx elementIdxShift,
                                                                    const Func func,
@@ -189,19 +189,19 @@ namespace cms {
       const Idx blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[dimIndex]);
       elementIdxShift += blockIdxInGrid * blockDimension;
 
-      for_each_element_in_thread_1D_index_in_block(acc, maxNumberOfElements, elementIdxShift, func, dimIndex);
+      for_each_element_in_block(acc, maxNumberOfElements, elementIdxShift, func, dimIndex);
     }
 
     /*
      * Overload for elementIdxShift = 0
      */
     template <typename TAcc, typename Func>
-    ALPAKA_FN_ACC void for_each_element_in_thread_1D_index_in_grid(const TAcc& acc,
+    ALPAKA_FN_ACC void for_each_element_in_grid(const TAcc& acc,
                                                                    const Idx maxNumberOfElements,
                                                                    const Func func,
                                                                    const Idx dimIndex = 0) {
       const Idx elementIdxShift = 0;
-      cms::alpakatools::for_each_element_in_thread_1D_index_in_grid(
+      cms::alpakatools::for_each_element_in_grid(
           acc, maxNumberOfElements, elementIdxShift, func, dimIndex);
     }
 
@@ -216,7 +216,7 @@ namespace cms {
      * Indexes are local to the BLOCK.
      */
     template <typename TAcc, typename Func>
-    ALPAKA_FN_ACC void for_each_element_1D_block_stride(const TAcc& acc,
+    ALPAKA_FN_ACC void for_each_element_in_block_strided(const TAcc& acc,
                                                         const Idx maxNumberOfElements,
                                                         const Idx elementIdxShift,
                                                         const Func func,
@@ -246,12 +246,12 @@ namespace cms {
      * Overload for elementIdxShift = 0
      */
     template <typename TAcc, typename Func>
-    ALPAKA_FN_ACC void for_each_element_1D_block_stride(const TAcc& acc,
+    ALPAKA_FN_ACC void for_each_element_in_block_strided(const TAcc& acc,
                                                         const Idx maxNumberOfElements,
                                                         const Func func,
                                                         const Idx dimIndex = 0) {
       const Idx elementIdxShift = 0;
-      cms::alpakatools::for_each_element_1D_block_stride(acc, maxNumberOfElements, elementIdxShift, func, dimIndex);
+      cms::alpakatools::for_each_element_in_block_strided(acc, maxNumberOfElements, elementIdxShift, func, dimIndex);
     }
 
     /*
@@ -261,7 +261,7 @@ namespace cms {
      * Indexes are local to the GRID.
      */
     template <typename TAcc, typename Func>
-    ALPAKA_FN_ACC void for_each_element_1D_grid_stride(const TAcc& acc,
+    ALPAKA_FN_ACC void for_each_element_in_grid_strided(const TAcc& acc,
                                                        const Idx maxNumberOfElements,
                                                        const Idx elementIdxShift,
                                                        const Func func,
@@ -291,19 +291,19 @@ namespace cms {
      * Overload for elementIdxShift = 0
      */
     template <typename TAcc, typename Func>
-    ALPAKA_FN_ACC void for_each_element_1D_grid_stride(const TAcc& acc,
+    ALPAKA_FN_ACC void for_each_element_in_grid_strided(const TAcc& acc,
                                                        const Idx maxNumberOfElements,
                                                        const Func func,
                                                        const Idx dimIndex = 0) {
       const Idx elementIdxShift = 0;
-      cms::alpakatools::for_each_element_1D_grid_stride(acc, maxNumberOfElements, elementIdxShift, func, dimIndex);
+      cms::alpakatools::for_each_element_in_grid_strided(acc, maxNumberOfElements, elementIdxShift, func, dimIndex);
     }
 
     /*
      * Case where the input index has reached the end of threadDimension: strides the input index.
      * Otherwise: do nothing.
      */
-    ALPAKA_FN_ACC ALPAKA_FN_INLINE bool get_next_element_1D_index_stride(Idx& i,
+    ALPAKA_FN_ACC ALPAKA_FN_INLINE bool next_valid_element_index_strided(Idx& i,
                                                                          Idx& firstElementIdx,
                                                                          Idx& endElementIdx,
                                                                          const Idx stride,

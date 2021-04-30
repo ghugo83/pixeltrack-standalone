@@ -23,7 +23,7 @@ struct countMultiLocal {
                                 TK const* __restrict__ tk,
                                 Multiplicity* __restrict__ assoc,
                                 uint32_t n) const {
-    cms::alpakatools::for_each_element_1D_grid_stride(acc, n, [&](uint32_t i) {
+    cms::alpakatools::for_each_element_in_grid_strided(acc, n, [&](uint32_t i) {
       auto& local = alpaka::declareSharedVar<Multiplicity::CountersOnly, __COUNTER__>(acc);
       const uint32_t threadIdxLocal(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[0u]);
       const bool oncePerSharedMemoryAccess = (threadIdxLocal == 0);
@@ -46,14 +46,14 @@ struct countMulti {
                                 TK const* __restrict__ tk,
                                 Multiplicity* __restrict__ assoc,
                                 uint32_t n) const {
-    cms::alpakatools::for_each_element_1D_grid_stride(acc, n, [&](uint32_t i) { assoc->countDirect(acc, 2 + i % 4); });
+    cms::alpakatools::for_each_element_in_grid_strided(acc, n, [&](uint32_t i) { assoc->countDirect(acc, 2 + i % 4); });
   }
 };
 
 struct verifyMulti {
   template <typename T_Acc>
   ALPAKA_FN_ACC void operator()(const T_Acc& acc, Multiplicity* __restrict__ m1, Multiplicity* __restrict__ m2) const {
-    cms::alpakatools::for_each_element_1D_grid_stride(
+    cms::alpakatools::for_each_element_in_grid_strided(
         acc, Multiplicity::totbins(), [&](uint32_t i) { assert(m1->off[i] == m2->off[i]); });
   }
 };
@@ -64,7 +64,7 @@ struct count {
                                 TK const* __restrict__ tk,
                                 Assoc* __restrict__ assoc,
                                 uint32_t n) const {
-    cms::alpakatools::for_each_element_1D_grid_stride(acc, 4 * n, [&](uint32_t i) {
+    cms::alpakatools::for_each_element_in_grid_strided(acc, 4 * n, [&](uint32_t i) {
       auto k = i / 4;
       auto j = i - 4 * k;
       assert(j < 4);
@@ -84,7 +84,7 @@ struct fill {
                                 TK const* __restrict__ tk,
                                 Assoc* __restrict__ assoc,
                                 uint32_t n) const {
-    cms::alpakatools::for_each_element_1D_grid_stride(acc, 4 * n, [&](uint32_t i) {
+    cms::alpakatools::for_each_element_in_grid_strided(acc, 4 * n, [&](uint32_t i) {
       auto k = i / 4;
       auto j = i - 4 * k;
       assert(j < 4);
@@ -112,7 +112,7 @@ struct fillBulk {
                                 TK const* __restrict__ tk,
                                 Assoc* __restrict__ assoc,
                                 uint32_t n) const {
-    cms::alpakatools::for_each_element_1D_grid_stride(acc, n, [&](uint32_t k) {
+    cms::alpakatools::for_each_element_in_grid_strided(acc, n, [&](uint32_t k) {
       auto m = tk[k][3] < MaxElem ? 4 : 3;
       assoc->bulkFill(acc, *apc, &tk[k][0], m);
     });

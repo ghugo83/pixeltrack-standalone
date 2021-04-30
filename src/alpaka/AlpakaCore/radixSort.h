@@ -23,22 +23,22 @@ namespace cms {
       alpaka::syncBlockThreads(acc);
 
       // find first negative
-      cms::alpakatools::for_each_element_1D_block_stride(acc, size - 1, [&](uint32_t i) {
+      cms::alpakatools::for_each_element_in_block_strided(acc, size - 1, [&](uint32_t i) {
         if ((a[ind[i]] ^ a[ind[i + 1]]) < 0)
           firstNeg = i + 1;
       });
 
       alpaka::syncBlockThreads(acc);
 
-      cms::alpakatools::for_each_element_1D_block_stride(
+      cms::alpakatools::for_each_element_in_block_strided(
           acc, size, firstNeg, [&](uint32_t i) { ind2[i - firstNeg] = ind[i]; });
       alpaka::syncBlockThreads(acc);
 
-      cms::alpakatools::for_each_element_1D_block_stride(
+      cms::alpakatools::for_each_element_in_block_strided(
           acc, firstNeg, [&](uint32_t i) { ind2[i + size - firstNeg] = ind[i]; });
       alpaka::syncBlockThreads(acc);
 
-      cms::alpakatools::for_each_element_1D_block_stride(acc, size, [&](uint32_t i) { ind[i] = ind2[i]; });
+      cms::alpakatools::for_each_element_in_block_strided(acc, size, [&](uint32_t i) { ind[i] = ind2[i]; });
     }
 
     template <typename T_Acc, typename T>
@@ -51,21 +51,21 @@ namespace cms {
       alpaka::syncBlockThreads(acc);
 
       // find first negative
-      cms::alpakatools::for_each_element_1D_block_stride(acc, size - 1, [&](uint32_t i) {
+      cms::alpakatools::for_each_element_in_block_strided(acc, size - 1, [&](uint32_t i) {
         if ((a[ind[i]] ^ a[ind[i + 1]]) < 0)
           firstNeg = i + 1;
       });
       alpaka::syncBlockThreads(acc);
 
-      cms::alpakatools::for_each_element_1D_block_stride(
+      cms::alpakatools::for_each_element_in_block_strided(
           acc, size, firstNeg, [&](uint32_t i) { ind2[size - firstNeg - i - 1] = ind[i]; });
       alpaka::syncBlockThreads(acc);
 
-      cms::alpakatools::for_each_element_1D_block_stride(
+      cms::alpakatools::for_each_element_in_block_strided(
           acc, firstNeg, [&](uint32_t i) { ind2[i + size - firstNeg] = ind[i]; });
       alpaka::syncBlockThreads(acc);
 
-      cms::alpakatools::for_each_element_1D_block_stride(acc, size, [&](uint32_t i) { ind[i] = ind2[i]; });
+      cms::alpakatools::for_each_element_in_block_strided(acc, size, [&](uint32_t i) { ind[i] = ind2[i]; });
     }
 
     template <typename T_Acc,
@@ -97,22 +97,22 @@ namespace cms {
       auto j = ind;
       auto k = ind2;
 
-      cms::alpakatools::for_each_element_1D_block_stride(acc, size, [&](uint32_t i) { j[i] = i; });
+      cms::alpakatools::for_each_element_in_block_strided(acc, size, [&](uint32_t i) { j[i] = i; });
       alpaka::syncBlockThreads(acc);
 
       while (alpaka::syncBlockThreadsPredicate<alpaka::BlockAnd>(acc, (p < w / d))) {
-        cms::alpakatools::for_each_element_in_thread_1D_index_in_block(acc, sb, [&](uint32_t i) { c[i] = 0; });
+        cms::alpakatools::for_each_element_in_block(acc, sb, [&](uint32_t i) { c[i] = 0; });
         alpaka::syncBlockThreads(acc);
 
         // fill bins
-        cms::alpakatools::for_each_element_1D_block_stride(acc, size, [&](uint32_t i) {
+        cms::alpakatools::for_each_element_in_block_strided(acc, size, [&](uint32_t i) {
           auto bin = (a[j[i]] >> d * p) & (sb - 1);
           alpaka::atomicOp<alpaka::AtomicAdd>(acc, &c[bin], 1);
         });
         alpaka::syncBlockThreads(acc);
 
         // prefix scan "optimized"???...
-        cms::alpakatools::for_each_element_in_thread_1D_index_in_block(acc, sb, [&](uint32_t i) {
+        cms::alpakatools::for_each_element_in_block(acc, sb, [&](uint32_t i) {
           auto x = c[i];
           auto laneId = i & 0x1f;
 
@@ -125,7 +125,7 @@ namespace cms {
         });
         alpaka::syncBlockThreads(acc);
 
-        cms::alpakatools::for_each_element_in_thread_1D_index_in_block(acc, sb, [&](uint32_t i) {
+        cms::alpakatools::for_each_element_in_block(acc, sb, [&](uint32_t i) {
           auto ss = (i / 32) * 32 - 1;
           c[i] = ct[i];
           for (int i = ss; i > 0; i -= 32)
@@ -143,13 +143,13 @@ namespace cms {
         alpaka::syncBlockThreads(acc);
 
         while (alpaka::syncBlockThreadsPredicate<alpaka::BlockAnd>(acc, ibs > 0)) {
-          cms::alpakatools::for_each_element_in_thread_1D_index_in_block(acc, sb, [&](uint32_t i) {
+          cms::alpakatools::for_each_element_in_block(acc, sb, [&](uint32_t i) {
             cu[i] = -1;
             ct[i] = -1;
           });
           alpaka::syncBlockThreads(acc);
 
-          cms::alpakatools::for_each_element_in_thread_1D_index_in_block(acc, sb, [&](uint32_t idx) {
+          cms::alpakatools::for_each_element_in_block(acc, sb, [&](uint32_t idx) {
             int i = ibs - idx;
             int32_t bin = -1;
             if (i >= 0) {
@@ -160,7 +160,7 @@ namespace cms {
           });
           alpaka::syncBlockThreads(acc);
 
-          cms::alpakatools::for_each_element_in_thread_1D_index_in_block(acc, sb, [&](uint32_t idx) {
+          cms::alpakatools::for_each_element_in_block(acc, sb, [&](uint32_t idx) {
             int i = ibs - idx;
             int32_t bin = (i >= 0 ? ((a[j[i]] >> d * p) & (sb - 1)) : -1);
             if (i >= 0 && i == cu[bin])  // ensure to keep them in order
@@ -207,7 +207,7 @@ namespace cms {
         assert(j == ind);  // w/d is even so ind is correct
 
       if (j != ind)  // odd...
-        cms::alpakatools::for_each_element_1D_block_stride(acc, size, [&](uint32_t i) { ind[i] = ind2[i]; });
+        cms::alpakatools::for_each_element_in_block_strided(acc, size, [&](uint32_t i) { ind[i] = ind2[i]; });
 
       alpaka::syncBlockThreads(acc);
 

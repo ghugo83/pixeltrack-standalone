@@ -43,7 +43,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           auto& agc = hits.averageGeometry();
           auto const& ag = cpeParams->averageGeometry();
           constexpr auto numberOfLaddersInBarrel = TrackingRecHit2DSOAView::AverageGeometry::numberOfLaddersInBarrel;
-          cms::alpakatools::for_each_element_1D_block_stride(acc, numberOfLaddersInBarrel, [&](uint32_t il) {
+          cms::alpakatools::for_each_element_in_block_strided(acc, numberOfLaddersInBarrel, [&](uint32_t il) {
             agc.ladderZ[il] = ag.ladderZ[il] - bs->z;
             agc.ladderX[il] = ag.ladderX[il] - bs->x;
             agc.ladderY[il] = ag.ladderY[il] - bs->y;
@@ -100,7 +100,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           assert(nclus > MaxHitsInIter || (0 == startClus && nClusInIter == nclus && lastClus == nclus));
 
           // init
-          cms::alpakatools::for_each_element_1D_block_stride(acc, nClusInIter, [&](uint32_t ic) {
+          cms::alpakatools::for_each_element_in_block_strided(acc, nClusInIter, [&](uint32_t ic) {
             clusParams.minRow[ic] = std::numeric_limits<uint32_t>::max();
             clusParams.maxRow[ic] = 0;
             clusParams.minCol[ic] = std::numeric_limits<uint32_t>::max();
@@ -122,7 +122,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           uint32_t rowsColsFirstElementIdx = firstElementIdxNoStride;
           uint32_t rowsColsEndElementIdx = endElementIdxNoStride;
           for (uint32_t i = rowsColsFirstElementIdx; i < numElements; ++i) {
-            if (!cms::alpakatools::get_next_element_1D_index_stride(
+            if (!cms::alpakatools::next_valid_element_index_strided(
                     i, rowsColsFirstElementIdx, rowsColsEndElementIdx, blockDimension, numElements))
               break;
             auto id = digis.moduleInd(i);
@@ -152,7 +152,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           uint32_t chargeFirstElementIdx = firstElementIdxNoStride;
           uint32_t chargeEndElementIdx = endElementIdxNoStride;
           for (uint32_t i = chargeFirstElementIdx; i < numElements; ++i) {
-            if (!cms::alpakatools::get_next_element_1D_index_stride(
+            if (!cms::alpakatools::next_valid_element_index_strided(
                     i, chargeFirstElementIdx, chargeEndElementIdx, blockDimension, numElements))
               break;
             auto id = digis.moduleInd(i);
@@ -186,7 +186,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
           first = clusters.clusModuleStart(me) + startClus;
 
-          cms::alpakatools::for_each_element_1D_block_stride(acc, nClusInIter, [&](uint32_t ic) {
+          cms::alpakatools::for_each_element_in_block_strided(acc, nClusInIter, [&](uint32_t ic) {
             auto h = first + ic;  // output index in global memory
 
             // this cannot happen anymore

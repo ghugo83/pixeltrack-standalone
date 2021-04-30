@@ -22,7 +22,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         auto const& fit = tracks.stateAtBS;
         auto const* quality = tracks.qualityData();
 
-        cms::alpakatools::for_each_element_1D_grid_stride(acc, TkSoA::stride(), [&](uint32_t idx) {
+        cms::alpakatools::for_each_element_in_grid_strided(acc, TkSoA::stride(), [&](uint32_t idx) {
           auto nHits = tracks.nHits(idx);
           if (nHits == 0)
             return;  // this is a guard: maybe we need to move to nTracks...

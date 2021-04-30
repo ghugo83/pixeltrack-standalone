@@ -47,7 +47,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 #endif
 
       const auto nt = Rfit::maxNumberOfConcurrentFits();
-      cms::alpakatools::for_each_element_1D_grid_stride(acc, nt, [&](uint32_t local_idx) {
+      cms::alpakatools::for_each_element_in_grid_strided(acc, nt, [&](uint32_t local_idx) {
         auto tuple_idx = local_idx + offset;
         if (tuple_idx >= tupleMultiplicity->size(nHits))
           return;
@@ -107,7 +107,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       // look in bin for this hit multiplicity
       const auto nt = Rfit::maxNumberOfConcurrentFits();
-      cms::alpakatools::for_each_element_1D_grid_stride(acc, nt, [&](uint32_t local_idx) {
+      cms::alpakatools::for_each_element_in_grid_strided(acc, nt, [&](uint32_t local_idx) {
         auto tuple_idx = local_idx + offset;
         if (tuple_idx >= tupleMultiplicity->size(nHits))
           return;
@@ -154,7 +154,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       // look in bin for this hit multiplicity
       const auto nt = Rfit::maxNumberOfConcurrentFits();
-      cms::alpakatools::for_each_element_1D_grid_stride(acc, nt, [&](uint32_t local_idx) {
+      cms::alpakatools::for_each_element_in_grid_strided(acc, nt, [&](uint32_t local_idx) {
         auto tuple_idx = local_idx + offset;
         if (tuple_idx >= tupleMultiplicity->size(nHits))
           return;

@@ -70,7 +70,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       }
 
       const auto ntNbins = foundNtuplets->nbins();
-      cms::alpakatools::for_each_element_1D_grid_stride(acc, ntNbins, [&](uint32_t idx) {
+      cms::alpakatools::for_each_element_in_grid_strided(acc, ntNbins, [&](uint32_t idx) {
         if (foundNtuplets->size(idx) > 5)
           printf("ERROR %d, %d\n", idx, foundNtuplets->size(idx));
         assert(foundNtuplets->size(idx) < 6);
@@ -91,7 +91,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       }
 
       const auto ntNCells = (*nCells);
-      cms::alpakatools::for_each_element_1D_grid_stride(acc, ntNCells, [&](uint32_t idx) {
+      cms::alpakatools::for_each_element_in_grid_strided(acc, ntNCells, [&](uint32_t idx) {
         auto const &thisCell = cells[idx];
         if (thisCell.outerNeighbors().full())  //++tooManyNeighbors[thisCell.theLayerPairId];
           printf("OuterNeighbors overflow %d in %d\n", idx, thisCell.theLayerPairId);
@@ -105,7 +105,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           alpaka::atomicOp<alpaka::AtomicAdd>(acc, &c.nZeroTrackCells, 1ull);
       });
 
-      cms::alpakatools::for_each_element_1D_grid_stride(acc, nHits, [&](uint32_t idx) {
+      cms::alpakatools::for_each_element_in_grid_strided(acc, nHits, [&](uint32_t idx) {
         if (isOuterHitOfCell[idx].full())  // ++tooManyOuterHitOfCell;
           printf("OuterHitOfCell overflow %d\n", idx);
       });
@@ -121,7 +121,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       constexpr auto bad = trackQuality::bad;
 
       const auto ntNCells = (*nCells);
-      cms::alpakatools::for_each_element_1D_grid_stride(acc, ntNCells, [&](uint32_t idx) {
+      cms::alpakatools::for_each_element_in_grid_strided(acc, ntNCells, [&](uint32_t idx) {
         auto const &thisCell = cells[idx];
 
         if (thisCell.theDoubletId < 0) {
@@ -145,7 +145,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       assert(nCells);
       const auto ntNCells = (*nCells);
-      cms::alpakatools::for_each_element_1D_grid_stride(acc, ntNCells, [&](uint32_t idx) {
+      cms::alpakatools::for_each_element_in_grid_strided(acc, ntNCells, [&](uint32_t idx) {
         auto const &thisCell = cells[idx];
 
         if (thisCell.tracks().size() >= 2) {
@@ -182,7 +182,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       assert(nCells);
 
-      cms::alpakatools::for_each_element_1D_grid_stride(acc, (*nCells), [&](uint32_t idx) {
+      cms::alpakatools::for_each_element_in_grid_strided(acc, (*nCells), [&](uint32_t idx) {
         auto const &thisCell = cells[idx];
         if (thisCell.tracks().size() >= 2) {
           // if (thisCell.theDoubletId < 0) continue;
@@ -240,7 +240,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         (*apc2) = 0;
       }  // ready for next kernel
 
-      cms::alpakatools::for_each_element_1D_grid_stride(
+      cms::alpakatools::for_each_element_in_grid_strided(
           acc,
           (*nCells),
           0u,
@@ -262,7 +262,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             auto zo = thisCell.get_outer_z(hh);
             auto isBarrel = thisCell.get_inner_detIndex(hh) < last_barrel_detIndex;
 
-            cms::alpakatools::for_each_element_1D_block_stride(
+            cms::alpakatools::for_each_element_in_block_strided(
                 acc,
                 numberOfPossibleNeighbors,
                 0u,
@@ -316,7 +316,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       //auto first = threadIdx.x + blockIdx.x * blockDim.x;
       //for (int idx = first, nt = (*nCells); idx < nt; idx += gridDim.x * blockDim.x) {
-      cms::alpakatools::for_each_element_1D_grid_stride(acc, (*nCells), [&](uint32_t idx) {
+      cms::alpakatools::for_each_element_in_grid_strided(acc, (*nCells), [&](uint32_t idx) {
         auto const &thisCell = cells[idx];
         if (thisCell.theDoubletId >= 0) {  // cut by earlyFishbone
 
@@ -342,7 +342,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                   GPUCACell *__restrict__ cells,
                                   uint32_t const *nCells) const {
       // auto const &hh = *hhp;
-      cms::alpakatools::for_each_element_1D_grid_stride(acc, (*nCells), [&](uint32_t idx) {
+      cms::alpakatools::for_each_element_in_grid_strided(acc, (*nCells), [&](uint32_t idx) {
         auto &thisCell = cells[idx];
         if (!thisCell.tracks().empty())
           thisCell.theUsed |= 2;
@@ -356,7 +356,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                   HitContainer const *__restrict__ foundNtuplets,
                                   Quality const *__restrict__ quality,
                                   CAConstants::TupleMultiplicity *tupleMultiplicity) const {
-      cms::alpakatools::for_each_element_1D_grid_stride(acc, foundNtuplets->nbins(), [&](uint32_t it) {
+      cms::alpakatools::for_each_element_in_grid_strided(acc, foundNtuplets->nbins(), [&](uint32_t it) {
         auto nhits = foundNtuplets->size(it);
         if (nhits >= 3 && quality[it] != trackQuality::dup) {
           assert(quality[it] == trackQuality::bad);
@@ -375,7 +375,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                   HitContainer const *__restrict__ foundNtuplets,
                                   Quality const *__restrict__ quality,
                                   CAConstants::TupleMultiplicity *tupleMultiplicity) const {
-      cms::alpakatools::for_each_element_1D_grid_stride(acc, foundNtuplets->nbins(), [&](uint32_t it) {
+      cms::alpakatools::for_each_element_in_grid_strided(acc, foundNtuplets->nbins(), [&](uint32_t it) {
         auto nhits = foundNtuplets->size(it);
         if (nhits >= 3 && quality[it] != trackQuality::dup) {
           assert(quality[it] == trackQuality::bad);
@@ -395,7 +395,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                   TkSoA const *__restrict__ tracks,
                                   CAHitNtupletGeneratorKernels::QualityCuts cuts,
                                   Quality *__restrict__ quality) const {
-      cms::alpakatools::for_each_element_1D_grid_stride(acc, tuples->nbins(), [&](uint32_t it) {
+      cms::alpakatools::for_each_element_in_grid_strided(acc, tuples->nbins(), [&](uint32_t it) {
         auto nhits = tuples->size(it);
         if (nhits == 0)
           return;  // guard
@@ -461,7 +461,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                   HitContainer const *__restrict__ tuples,
                                   Quality const *__restrict__ quality,
                                   CAHitNtupletGeneratorKernels::Counters *counters) const {
-      cms::alpakatools::for_each_element_1D_grid_stride(acc, tuples->nbins(), [&](uint32_t idx) {
+      cms::alpakatools::for_each_element_in_grid_strided(acc, tuples->nbins(), [&](uint32_t idx) {
         if (tuples->size(idx) == 0)
           return;  //guard
         if (quality[idx] == trackQuality::loose) {
@@ -477,7 +477,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                   HitContainer const *__restrict__ tuples,
                                   Quality const *__restrict__ quality,
                                   CAHitNtupletGeneratorKernels::HitToTuple *hitToTuple) const {
-      cms::alpakatools::for_each_element_1D_grid_stride(acc, tuples->nbins(), [&](uint32_t idx) {
+      cms::alpakatools::for_each_element_in_grid_strided(acc, tuples->nbins(), [&](uint32_t idx) {
         if (tuples->size(idx) == 0)
           return;  // guard
         if (quality[idx] == trackQuality::loose) {
@@ -494,7 +494,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                   HitContainer const *__restrict__ tuples,
                                   Quality const *__restrict__ quality,
                                   CAHitNtupletGeneratorKernels::HitToTuple *hitToTuple) const {
-      cms::alpakatools::for_each_element_1D_grid_stride(acc, tuples->nbins(), [&](uint32_t idx) {
+      cms::alpakatools::for_each_element_in_grid_strided(acc, tuples->nbins(), [&](uint32_t idx) {
         if (tuples->size(idx) == 0)
           return;  // guard
         if (quality[idx] == trackQuality::loose) {
@@ -512,14 +512,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                   TrackingRecHit2DSOAView const *__restrict__ hhp,
                                   HitContainer *__restrict__ hitDetIndices) const {
       // copy offsets
-      cms::alpakatools::for_each_element_1D_grid_stride(
+      cms::alpakatools::for_each_element_in_grid_strided(
           acc, tuples->totbins(), [&](uint32_t idx) { hitDetIndices->off[idx] = tuples->off[idx]; });
       // fill hit indices
       auto const &hh = *hhp;
 #ifndef NDEBUG
       auto nhits = hh.nHits();
 #endif
-      cms::alpakatools::for_each_element_1D_grid_stride(acc, tuples->size(), [&](uint32_t idx) {
+      cms::alpakatools::for_each_element_in_grid_strided(acc, tuples->size(), [&](uint32_t idx) {
         assert(tuples->bins[idx] < nhits);
         hitDetIndices->bins[idx] = hh.detectorIndex(tuples->bins[idx]);
       });
@@ -532,7 +532,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                   CAHitNtupletGeneratorKernels::HitToTuple const *__restrict__ hitToTuple,
                                   CAHitNtupletGeneratorKernels::Counters *counters) const {
       auto &c = *counters;
-      cms::alpakatools::for_each_element_1D_grid_stride(acc, hitToTuple->nbins(), [&](uint32_t idx) {
+      cms::alpakatools::for_each_element_in_grid_strided(acc, hitToTuple->nbins(), [&](uint32_t idx) {
         if (hitToTuple->size(idx) != 0) {  // SHALL NOT BE break
           alpaka::atomicOp<alpaka::AtomicAdd>(acc, &c.nUsedHits, 1ull);
           if (hitToTuple->size(idx) > 1)
@@ -561,7 +561,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       //  auto const & hh = *hhp;
       // auto l1end = hh.hitsLayerStart_d[1];
 
-      cms::alpakatools::for_each_element_1D_grid_stride(acc, phitToTuple->nbins(), [&](uint32_t idx) {
+      cms::alpakatools::for_each_element_in_grid_strided(acc, phitToTuple->nbins(), [&](uint32_t idx) {
         if (hitToTuple.size(idx) >= 2) {
           float mc = 10000.f;
           uint16_t im = 60000;
@@ -615,7 +615,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       auto const &foundNtuplets = *ptuples;
       auto const &tracks = *ptracks;
       const auto np = std::min(maxPrint, foundNtuplets.nbins());
-      cms::alpakatools::for_each_element_1D_grid_stride(acc, np, [&](uint32_t i) {
+      cms::alpakatools::for_each_element_in_grid_strided(acc, np, [&](uint32_t i) {
         auto nh = foundNtuplets.size(i);
         if (nh >= 3) {
           printf("TK: %d %d %d %f %f %f %f %f %f %f %d %d %d %d %d\n",
