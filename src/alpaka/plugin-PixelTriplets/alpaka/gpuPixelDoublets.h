@@ -84,7 +84,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           assert(0 == i);
           (*cellNeighbors)[0].reset();
           auto ii = cellTracks->extend(acc); // NB: Increases cellTracks by 1, returns previous size which should be 0.
-          assert(0 == i);
+          assert(0 == ii);
           (*cellTracks)[0].reset();
         }
       }  // initDoublets kernel operator()
