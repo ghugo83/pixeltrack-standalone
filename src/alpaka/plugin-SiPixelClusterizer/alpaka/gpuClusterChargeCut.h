@@ -54,7 +54,7 @@ namespace gpuClustering {
         uint32_t endElementIdx = endElementIdxNoStride;
         // remove excess  FIXME find a way to cut charge first....
         for (uint32_t i = firstElementIdx; i < numElements; ++i) {
-          if (!cms::alpakatools::get_next_element_1D_index_stride(
+          if (!cms::alpakatools::next_valid_element_index_strided(
                   i, firstElementIdx, endElementIdx, blockDimension, numElements))
             break;
           if (id[i] == InvId)
@@ -80,13 +80,13 @@ namespace gpuClustering {
       auto& newclusId = alpaka::declareSharedVar<uint16_t[MaxNumClustersPerModules], __COUNTER__>(acc);
 
       assert(nclus <= MaxNumClustersPerModules);
-      cms::alpakatools::for_each_element_1D_block_stride(acc, nclus, [&](uint32_t i) { charge[i] = 0; });
+      cms::alpakatools::for_each_element_in_block_strided(acc, nclus, [&](uint32_t i) { charge[i] = 0; });
       alpaka::syncBlockThreads(acc);
 
       uint32_t firstElementIdx = firstElementIdxNoStride;
       uint32_t endElementIdx = endElementIdxNoStride;
       for (uint32_t i = firstElementIdx; i < numElements; ++i) {
-        if (!cms::alpakatools::get_next_element_1D_index_stride(
+        if (!cms::alpakatools::next_valid_element_index_strided(
                 i, firstElementIdx, endElementIdx, blockDimension, numElements))
           break;
         if (id[i] == InvId)
@@ -98,7 +98,7 @@ namespace gpuClustering {
       alpaka::syncBlockThreads(acc);
 
       auto chargeCut = thisModuleId < 96 ? 2000 : 4000;  // move in constants (calib?)
-      cms::alpakatools::for_each_element_1D_block_stride(
+      cms::alpakatools::for_each_element_in_block_strided(
           acc, nclus, [&](uint32_t i) { newclusId[i] = ok[i] = charge[i] > chargeCut ? 1 : 0; });
       alpaka::syncBlockThreads(acc);
 
@@ -115,7 +115,7 @@ namespace gpuClustering {
       alpaka::syncBlockThreads(acc);
 
       // mark bad cluster again
-      cms::alpakatools::for_each_element_1D_block_stride(acc, nclus, [&](uint32_t i) {
+      cms::alpakatools::for_each_element_in_block_strided(acc, nclus, [&](uint32_t i) {
         if (0 == ok[i])
           newclusId[i] = InvId + 1;
       });
@@ -125,7 +125,7 @@ namespace gpuClustering {
       firstElementIdx = firstElementIdxNoStride;
       endElementIdx = endElementIdxNoStride;
       for (uint32_t i = firstElementIdx; i < numElements; ++i) {
-        if (!cms::alpakatools::get_next_element_1D_index_stride(
+        if (!cms::alpakatools::next_valid_element_index_strided(
                 i, firstElementIdx, endElementIdx, blockDimension, numElements))
           break;
         if (id[i] == InvId)

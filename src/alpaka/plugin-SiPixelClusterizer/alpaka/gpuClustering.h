@@ -24,7 +24,7 @@ namespace gpuClustering {
                                   uint32_t* __restrict__ moduleStart,
                                   int32_t* __restrict__ clusterId,
                                   const unsigned int numElements) const {
-      cms::alpakatools::for_each_element_1D_grid_stride(acc, numElements, [&](uint32_t i) {
+      cms::alpakatools::for_each_element_in_grid_strided(acc, numElements, [&](uint32_t i) {
         clusterId[i] = i;
         if (InvId != id[i]) {
           int j = i - 1;
@@ -86,7 +86,7 @@ namespace gpuClustering {
 
       // skip threads not associated to an existing pixel
       for (uint32_t i = firstElementIdx; i < numElements; ++i) {
-        if (!cms::alpakatools::get_next_element_1D_index_stride(
+        if (!cms::alpakatools::next_valid_element_index_strided(
                 i, firstElementIdx, endElementIdx, blockDimension, numElements))
           break;
         if (id[i] == InvId)  // skip invalid pixels
@@ -104,7 +104,7 @@ namespace gpuClustering {
       auto& hist = alpaka::declareSharedVar<Hist, __COUNTER__>(acc);
       auto& ws = alpaka::declareSharedVar<Hist::Counter[32], __COUNTER__>(acc);
 
-      cms::alpakatools::for_each_element_1D_block_stride(acc, Hist::totbins(), [&](uint32_t j) { hist.off[j] = 0; });
+      cms::alpakatools::for_each_element_in_block_strided(acc, Hist::totbins(), [&](uint32_t j) { hist.off[j] = 0; });
       alpaka::syncBlockThreads(acc);
 
       assert((msize == numElements) or ((msize < numElements) and (id[msize] != thisModuleId)));
@@ -127,7 +127,7 @@ namespace gpuClustering {
 #endif
 
       // fill histo
-      cms::alpakatools::for_each_element_1D_block_stride(acc, msize, firstPixel, [&](uint32_t i) {
+      cms::alpakatools::for_each_element_in_block_strided(acc, msize, firstPixel, [&](uint32_t i) {
         if (id[i] != InvId) {  // skip invalid pixels
           hist.count(acc, y[i]);
 #ifdef GPU_DEBUG
@@ -136,7 +136,7 @@ namespace gpuClustering {
         }
       });
       alpaka::syncBlockThreads(acc);
-      cms::alpakatools::for_each_element_in_thread_1D_index_in_block(acc, 32u, [&](uint32_t i) {
+      cms::alpakatools::for_each_element_in_block(acc, 32u, [&](uint32_t i) {
         ws[i] = 0;  // used by prefix scan...
       });
       alpaka::syncBlockThreads(acc);
@@ -148,7 +148,7 @@ namespace gpuClustering {
         if (threadIdxLocal == 0)
           printf("histo size %d\n", hist.size());
 #endif
-      cms::alpakatools::for_each_element_1D_block_stride(acc, msize, firstPixel, [&](uint32_t i) {
+      cms::alpakatools::for_each_element_in_block_strided(acc, msize, firstPixel, [&](uint32_t i) {
         if (id[i] != InvId) {  // skip invalid pixels
           hist.fill(acc, y[i], i - firstPixel);
         }
@@ -194,7 +194,7 @@ namespace gpuClustering {
       auto& n60 = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);
       n40 = n60 = 0;
       alpaka::syncBlockThreads(acc);
-      cms::alpakatools::for_each_element_1D_block_stride(acc, Hist::nbins(), [&](uint32_t j) {
+      cms::alpakatools::for_each_element_in_block_strided(acc, Hist::nbins(), [&](uint32_t j) {
         if (hist.size(j) > 60)
           alpaka::atomicOp<alpaka::AtomicAdd>(acc, &n60, 1u);
         if (hist.size(j) > 40)
@@ -212,7 +212,7 @@ namespace gpuClustering {
 
       // fill NN
       uint32_t k = 0u;
-      cms::alpakatools::for_each_element_1D_block_stride(acc, hist.size(), [&](uint32_t j) {
+      cms::alpakatools::for_each_element_in_block_strided(acc, hist.size(), [&](uint32_t j) {
         const uint32_t jEquivalentClass = j % threadDimension;
         k = j / blockDimension;
         assert(k < maxiter);
@@ -245,7 +245,7 @@ namespace gpuClustering {
       int nloops = 0;
       while (alpaka::syncBlockThreadsPredicate<alpaka::BlockOr>(acc, more)) {
         if (1 == nloops % 2) {
-          cms::alpakatools::for_each_element_1D_block_stride(acc, hist.size(), [&](uint32_t j) {
+          cms::alpakatools::for_each_element_in_block_strided(acc, hist.size(), [&](uint32_t j) {
             auto p = hist.begin() + j;
             auto i = *p + firstPixel;
             auto m = clusterId[i];
@@ -256,7 +256,7 @@ namespace gpuClustering {
         } else {
           more = false;
           uint32_t k = 0u;
-          cms::alpakatools::for_each_element_1D_block_stride(acc, hist.size(), [&](uint32_t j) {
+          cms::alpakatools::for_each_element_in_block_strided(acc, hist.size(), [&](uint32_t j) {
             k = j / blockDimension;
             const uint32_t jEquivalentClass = j % threadDimension;
             auto p = hist.begin() + j;
@@ -299,7 +299,7 @@ namespace gpuClustering {
 
       // find the number of different clusters, identified by a pixels with clus[i] == i;
       // mark these pixels with a negative id.
-      cms::alpakatools::for_each_element_1D_block_stride(acc, msize, firstPixel, [&](uint32_t i) {
+      cms::alpakatools::for_each_element_in_block_strided(acc, msize, firstPixel, [&](uint32_t i) {
         if (id[i] != InvId) {  // skip invalid pixels
           if (clusterId[i] == static_cast<int>(i)) {
             auto old = alpaka::atomicOp<alpaka::AtomicInc>(acc, &foundClusters, 0xffffffff);
@@ -310,7 +310,7 @@ namespace gpuClustering {
       alpaka::syncBlockThreads(acc);
 
       // propagate the negative id to all the pixels in the cluster.
-      cms::alpakatools::for_each_element_1D_block_stride(acc, msize, firstPixel, [&](uint32_t i) {
+      cms::alpakatools::for_each_element_in_block_strided(acc, msize, firstPixel, [&](uint32_t i) {
         if (id[i] != InvId) {  // skip invalid pixels
           if (clusterId[i] >= 0) {
             // mark each pixel in a cluster with the same id as the first one
@@ -321,7 +321,7 @@ namespace gpuClustering {
       alpaka::syncBlockThreads(acc);
 
       // adjust the cluster id to be a positive value starting from 0
-      cms::alpakatools::for_each_element_1D_block_stride(acc, msize, firstPixel, [&](uint32_t i) {
+      cms::alpakatools::for_each_element_in_block_strided(acc, msize, firstPixel, [&](uint32_t i) {
         if (id[i] == InvId) {  // skip invalid pixels
           clusterId[i] = -9999;
         } else {

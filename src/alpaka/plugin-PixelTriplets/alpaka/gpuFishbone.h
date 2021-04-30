@@ -52,7 +52,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         uint32_t firstElementIdxY = firstElementIdxNoStrideY;
         uint32_t endElementIdxY = endElementIdxNoStrideY;
         for (uint32_t idy = firstElementIdxY, nt = nHits; idy < nt; ++idy) {
-          if (!cms::alpakatools::get_next_element_1D_index_stride(
+          if (!cms::alpakatools::next_valid_element_index_strided(
                   idy, firstElementIdxY, endElementIdxY, gridDimensionY, nt))
             break;
 
@@ -88,7 +88,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           uint32_t firstElementIdxX = firstElementIdxNoStrideX;
           uint32_t endElementIdxX = endElementIdxNoStrideX;
           for (uint32_t ic = firstElementIdxX; ic < sg - 1; ++ic) {
-            if (!cms::alpakatools::get_next_element_1D_index_stride(
+            if (!cms::alpakatools::next_valid_element_index_strided(
                     ic, firstElementIdxX, endElementIdxX, blockDimensionX, sg - 1))
               break;
 

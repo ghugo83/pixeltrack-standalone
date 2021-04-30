@@ -24,15 +24,15 @@ struct mykernel {
     auto& ws = alpaka::declareSharedVar<typename Hist::Counter[32], __COUNTER__>(acc);
 
     // set off zero
-    cms::alpakatools::for_each_element_1D_block_stride(acc, Hist::totbins(), [&](uint32_t j) { hist.off[j] = 0; });
+    cms::alpakatools::for_each_element_in_block_strided(acc, Hist::totbins(), [&](uint32_t j) { hist.off[j] = 0; });
     alpaka::syncBlockThreads(acc);
 
     // set bins zero
-    cms::alpakatools::for_each_element_1D_block_stride(acc, Hist::totbins(), [&](uint32_t j) { hist.bins[j] = 0; });
+    cms::alpakatools::for_each_element_in_block_strided(acc, Hist::totbins(), [&](uint32_t j) { hist.bins[j] = 0; });
     alpaka::syncBlockThreads(acc);
 
     // count
-    cms::alpakatools::for_each_element_1D_block_stride(acc, N, [&](uint32_t j) { hist.count(acc, v[j]); });
+    cms::alpakatools::for_each_element_in_block_strided(acc, N, [&](uint32_t j) { hist.count(acc, v[j]); });
     alpaka::syncBlockThreads(acc);
 
     assert(0 == hist.size());
@@ -45,17 +45,17 @@ struct mykernel {
     assert(N == hist.size());
 
     // verify
-    cms::alpakatools::for_each_element_1D_block_stride(
+    cms::alpakatools::for_each_element_in_block_strided(
         acc, Hist::nbins(), [&](uint32_t j) { assert(hist.off[j] <= hist.off[j + 1]); });
     alpaka::syncBlockThreads(acc);
 
-    cms::alpakatools::for_each_element_in_thread_1D_index_in_block(acc, 32, [&](uint32_t i) {
+    cms::alpakatools::for_each_element_in_block(acc, 32, [&](uint32_t i) {
       ws[i] = 0;  // used by prefix scan...
     });
     alpaka::syncBlockThreads(acc);
 
     // fill
-    cms::alpakatools::for_each_element_1D_block_stride(acc, N, [&](uint32_t j) { hist.fill(acc, v[j], j); });
+    cms::alpakatools::for_each_element_in_block_strided(acc, N, [&](uint32_t j) { hist.fill(acc, v[j], j); });
     alpaka::syncBlockThreads(acc);
 
     assert(0 == hist.off[0]);
@@ -63,7 +63,7 @@ struct mykernel {
 
     // bin
 #ifndef NDEBUG
-    cms::alpakatools::for_each_element_1D_block_stride(acc, hist.size() - 1, [&](uint32_t j) {
+    cms::alpakatools::for_each_element_in_block_strided(acc, hist.size() - 1, [&](uint32_t j) {
       auto p = hist.begin() + j;
       assert((*p) < N);
       auto k1 = Hist::bin(v[*p]);
@@ -73,7 +73,7 @@ struct mykernel {
 #endif
 
     // forEachInWindow
-    cms::alpakatools::for_each_element_1D_block_stride(acc, hist.size(), [&](uint32_t i) {
+    cms::alpakatools::for_each_element_in_block_strided(acc, hist.size(), [&](uint32_t i) {
       auto p = hist.begin() + i;
       auto j = *p;
 #ifndef NDEBUG

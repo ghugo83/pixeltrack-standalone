@@ -33,13 +33,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         return;
 
       // fill indexing
-      cms::alpakatools::for_each_element_1D_block_stride(acc, nt, [&](uint32_t i) { data.idv[ws.itrk[i]] = iv[i]; });
+      cms::alpakatools::for_each_element_in_block_strided(acc, nt, [&](uint32_t i) { data.idv[ws.itrk[i]] = iv[i]; });
 
       // can be done asynchronoisly at the end of previous event
-      cms::alpakatools::for_each_element_1D_block_stride(acc, nvFinal, [&](uint32_t i) { ptv2[i] = 0; });
+      cms::alpakatools::for_each_element_in_block_strided(acc, nvFinal, [&](uint32_t i) { ptv2[i] = 0; });
       alpaka::syncBlockThreads(acc);
 
-      cms::alpakatools::for_each_element_1D_block_stride(acc, nt, [&](uint32_t i) {
+      cms::alpakatools::for_each_element_in_block_strided(acc, nt, [&](uint32_t i) {
         if (iv[i] <= 9990) {
           alpaka::atomicOp<alpaka::AtomicAdd>(acc, &ptv2[iv[i]], ptt2[i]);
         }

@@ -22,7 +22,7 @@ namespace cms {
                                     T const *__restrict__ v,
                                     uint32_t const *__restrict__ offsets) const {
         const uint32_t nt = offsets[nh];
-        cms::alpakatools::for_each_element_1D_grid_stride(acc, nt, [&](uint32_t i) {
+        cms::alpakatools::for_each_element_in_grid_strided(acc, nt, [&](uint32_t i) {
           auto off = alpaka_std::upper_bound(offsets, offsets + nh + 1, i);
           assert((*off) > 0);
           int32_t ih = off - offsets - 1;
@@ -41,7 +41,7 @@ namespace cms {
                                     T const *__restrict__ v,
                                     uint32_t const *__restrict__ offsets) const {
         const uint32_t nt = offsets[nh];
-        cms::alpakatools::for_each_element_1D_grid_stride(acc, nt, [&](uint32_t i) {
+        cms::alpakatools::for_each_element_in_grid_strided(acc, nt, [&](uint32_t i) {
           auto off = alpaka_std::upper_bound(offsets, offsets + nh + 1, i);
           assert((*off) > 0);
           int32_t ih = off - offsets - 1;
@@ -250,7 +250,7 @@ namespace cms {
           return;
         }
 
-        cms::alpakatools::for_each_element_1D_grid_stride(acc, totbins(), m, [&](uint32_t i) { off[i] = n; });
+        cms::alpakatools::for_each_element_in_grid_strided(acc, totbins(), m, [&](uint32_t i) { off[i] = n; });
       }
 
       template <typename T_Acc>
