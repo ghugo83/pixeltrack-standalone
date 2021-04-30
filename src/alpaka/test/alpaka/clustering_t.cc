@@ -265,8 +265,8 @@ int main(void) {
                                                                      n));
 
     // FIND CLUSTER
-    const WorkDiv1& workDivMaxNumModules =
-        cms::alpakatools::make_workdiv(Vec1::all(gpuClustering::MaxNumModules), Vec1::all(threadsPerBlockOrElementsPerThread));
+    const WorkDiv1& workDivMaxNumModules = cms::alpakatools::make_workdiv(
+        Vec1::all(gpuClustering::MaxNumModules), Vec1::all(threadsPerBlockOrElementsPerThread));
     std::cout << "CUDA findModules kernel launch with " << gpuClustering::MaxNumModules << " blocks of "
               << threadsPerBlockOrElementsPerThread << " threads (GPU) or elements (CPU). \n";
 
@@ -296,8 +296,8 @@ int main(void) {
     auto h_moduleId_buf = alpaka::allocBuf<uint32_t, Idx>(host, nModules[0]);
     //auto moduleId = alpaka::getPtrNative(h_moduleId_buf);
 
-    std::cout << "before charge cut found " << std::accumulate(nclus, nclus + gpuClustering::MaxNumModules, 0) << " clusters"
-              << std::endl;
+    std::cout << "before charge cut found " << std::accumulate(nclus, nclus + gpuClustering::MaxNumModules, 0)
+              << " clusters" << std::endl;
     for (auto i = gpuClustering::MaxNumModules; i > 0; i--)
       if (nclus[i - 1] > 0) {
         std::cout << "last module is " << i - 1 << ' ' << nclus[i - 1] << std::endl;
@@ -367,8 +367,8 @@ int main(void) {
         std::cout << "error " << mid << ": " << nc << ' ' << pnc << std::endl;
     }
 
-    std::cout << "found " << std::accumulate(nclus, nclus + gpuClustering::MaxNumModules, 0) << ' ' << clids.size() << " clusters"
-              << std::endl;
+    std::cout << "found " << std::accumulate(nclus, nclus + gpuClustering::MaxNumModules, 0) << ' ' << clids.size()
+              << " clusters" << std::endl;
     for (auto i = gpuClustering::MaxNumModules; i > 0; i--)
       if (nclus[i - 1] > 0) {
         std::cout << "last module is " << i - 1 << ' ' << nclus[i - 1] << std::endl;

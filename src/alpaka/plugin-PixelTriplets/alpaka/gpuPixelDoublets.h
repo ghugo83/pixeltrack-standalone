@@ -74,16 +74,19 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     CellTracksVector* cellTracks,
                                     CellTracks* cellTracksContainer) const {
         assert(isOuterHitOfCell);
-        cms::alpakatools::for_each_element_in_grid_strided(acc, nHits, [&](uint32_t i) { isOuterHitOfCell[i].reset(); });
+        cms::alpakatools::for_each_element_in_grid_strided(
+            acc, nHits, [&](uint32_t i) { isOuterHitOfCell[i].reset(); });
 
         const uint32_t threadIdx(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u]);
         if (0 == threadIdx) {
           cellNeighbors->construct(CAConstants::maxNumOfActiveDoublets(), cellNeighborsContainer);
           cellTracks->construct(CAConstants::maxNumOfActiveDoublets(), cellTracksContainer);
-          auto i = cellNeighbors->extend(acc); // NB: Increases cellNeighbors size by 1, returns previous size which should be 0.
+          auto i = cellNeighbors->extend(
+              acc);  // NB: Increases cellNeighbors size by 1, returns previous size which should be 0.
           assert(0 == i);
           (*cellNeighbors)[0].reset();
-          auto ii = cellTracks->extend(acc); // NB: Increases cellTracks size by 1, returns previous size which should be 0.
+          auto ii =
+              cellTracks->extend(acc);  // NB: Increases cellTracks size by 1, returns previous size which should be 0.
           assert(0 == ii);
           (*cellTracks)[0].reset();
         }

@@ -11,7 +11,7 @@
 
 namespace gpuClustering {
 
-#ifdef GPU_DEBUG 
+#ifdef GPU_DEBUG
   namespace ALPAKA_ACCELERATOR_NAMESPACE {
     ALPAKA_STATIC_ACC_MEM_GLOBAL uint32_t gMaxHit = 0;
   }
@@ -349,6 +349,5 @@ namespace gpuClustering {
   };
 
 }  // namespace gpuClustering
-
 
 #endif  // RecoLocalTracker_SiPixelClusterizer_plugins_gpuClustering_h
