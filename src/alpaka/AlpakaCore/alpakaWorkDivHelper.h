@@ -302,6 +302,7 @@ namespace cms {
     /*
      * Case where the input index has reached the end of threadDimension: strides the input index.
      * Otherwise: do nothing.
+     * NB: Modifies i, firstElementIdx and endElementIdx.
      */
     ALPAKA_FN_ACC ALPAKA_FN_INLINE bool next_valid_element_index_strided(Idx& i,
                                                                          Idx& firstElementIdx,

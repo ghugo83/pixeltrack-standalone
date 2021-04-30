@@ -80,10 +80,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         if (0 == threadIdx) {
           cellNeighbors->construct(CAConstants::maxNumOfActiveDoublets(), cellNeighborsContainer);
           cellTracks->construct(CAConstants::maxNumOfActiveDoublets(), cellTracksContainer);
-          auto i = cellNeighbors->extend(acc); // NB: Increases cellNeighbors by 1, returns previous size which should be 0.
+          auto i = cellNeighbors->extend(acc); // NB: Increases cellNeighbors size by 1, returns previous size which should be 0.
           assert(0 == i);
           (*cellNeighbors)[0].reset();
-          auto ii = cellTracks->extend(acc); // NB: Increases cellTracks by 1, returns previous size which should be 0.
+          auto ii = cellTracks->extend(acc); // NB: Increases cellTracks size by 1, returns previous size which should be 0.
           assert(0 == ii);
           (*cellTracks)[0].reset();
         }
