@@ -8,6 +8,10 @@ using namespace alpaka_common;
 namespace cms {
   namespace alpakatools {
 
+    /*********************************************
+     *              WORKDIV CREATION
+     ********************************************/
+
     /*
      * Creates the accelerator-dependent workdiv.
      */
@@ -28,15 +32,9 @@ namespace cms {
 #endif
     }
 
-    /*
-     * 1D helper to only access 1 element per block 
-     * (should obviously only be needed for debug / printout).
-     */
-    template <typename TAcc>
-    ALPAKA_FN_ACC bool once_per_block_1D(const TAcc& acc, Idx i) {
-      const Idx blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[0u]);
-      return (i % blockDimension == 0);
-    }
+    /*********************************************
+     *           RANGE COMPUTATION
+     ********************************************/
 
     /*
      * Computes the range of the elements indexes, local to the block.
@@ -135,7 +133,7 @@ namespace cms {
     }
 
     /*********************************************
-     *     1D HELPERS, LOOP ON ALL CPU ELEMENTS
+     *           LOOP ON ALL ELEMENTS
      ********************************************/
 
     /*
@@ -197,9 +195,9 @@ namespace cms {
       cms::alpakatools::for_each_element_in_grid(acc, maxNumberOfElements, elementIdxShift, func, dimIndex);
     }
 
-    /******************************************************************************
-     *     1D HELPERS, LOOP ON ALL CPU ELEMENTS, AND ELEMENT/THREAD STRIDED ACCESS
-     ******************************************************************************/
+    /**************************************************************
+     *          LOOP ON ALL ELEMENTS, WITH STRIDED ACCESS
+     **************************************************************/
 
     /*
      * (CPU) Loop on all elements + (CPU/GPU) Strided access.
@@ -290,6 +288,10 @@ namespace cms {
       const Idx elementIdxShift = 0;
       cms::alpakatools::for_each_element_in_grid_strided(acc, maxNumberOfElements, elementIdxShift, func, dimIndex);
     }
+
+    /**************************************************************
+     *          LOOP ON ALL ELEMENTS WITH ONE LOOP
+     **************************************************************/
 
     /*
      * Case where the input index i has reached the end of threadDimension: strides the input index.
