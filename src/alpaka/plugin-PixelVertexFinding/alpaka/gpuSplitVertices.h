@@ -37,11 +37,18 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       assert(zt);
 
       constexpr uint32_t MAXTK = 512;
+      // NB: Shared memory size? Is it enough?
+#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
       auto& it = alpaka::declareSharedVar<uint32_t[MAXTK], __COUNTER__>(acc);   // track index
       auto& zz = alpaka::declareSharedVar<float[MAXTK], __COUNTER__>(acc);      // z pos
       auto& newV = alpaka::declareSharedVar<uint8_t[MAXTK], __COUNTER__>(acc);  // 0 or 1
       auto& ww = alpaka::declareSharedVar<float[MAXTK], __COUNTER__>(acc);      // z weight
-
+#else
+      uint32_t it[MAXTK];
+      float zz[MAXTK];
+      uint8_t newV[MAXTK];
+      float ww[MAXTK];
+#endif
       auto& nq = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);  // number of track for this vertex
 
       const uint32_t blockIdx(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
