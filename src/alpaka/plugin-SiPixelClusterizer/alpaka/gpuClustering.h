@@ -159,16 +159,21 @@ namespace gpuClustering {
       // Hence, also works for CPU case, with 256 or 512 elements per thread.
       // Real constrainst is maxiter = hist.size() / blockDimension,
       // with blockDimension = threadPerBlock * elementsPerThread.
-      // Hence, maxiter can be tuned accordingly to the workdiv.
+      // Hence, maxiter can be tuned according to the workdiv.
+#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
       constexpr unsigned int maxiter = 16;
+#else
+      const unsigned int maxiter =
+          hist.size();  // After change of threadDimension, should be changed to hist.size() / blockDimension.
+#endif
       assert((hist.size() / blockDimension) <= maxiter);
 
-#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+      //#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
       constexpr uint32_t threadDimension = 1;
-#else
+      //#else
       // NB: can be tuned.
-      constexpr uint32_t threadDimension = 256;
-#endif
+      //constexpr uint32_t threadDimension = 256;
+      //#endif
 
 #ifndef NDEBUG
       const uint32_t runTimeThreadDimension(alpaka::getWorkDiv<alpaka::Thread, alpaka::Elems>(acc)[0u]);
