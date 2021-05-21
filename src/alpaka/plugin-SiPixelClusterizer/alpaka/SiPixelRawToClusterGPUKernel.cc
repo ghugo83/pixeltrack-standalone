@@ -629,11 +629,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         const int threadsPerBlockOrElementsPerThread = 256;
 #else
         // NB: MPORTANT: This could be tuned to benefit from innermost loop.
-        const int threadsPerBlockOrElementsPerThread = 32;
+        const int threadsPerBlockOrElementsPerThread = 1;
 #endif
-        const int blocks =
+	const int blocks = 1;
+        /*const int blocks =
             (std::max(int(wordCounter), int(gpuClustering::MaxNumModules)) + threadsPerBlockOrElementsPerThread - 1) /
-            threadsPerBlockOrElementsPerThread;
+            threadsPerBlockOrElementsPerThread;*/
         const WorkDiv1 &workDiv =
             cms::alpakatools::make_workdiv(Vec1::all(blocks), Vec1::all(threadsPerBlockOrElementsPerThread));
 
